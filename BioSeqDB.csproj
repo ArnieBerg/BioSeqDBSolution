@@ -1,0 +1,422 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{749BFBD1-EEC7-4B6B-B852-DE2AF8B6148E}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>BioSeqDB</RootNamespace>
+    <AssemblyName>BioSeqDB</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
+    <PublishUrl>C:\PDSFiles\BioSeqDBSolution\PublishClient\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Unc</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>\\jade.usask.ca\wcvm\PDS\Apps\BioSeqDB\</InstallUrl>
+    <ProductName>BioSeqDB</ProductName>
+    <PublisherName>Prairie Diagnostic Services</PublisherName>
+    <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
+    <ApplicationRevision>23</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\dna.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>E8C0403188521947A397D020A133DA123E2842B5</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>PDSCodeSigningCert.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AppConfigHelper.cs" />
+    <Compile Include="BioSeqAssemble.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqAssemble.Designer.cs">
+      <DependentUpon>BioSeqAssemble.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqDBLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqDBLogin.Designer.cs">
+      <DependentUpon>BioSeqDBLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqDBNotifications.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqDBNotifications.Designer.cs">
+      <DependentUpon>BioSeqDBNotifications.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqAnalysis.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqAnalysis.Designer.cs">
+      <DependentUpon>BioSeqAnalysis.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqSalmonella.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqSalmonella.Designer.cs">
+      <DependentUpon>BioSeqSalmonella.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqInfluenzaAFastq.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqInfluenzaAFastq.Designer.cs">
+      <DependentUpon>BioSeqInfluenzaAFastq.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqLIMSEdit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqLIMSEdit.Designer.cs">
+      <DependentUpon>BioSeqLIMSEdit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqInfluenzaA.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqInfluenzaA.Designer.cs">
+      <DependentUpon>BioSeqInfluenzaA.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqRestore.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqRestore.Designer.cs">
+      <DependentUpon>BioSeqRestore.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqDBAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqDBAbout.Designer.cs">
+      <DependentUpon>BioSeqDBAbout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqBuildTree.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqBuildTree.Designer.cs">
+      <DependentUpon>BioSeqBuildTree.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqUI.Designer.cs">
+      <DependentUpon>BioSeqUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqExtract.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqExtract.Designer.cs">
+      <DependentUpon>BioSeqExtract.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqBackup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqBackup.Designer.cs">
+      <DependentUpon>BioSeqBackup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqRemove.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqRemove.Designer.cs">
+      <DependentUpon>BioSeqRemove.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqInsert.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqInsert.Designer.cs">
+      <DependentUpon>BioSeqInsert.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqNewDB.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqNewDB.Designer.cs">
+      <DependentUpon>BioSeqNewDB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqSplash.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqSplash.designer.cs">
+      <DependentUpon>BioSeqSplash.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ISplashForm.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SeqDBHelper.cs" />
+    <Compile Include="ServiceCallHelper.cs" />
+    <Compile Include="Splasher.cs" />
+    <None Include="BioSeqDBHelp.docx" />
+    <None Include="BioSeqDBHelp.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="PDSCodeSigningCert.pfx" />
+    <None Include="Properties\app.manifest" />
+    <None Include="Resources\plusicon.ico" />
+    <None Include="Resources\search.ico" />
+    <None Include="Resources\plier.ico" />
+    <None Include="Resources\treegraph.ico" />
+    <None Include="Resources\plier.jpg" />
+    <None Include="Resources\dna.ico" />
+    <None Include="Resources\DNAicon.bmp" />
+    <None Include="Resources\dna.png" />
+    <None Include="Resources\treegraph.jpg" />
+    <None Include="Resources\Search.png" />
+    <None Include="Resources\DELETE.ICO" />
+    <EmbeddedResource Include="BioSeqAssemble.resx">
+      <DependentUpon>BioSeqAssemble.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqDBLogin.resx">
+      <DependentUpon>BioSeqDBLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqDBNotifications.resx">
+      <DependentUpon>BioSeqDBNotifications.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqAnalysis.resx">
+      <DependentUpon>BioSeqAnalysis.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqSalmonella.resx">
+      <DependentUpon>BioSeqSalmonella.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqInfluenzaAFastq.resx">
+      <DependentUpon>BioSeqInfluenzaAFastq.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqLIMSEdit.resx">
+      <DependentUpon>BioSeqLIMSEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqInfluenzaA.resx">
+      <DependentUpon>BioSeqInfluenzaA.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqRestore.resx">
+      <DependentUpon>BioSeqRestore.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqDBAbout.resx">
+      <DependentUpon>BioSeqDBAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqBuildTree.resx">
+      <DependentUpon>BioSeqBuildTree.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqUI.resx">
+      <DependentUpon>BioSeqUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqExtract.resx">
+      <DependentUpon>BioSeqExtract.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqInsert.resx">
+      <DependentUpon>BioSeqInsert.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqBackup.resx">
+      <DependentUpon>BioSeqBackup.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqNewDB.resx">
+      <DependentUpon>BioSeqNewDB.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqRemove.resx">
+      <DependentUpon>BioSeqRemove.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqSplash.resx">
+      <DependentUpon>BioSeqSplash.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="bin\Debug\appsettings.json" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json">
+      <Version>3.1.7</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions">
+      <Version>3.1.7</Version>
+    </PackageReference>
+    <PackageReference Include="Ookii.Dialogs.WinForms">
+      <Version>1.1.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\dna %281%29.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\greenlight.jpg" />
+    <None Include="Resources\Explorer.png" />
+    <Content Include="bin\Debug\ChangeLog.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\help.png" />
+    <Content Include="Resources\pushdull.jpg" />
+    <None Include="Resources\redlight.jpg" />
+    <Content Include="Resources\refresh.jpg" />
+    <None Include="Resources\push.ico" />
+    <Content Include="Resources\push.jpg" />
+    <None Include="Resources\redbutton.png" />
+    <None Include="Resources\5130_-_Assembly_Line-512.ico" />
+    <Content Include="Resources\5130_-_Assembly_Line-512.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BioSeqDB.ModelClient\BioSeqDB.ModelClient.csproj">
+      <Project>{80abba09-ad60-4a0b-950a-7e3c8c1e042d}</Project>
+      <Name>BioSeqDB.ModelClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BioSeqDBData\BioSeqDBData.csproj">
+      <Project>{1fa71291-be01-4d8c-8637-787a05650f9d}</Project>
+      <Name>BioSeqDBData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FSExplorer\FSExplorer.csproj">
+      <Project>{6172cfdf-1092-469a-bb4f-1e314d1bf237}</Project>
+      <Name>FSExplorer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="BioSeqDB.ModelClient.pdb">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="BioSeqDB.pdb">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="BioSeqDBData.pdb">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="FSExplorer.pdb">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Ookii.Dialogs.WinForms.pdb">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
