@@ -44,6 +44,7 @@
       this.txtNewPassword = new System.Windows.Forms.TextBox();
       this.chkRemember = new System.Windows.Forms.CheckBox();
       this.btnCancel = new System.Windows.Forms.Button();
+      this.chkEmailNotifications = new System.Windows.Forms.CheckBox();
       this.groupBox1.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -88,7 +89,7 @@
       // lblMessage
       // 
       this.lblMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblMessage.Location = new System.Drawing.Point(41, 229);
+      this.lblMessage.Location = new System.Drawing.Point(41, 257);
       this.lblMessage.Name = "lblMessage";
       this.lblMessage.Size = new System.Drawing.Size(319, 46);
       this.lblMessage.TabIndex = 10;
@@ -119,10 +120,10 @@
       // 
       this.btnLogin.DialogResult = System.Windows.Forms.DialogResult.OK;
       this.btnLogin.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnLogin.Location = new System.Drawing.Point(285, 278);
+      this.btnLogin.Location = new System.Drawing.Point(285, 306);
       this.btnLogin.Name = "btnLogin";
       this.btnLogin.Size = new System.Drawing.Size(75, 23);
-      this.btnLogin.TabIndex = 5;
+      this.btnLogin.TabIndex = 7;
       this.btnLogin.Text = "OK";
       this.btnLogin.UseVisualStyleBackColor = true;
       this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
@@ -134,7 +135,7 @@
       this.groupBox1.Controls.Add(this.label5);
       this.groupBox1.Controls.Add(this.txtNewPassword);
       this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.groupBox1.Location = new System.Drawing.Point(12, 142);
+      this.groupBox1.Location = new System.Drawing.Point(12, 170);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(359, 83);
       this.groupBox1.TabIndex = 13;
@@ -159,7 +160,7 @@
       this.txtConfirm.Name = "txtConfirm";
       this.txtConfirm.PasswordChar = '*';
       this.txtConfirm.Size = new System.Drawing.Size(240, 20);
-      this.txtConfirm.TabIndex = 4;
+      this.txtConfirm.TabIndex = 5;
       // 
       // label5
       // 
@@ -179,7 +180,7 @@
       this.txtNewPassword.Name = "txtNewPassword";
       this.txtNewPassword.PasswordChar = '*';
       this.txtNewPassword.Size = new System.Drawing.Size(240, 20);
-      this.txtNewPassword.TabIndex = 3;
+      this.txtNewPassword.TabIndex = 4;
       // 
       // chkRemember
       // 
@@ -196,14 +197,25 @@
       // 
       this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
       this.btnCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnCancel.Location = new System.Drawing.Point(159, 278);
+      this.btnCancel.Location = new System.Drawing.Point(159, 306);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Size = new System.Drawing.Size(75, 23);
-      this.btnCancel.TabIndex = 14;
+      this.btnCancel.TabIndex = 6;
       this.btnCancel.Text = "Cancel";
       this.btnCancel.UseVisualStyleBackColor = true;
       this.btnCancel.Visible = false;
       this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+      // 
+      // chkEmailNotifications
+      // 
+      this.chkEmailNotifications.AutoSize = true;
+      this.chkEmailNotifications.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.chkEmailNotifications.Location = new System.Drawing.Point(120, 134);
+      this.chkEmailNotifications.Name = "chkEmailNotifications";
+      this.chkEmailNotifications.Size = new System.Drawing.Size(250, 17);
+      this.chkEmailNotifications.TabIndex = 3;
+      this.chkEmailNotifications.Text = "Email Notifications of Task Completions";
+      this.chkEmailNotifications.UseVisualStyleBackColor = true;
       // 
       // BioSeqDBLogin
       // 
@@ -212,7 +224,8 @@
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.SystemColors.ControlDark;
       this.CancelButton = this.btnCancel;
-      this.ClientSize = new System.Drawing.Size(383, 308);
+      this.ClientSize = new System.Drawing.Size(383, 335);
+      this.Controls.Add(this.chkEmailNotifications);
       this.Controls.Add(this.btnCancel);
       this.Controls.Add(this.chkRemember);
       this.Controls.Add(this.groupBox1);
@@ -256,5 +269,6 @@
     private System.Windows.Forms.TextBox txtNewPassword;
     private System.Windows.Forms.CheckBox chkRemember;
     private System.Windows.Forms.Button btnCancel;
+    private System.Windows.Forms.CheckBox chkEmailNotifications;
   }
 }

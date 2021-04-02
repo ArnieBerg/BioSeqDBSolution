@@ -106,7 +106,7 @@ namespace BioSeqDB
         string path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(txtWildReference.Text)); // We want an actual file, so don't append "\\".
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to reference genome file",
                                  DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path), 
-                                 "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+                                 "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
         Explorer.frmExplorer.ShowDialog();
         if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
         {
@@ -124,7 +124,7 @@ namespace BioSeqDB
         }
         ofn.Title = "Input path to reference genome file";
         ofn.CheckFileExists = true;
-        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*";
+        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*";
 
         if (ofn.ShowDialog() != DialogResult.Cancel)
         {
@@ -251,6 +251,15 @@ namespace BioSeqDB
       EnableOK();
     }
 
+    private void lstQueryGenomes_ItemCheck(object sender, ItemCheckEventArgs e)
+    {
+      lstQueryGenomes.ItemCheck -= lstQueryGenomes_ItemCheck;   // Switch off event handler while we update the (un)checked value.
+      lstQueryGenomes.SetItemCheckState(e.Index, e.NewValue);
+      lstQueryGenomes.ItemCheck += lstQueryGenomes_ItemCheck;   // Switch on event handler
+
+      lstQueryGenomes_SelectedValueChanged(sender, e);
+    }
+
     private void lstQueryGenomes_SelectedValueChanged(object sender, EventArgs e)
     {
       EnableOK();
@@ -275,7 +284,7 @@ namespace BioSeqDB
         // We want an actual file, so don't append "\\".
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to query genome file",
                             DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path), 
-                            "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*", genomeList, AppConfigHelper.UbuntuPrefix());
+                            "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", genomeList, AppConfigHelper.UbuntuPrefix());
         result = Explorer.frmExplorer.ShowDialog();
         if (result != DialogResult.Cancel)
         {
@@ -293,7 +302,7 @@ namespace BioSeqDB
         ofn.Title = "Input path to query genome file(s)";
         ofn.CheckFileExists = true;
         ofn.Multiselect = true;
-        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*";
+        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*";
 
         result = ofn.ShowDialog();
         if (result != DialogResult.Cancel)

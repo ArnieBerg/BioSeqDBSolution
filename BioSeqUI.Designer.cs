@@ -62,7 +62,6 @@
       this.mnuExtract = new System.Windows.Forms.ToolStripMenuItem();
       this.mnuRemove = new System.Windows.Forms.ToolStripMenuItem();
       this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.cmbAnalysis = new System.Windows.Forms.ToolStripComboBox();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
       this.ConfirmDBDelete = new Ookii.Dialogs.WinForms.TaskDialog(this.components);
       this.btnDeleteDBYes = new Ookii.Dialogs.WinForms.TaskDialogButton(this.components);
@@ -70,6 +69,7 @@
       this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
       this.backgroundWorker_Versions = new System.ComponentModel.BackgroundWorker();
       this.backgroundWorker_SampleIDs = new System.ComponentModel.BackgroundWorker();
+      this.cmbAnalysis = new System.Windows.Forms.ToolStripComboBox();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
@@ -206,7 +206,6 @@
       this.panel1.Size = new System.Drawing.Size(32, 32);
       this.panel1.TabIndex = 7;
       this.panel1.Click += new System.EventHandler(this.panel1_Click);
-      this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
       // 
       // btnRestore
       // 
@@ -452,38 +451,42 @@
       // 
       // mnuAssemble
       // 
+      this.mnuAssemble.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
       this.mnuAssemble.Image = global::BioSeqDB.Properties.Resources._5130___Assembly_Line_5121;
       this.mnuAssemble.Name = "mnuAssemble";
       this.mnuAssemble.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.A)));
-      this.mnuAssemble.Size = new System.Drawing.Size(111, 36);
+      this.mnuAssemble.Size = new System.Drawing.Size(113, 36);
       this.mnuAssemble.Text = "&Assemble...";
       this.mnuAssemble.ToolTipText = "Assemble samples using NextFlow";
       this.mnuAssemble.Click += new System.EventHandler(this.mnuAssemble_Click);
       // 
       // mnuInsert
       // 
+      this.mnuInsert.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
       this.mnuInsert.Image = ((System.Drawing.Image)(resources.GetObject("mnuInsert.Image")));
       this.mnuInsert.Name = "mnuInsert";
-      this.mnuInsert.Size = new System.Drawing.Size(89, 36);
+      this.mnuInsert.Size = new System.Drawing.Size(93, 36);
       this.mnuInsert.Text = "Insert...";
       this.mnuInsert.ToolTipText = "add a new sequence to database";
       this.mnuInsert.Click += new System.EventHandler(this.mnuInsert_Click);
       // 
       // mnuExtract
       // 
+      this.mnuExtract.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
       this.mnuExtract.Image = global::BioSeqDB.Properties.Resources.plier;
       this.mnuExtract.Name = "mnuExtract";
-      this.mnuExtract.Size = new System.Drawing.Size(96, 36);
+      this.mnuExtract.Size = new System.Drawing.Size(100, 36);
       this.mnuExtract.Text = "Extract...";
       this.mnuExtract.ToolTipText = "retrieve a target sequence from database";
       this.mnuExtract.Click += new System.EventHandler(this.mnuExtract_Click);
       // 
       // mnuRemove
       // 
+      this.mnuRemove.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
       this.mnuRemove.Image = global::BioSeqDB.Properties.Resources.DELETE;
       this.mnuRemove.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
       this.mnuRemove.Name = "mnuRemove";
-      this.mnuRemove.Size = new System.Drawing.Size(87, 36);
+      this.mnuRemove.Size = new System.Drawing.Size(91, 36);
       this.mnuRemove.Text = "Remove...";
       this.mnuRemove.ToolTipText = "remove an existing target from database";
       this.mnuRemove.Click += new System.EventHandler(this.mnuRemove_Click);
@@ -495,24 +498,6 @@
       this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
       this.aboutToolStripMenuItem.Size = new System.Drawing.Size(44, 36);
       this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
-      // 
-      // cmbAnalysis
-      // 
-      this.cmbAnalysis.BackColor = System.Drawing.Color.PeachPuff;
-      this.cmbAnalysis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cmbAnalysis.Items.AddRange(new object[] {
-            "-- Select analysis --",
-            "BBMap...",
-            "Build tree...",
-            "InfluenzaA...",
-            "Kraken2...",
-            "Quast...",
-            "Salmonella Serotyping...",
-            "Search...",
-            "VFabricate..."});
-      this.cmbAnalysis.Name = "cmbAnalysis";
-      this.cmbAnalysis.Size = new System.Drawing.Size(200, 36);
-      this.cmbAnalysis.SelectedIndexChanged += new System.EventHandler(this.cmbAnalysis_SelectedIndexChanged);
       // 
       // ConfirmDBDelete
       // 
@@ -545,6 +530,26 @@
       // 
       this.backgroundWorker_SampleIDs.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker_SampleIDs_DoWork);
       this.backgroundWorker_SampleIDs.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker_SampleIDs_RunWorkerCompleted);
+      // 
+      // cmbAnalysis
+      // 
+      this.cmbAnalysis.BackColor = System.Drawing.Color.PeachPuff;
+      this.cmbAnalysis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbAnalysis.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+      this.cmbAnalysis.Items.AddRange(new object[] {
+            "-- Select analysis --",
+            "BBMap...",
+            "Build tree...",
+            "InfluenzaA...",
+            "Kraken2...",
+            "Quast...",
+            "Salmonella Serotyping...",
+            "Search...",
+            "VFabricate..."});
+      this.cmbAnalysis.Name = "cmbAnalysis";
+      this.cmbAnalysis.Size = new System.Drawing.Size(200, 36);
+      this.cmbAnalysis.Sorted = true;
+      this.cmbAnalysis.SelectedIndexChanged += new System.EventHandler(this.cmbAnalysis_SelectedIndexChanged);
       // 
       // BioSeqUI
       // 
@@ -609,10 +614,10 @@
     private System.Windows.Forms.ComboBox cmbUser;
     private System.Windows.Forms.Button btnRestore;
     private System.Windows.Forms.Button btnBackup;
-    private System.Windows.Forms.ToolStripComboBox cmbAnalysis;
     private System.ComponentModel.BackgroundWorker backgroundWorker;
     private System.ComponentModel.BackgroundWorker backgroundWorker_Versions;
     private System.ComponentModel.BackgroundWorker backgroundWorker_SampleIDs;
     private System.Windows.Forms.Panel panel1;
+    private System.Windows.Forms.ToolStripComboBox cmbAnalysis;
   }
 }

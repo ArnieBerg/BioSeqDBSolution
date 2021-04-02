@@ -17,6 +17,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSExplorer", "..\FSExplorer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BioSeqDB", "BioSeqDB.csproj", "{749BFBD1-EEC7-4B6B-B852-DE2AF8B6148E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbstractTcpLib", "..\..\TCPLibAbstract\AbstractTcpLib\AbstractTcpLib.csproj", "{FC004140-0530-4F76-ABB4-C6E976662FF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbstractTcpServer", "..\..\TCPLibAbstract\cs\AbstractTcpServer\AbstractTcpServer.csproj", "{267D74ED-D59B-44CC-BA88-9CFEB81CA65D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BioSeqDBUserCore", "..\BioSeqDBUserCore\BioSeqDBUserCore.csproj", "{0CAD77B1-800C-416E-8C49-88D2D75D803E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +85,29 @@ Global
 		{749BFBD1-EEC7-4B6B-B852-DE2AF8B6148E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{749BFBD1-EEC7-4B6B-B852-DE2AF8B6148E}.Release|x64.ActiveCfg = Release|Any CPU
 		{749BFBD1-EEC7-4B6B-B852-DE2AF8B6148E}.Release|x64.Build.0 = Release|Any CPU
+		{FC004140-0530-4F76-ABB4-C6E976662FF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC004140-0530-4F76-ABB4-C6E976662FF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC004140-0530-4F76-ABB4-C6E976662FF2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FC004140-0530-4F76-ABB4-C6E976662FF2}.Debug|x64.Build.0 = Debug|Any CPU
+		{FC004140-0530-4F76-ABB4-C6E976662FF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC004140-0530-4F76-ABB4-C6E976662FF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC004140-0530-4F76-ABB4-C6E976662FF2}.Release|x64.ActiveCfg = Release|Any CPU
+		{FC004140-0530-4F76-ABB4-C6E976662FF2}.Release|x64.Build.0 = Release|Any CPU
+		{267D74ED-D59B-44CC-BA88-9CFEB81CA65D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{267D74ED-D59B-44CC-BA88-9CFEB81CA65D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{267D74ED-D59B-44CC-BA88-9CFEB81CA65D}.Debug|x64.Build.0 = Debug|Any CPU
+		{267D74ED-D59B-44CC-BA88-9CFEB81CA65D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{267D74ED-D59B-44CC-BA88-9CFEB81CA65D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{267D74ED-D59B-44CC-BA88-9CFEB81CA65D}.Release|x64.ActiveCfg = Release|Any CPU
+		{267D74ED-D59B-44CC-BA88-9CFEB81CA65D}.Release|x64.Build.0 = Release|Any CPU
+		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Debug|x64.Build.0 = Debug|Any CPU
+		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Release|x64.ActiveCfg = Release|Any CPU
+		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

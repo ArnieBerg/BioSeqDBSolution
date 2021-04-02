@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace BioSeqDB
@@ -55,12 +54,12 @@ namespace BioSeqDB
       Cursor.Current = Cursors.Default;
       if (Size.Width != 0)
       {
-        Location = AppConfigHelper.Location();
+        Location = AppConfigHelper.UILocation();
         if (Location.X <= 0)
         {
           Location = new Point(100, 100);
         }
-        Size = AppConfigHelper.Size();
+        Size = AppConfigHelper.UISize();
         if (Size.Height <= 0 || Size.Width <= 0)
         {
           Size = new Size(3000, 1500);
@@ -100,19 +99,19 @@ namespace BioSeqDB
     {
       // Populate the drop down.
       cmbUser.Items.Clear();
-      if (AppConfigHelper.seqdbConfig.Users.Count > 0)
+      if (AppConfigHelper.seqdbConfigGlobal.Users.Count > 0)
       {
-        foreach (User user in AppConfigHelper.seqdbConfig.Users.Values)
+        foreach (User user in AppConfigHelper.seqdbConfigGlobal.Users.Values)
         {
           cmbUser.Items.Add(user.Username);
         }
       }
 
-      if (!string.IsNullOrEmpty(AppConfigHelper.seqdbConfig.LastUser))
+      if (!string.IsNullOrEmpty(AppConfigHelper.seqdbConfigGlobal.LastUser))
       {
         for (int i = 0; i < cmbUser.Items.Count; i++)
         {
-          if (cmbUser.Items[i].ToString() == AppConfigHelper.seqdbConfig.LastUser)
+          if (cmbUser.Items[i].ToString() == AppConfigHelper.seqdbConfigGlobal.LastUser)
           {
             cmbUser.SelectedIndex = i; // Pick the last selected.
             break;
@@ -221,6 +220,7 @@ namespace BioSeqDB
       }
 
       cmbUser.SelectedIndexChanged -= cmbUser_SelectedIndexChanged;
+      ServiceCallHelper.LoadConfig(string.Empty);
       ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser);
       AppConfigHelper.seqdbConfig.LastDBSelected = string.Empty;
       Initialize();
@@ -250,10 +250,10 @@ namespace BioSeqDB
           Cursor.Current = Cursors.WaitCursor;
 
           // If necessary, copy local files to server.
-          if (IsServiceClass.IsService)
+          string fastaPath = AppConfigHelper.Build_DBInput();
+          if (IsServiceClass.IsService && !string.IsNullOrEmpty(fastaPath))
           {
-            string fastaPath = AppConfigHelper.Build_DBInput();
-            if (fastaPath.StartsWith("[L]")) // Not extract sample ID
+            if (fastaPath.StartsWith("[L]") || !fastaPath.StartsWith("[")) 
             {
               ServiceCallHelper.ResetFastaFolder(AppConfigHelper.LoggedOnUser);
               string[] folders = Directory.GetDirectories(DirectoryHelper.CleanPath(fastaPath));
@@ -271,12 +271,12 @@ namespace BioSeqDB
                 }
               }
             }
+          }
 
-            if (!string.IsNullOrEmpty(AppConfigHelper.BuildTreeWildReference())) // This is the standard genome for the new database.
-            {
-              // Wherever it is, store it temporarily in the UserFolder.
-              DirectoryHelper.FileCopy(AppConfigHelper.BuildTreeWildReference(), "[S]" + AppConfigHelper.UserFolder(), true);
-            }
+          if (!string.IsNullOrEmpty(AppConfigHelper.BuildTreeWildReference())) // This is the standard genome for the new database.
+          {
+            // Wherever it is, store it temporarily in the UserFolder.
+            DirectoryHelper.FileCopy(AppConfigHelper.BuildTreeWildReference(), "[S]" + AppConfigHelper.UserFolder(), true);
           }
 
           ServiceCallHelper.Build_DB(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
@@ -360,25 +360,26 @@ namespace BioSeqDB
           DirectoryHelper.FileCopy(AppConfigHelper.InsertInputPath(), "[S]" + AppConfigHelper.UserFolder(), true);
         }
 
+        WSLProxyResponse WSLResponse = new WSLProxyResponse();
         if (AppConfigHelper.InsertSampleReplace)
         {
-          ret = ServiceCallHelper.ReplaceSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
+          WSLResponse = ServiceCallHelper.ReplaceSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
         }
         else // Go ahead without prompting.
         {
           function = "Insert";
-          ret = ServiceCallHelper.InsertSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
+          WSLResponse = ServiceCallHelper.InsertSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
         }
         ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // To retrieve StandardOutput and LastError.
         Cursor.Current = Cursors.Default;
-        if (ret == 0)
+        if (WSLResponse.ExitCode == 0)
         {
           MessageBox.Show(AppConfigHelper.StandardOutput + Environment.NewLine + function + " completed successfully.", "Success", MessageBoxButtons.OK);
           ReloadSampleIDs(); // Reload list with new sample ID.
         }
         else
         {
-          MessageBox.Show(function + " completed with error code " + ret.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          MessageBox.Show(function + " completed with error code " + WSLResponse.ExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
                                AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
         }
       }
@@ -392,17 +393,17 @@ namespace BioSeqDB
       {
         Cursor.Current = Cursors.WaitCursor;
         // Parameters are in appsettings.
-        int ret = ServiceCallHelper.Extract(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
+        WSLProxyResponse WSLResponse = ServiceCallHelper.Extract(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
         ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // To retrieve StandardOutput and LastError.
         Cursor.Current = Cursors.Default;
-        if (ret == 0)
+        if (WSLResponse.ExitCode == 0)
         {
           MessageBox.Show(AppConfigHelper.StandardOutput + Environment.NewLine + "Extract completed successfully. Result is in " +
                           AppConfigHelper.ExtractOutputPath() + "\\" + AppConfigHelper.ExtractSampleID() + ".fasta", "Success", MessageBoxButtons.OK);
         }
         else
         {
-          MessageBox.Show("Extract completed with error code " + ret.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          MessageBox.Show("Extract completed with error code " + WSLResponse.ExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
                              AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
         }
       }
@@ -416,10 +417,10 @@ namespace BioSeqDB
       {
         Cursor.Current = Cursors.WaitCursor;
         //int ret = SeqDBHelper.RemoveSample(); // Parameters are in appsettings.
-        int ret = ServiceCallHelper.RemoveSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
+        WSLProxyResponse WSLResponse = ServiceCallHelper.RemoveSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
         ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // To retrieve StandardOutput and LastError.
         Cursor.Current = Cursors.Default;
-        if (ret == 0)
+        if (WSLResponse.ExitCode == 0)
         {
           MessageBox.Show(AppConfigHelper.RemoveSampleID() + " successfully removed.", "Success", MessageBoxButtons.OK);
           AppConfigHelper.RemoveSample(string.Empty); // So we don't prompt for it again.
@@ -427,7 +428,7 @@ namespace BioSeqDB
         }
         else
         {
-          MessageBox.Show("Remove completed with error code " + ret.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          MessageBox.Show("Remove completed with error code " + WSLResponse.ExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
                             AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
         }
       }
@@ -440,10 +441,10 @@ namespace BioSeqDB
       if (rc == DialogResult.OK) // then the config has the specs 
       {
         Cursor.Current = Cursors.WaitCursor;
-        int ret = ServiceCallHelper.BackupDatabase(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
+        WSLProxyResponse WSLResponse = ServiceCallHelper.BackupDatabase(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
         ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // To retrieve StandardOutput and LastError.
         Cursor.Current = Cursors.Default;
-        if (ret == 0)
+        if (WSLResponse.ExitCode == 0)
         {
           RefreshVersionInformation(AppConfigHelper.seqdbConfig.seqDBs[AppConfigHelper.seqdbConfig.LastDBSelected]);
           MessageBox.Show(AppConfigHelper.StandardOutput + Environment.NewLine + "Backup successfully completed.", "Success", MessageBoxButtons.OK);
@@ -451,7 +452,7 @@ namespace BioSeqDB
         }
         else
         {
-          MessageBox.Show("Backup completed with error code " + ret.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          MessageBox.Show("Backup completed with error code " + WSLResponse.ExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
                               AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
         }
       }
@@ -464,17 +465,17 @@ namespace BioSeqDB
       if (rc == DialogResult.OK) // then the config has the specs 
       {
         Cursor.Current = Cursors.WaitCursor;
-        int ret = ServiceCallHelper.RestoreDatabase(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
+        WSLProxyResponse WSLResponse = ServiceCallHelper.RestoreDatabase(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
         ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // To retrieve StandardOutput and LastError.
         Cursor.Current = Cursors.Default;
-        if (ret == 0)
+        if (WSLResponse.ExitCode == 0)
         {
           ReloadSampleIDs(); // Reload list without sample ID.
           MessageBox.Show(AppConfigHelper.StandardOutput + Environment.NewLine + "Restore successfully completed.", "Success", MessageBoxButtons.OK);
         }
         else
         {
-          MessageBox.Show("Restore completed with error code " + ret.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          MessageBox.Show("Restore completed with error code " + WSLResponse.ExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
                                   AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
         }
       }
@@ -514,12 +515,12 @@ namespace BioSeqDB
       Cursor.Current = Cursors.Default;
       if (Size.Width != 0)
       {
-        Location = AppConfigHelper.Location();
+        Location = AppConfigHelper.UILocation();
         if (Location.X <= 0)
         {
           Location = new Point(100, 100);
         }
-        Size = AppConfigHelper.Size();
+        Size = AppConfigHelper.UISize();
         if (Size.Height <= 0 || Size.Width <= 0)
         {
           Size = new Size(3000, 1500);
@@ -539,7 +540,7 @@ namespace BioSeqDB
         Cursor.Current = Cursors.WaitCursor;
         SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete);
 
-        CreateNewTask("Assemble", AppConfigHelper.TaskMemo);
+        CreateNewTask("Assemble", AppConfigHelper.TaskMemo, string.Empty);
         UpdateNotificationStatus();
         backgroundWorker.RunWorkerAsync();
         Cursor.Current = Cursors.Default;
@@ -555,7 +556,7 @@ namespace BioSeqDB
         Cursor.Current = Cursors.WaitCursor;
         SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
 
-        CreateNewTask("BuildTree", AppConfigHelper.TaskMemo);
+        CreateNewTask("BuildTree", AppConfigHelper.TaskMemo, string.Empty);
         UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
 
         backgroundWorker.RunWorkerAsync();
@@ -566,53 +567,49 @@ namespace BioSeqDB
     private void backgroundWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
     {
       BioSeqTask task = AppConfigHelper.TaskOfID(AppConfigHelper.LastTaskID);
+      WSLProxyResponse WSLResponse = null;
       switch (task.TaskType)
       {
         case "Salmonella":
-          int rc = ServiceCallHelper.Salmonella(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          e.Result = new List<object>() { rc, task };
+          WSLResponse = ServiceCallHelper.Salmonella(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
 
         case "VFabricate":
-          rc = ServiceCallHelper.VFabricate(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          e.Result = new List<object>() { rc, task };
+          WSLResponse = ServiceCallHelper.VFabricate(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
 
         case "Search":
-          rc = ServiceCallHelper.SearchSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          e.Result = new List<object>() { rc, task };
+          WSLResponse = ServiceCallHelper.SearchSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
 
         case "Kraken2":
-          rc = ServiceCallHelper.Kraken2(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          e.Result = new List<object>() { rc, task };
+          WSLResponse = ServiceCallHelper.Kraken2(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
 
         case "Quast":
-          rc = ServiceCallHelper.Quast(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          e.Result = new List<object>() { rc, task };
+          WSLResponse = ServiceCallHelper.Quast(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
 
         case "BBMap":
-          rc = ServiceCallHelper.BBMap(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          e.Result = new List<object>() { rc, task };
+          WSLResponse = ServiceCallHelper.BBMap(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
 
         case "BuildTree":
-          rc = ServiceCallHelper.BuildTree(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          e.Result = new List<object>() { rc, task };
+          WSLResponse = ServiceCallHelper.BuildTree(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
 
         case "Assemble":
-          rc = ServiceCallHelper.Assemble(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), AppConfigHelper.QuerySampleConfig());
-          e.Result = new List<object>() { rc, task };
+          WSLResponse = ServiceCallHelper.Assemble(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), AppConfigHelper.QuerySampleConfig());
           break;
 
         case "InfluenzaA":
-          rc = ServiceCallHelper.InfluenzaA(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          e.Result = new List<object>() { rc, task };
+          WSLResponse = ServiceCallHelper.InfluenzaA(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
       }
+
+      task.LastError = WSLResponse.StandardError;
+      task.StandardOutput = WSLResponse.StandardOutput;
+      e.Result = new List<object>() { WSLResponse.ExitCode, task };
     }
 
     private void backgroundWorker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
@@ -620,6 +617,8 @@ namespace BioSeqDB
       // Parse the return from the background task.
       try
       {
+        //AppConfigHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // Reload user's config (gets at least the LastCommand)
+
         List<object> arguments = (List<object>)e.Result;
         int ret = (int)arguments[0];
         BioSeqTask task = (BioSeqTask)arguments[1];
@@ -641,7 +640,7 @@ namespace BioSeqDB
             }
             else if (ret == -2)
             {
-              MessageBox.Show("Failed to catenate files in BBMap.", "Error", MessageBoxButtons.OK);
+              MessageBox.Show(task.LastError, "Error", MessageBoxButtons.OK);
             }
             else if (ret == -4)
             {
@@ -674,13 +673,13 @@ namespace BioSeqDB
       }
     }
 
-    private void CreateNewTask(string taskType, string taskMemo)
+    private void CreateNewTask(string taskType, string taskMemo, string DB)
     {
       int taskid = AppConfigHelper.MaxTaskID() + 1;
       BioSeqTask task = new BioSeqTask()
       {
         TaskMemo = taskMemo,
-        TaskDB = AppConfigHelper.CurrentDBName(),
+        TaskDB = DB, //  AppConfigHelper.CurrentDBName(),
         TaskID = taskid.ToString(),
         TaskStatus = "Pending",
         TaskTime = DateTime.Now,
@@ -739,7 +738,6 @@ namespace BioSeqDB
       {
         AppConfigHelper.Logout();
         AppConfigHelper.SaveUIForm(Location, Size);
-
       }
     }
 
@@ -767,7 +765,7 @@ namespace BioSeqDB
             Cursor.Current = Cursors.WaitCursor;
             SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
 
-            CreateNewTask("Salmonella", AppConfigHelper.TaskMemo);
+            CreateNewTask("Salmonella", AppConfigHelper.TaskMemo, string.Empty);
             UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
 
             backgroundWorker.RunWorkerAsync();
@@ -776,8 +774,8 @@ namespace BioSeqDB
           break;
 
         case "Search...":
-          BioSeqAnalysis frm = new BioSeqAnalysis(cmbAnalysis.Text);
-           rc = frm.ShowDialog();
+          BioSeqAnalysis frm = new BioSeqAnalysis(cmbAnalysis.Text, SampleList());
+          rc = frm.ShowDialog();
           if (rc == DialogResult.OK) // then the config has the specs 
           {
             Cursor.Current = Cursors.WaitCursor;
@@ -787,7 +785,7 @@ namespace BioSeqDB
                       "Search for " + (AppConfigHelper.SampleChecked("Search") ? AppConfigHelper.SampleID("Search") : AppConfigHelper.InputPath("Search")) + "." :
                       AppConfigHelper.TaskMemo;
 
-            CreateNewTask("Search", memo);
+            CreateNewTask("Search", memo, AppConfigHelper.CurrentDBName());
             UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
 
             backgroundWorker.RunWorkerAsync();
@@ -803,7 +801,7 @@ namespace BioSeqDB
             Cursor.Current = Cursors.WaitCursor;
             SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
 
-            CreateNewTask("InfluenzaA", AppConfigHelper.TaskMemo);
+            CreateNewTask("InfluenzaA", AppConfigHelper.TaskMemo, string.Empty);
             UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
 
             backgroundWorker.RunWorkerAsync();
@@ -816,7 +814,7 @@ namespace BioSeqDB
           break;
 
         case "Kraken2...":
-          frm = new BioSeqAnalysis(cmbAnalysis.Text);
+          frm = new BioSeqAnalysis(cmbAnalysis.Text, SampleList());
           rc = frm.ShowDialog();
           if (rc == DialogResult.OK) // then the config has the specs 
           {
@@ -827,7 +825,7 @@ namespace BioSeqDB
                       "Kraken2 analysis for " + (AppConfigHelper.SampleChecked("Kraken2") ? AppConfigHelper.SampleID("Kraken2") : AppConfigHelper.InputPath("Kraken2")) + "." :
                       AppConfigHelper.TaskMemo;
 
-            CreateNewTask("Search", memo);
+            CreateNewTask("Kraken2", memo, AppConfigHelper.CurrentDBName());
             UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
 
             backgroundWorker.RunWorkerAsync();
@@ -836,7 +834,7 @@ namespace BioSeqDB
           break;
 
         case "Quast...":
-          frm = new BioSeqAnalysis(cmbAnalysis.Text);
+          frm = new BioSeqAnalysis(cmbAnalysis.Text, SampleList());
           rc = frm.ShowDialog();
           if (rc == DialogResult.OK) // then the config has the specs 
           {
@@ -847,7 +845,7 @@ namespace BioSeqDB
                       "Quast analysis for " + (AppConfigHelper.SampleChecked("Quast") ? AppConfigHelper.SampleID("Quast") : AppConfigHelper.InputPath("Quast")) + "." :
                       AppConfigHelper.TaskMemo;
 
-            CreateNewTask("Quast", memo);
+            CreateNewTask("Quast", memo, AppConfigHelper.CurrentDBName());
             UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
 
             backgroundWorker.RunWorkerAsync();
@@ -856,7 +854,7 @@ namespace BioSeqDB
           break;
 
         case "BBMap...":
-          frm = new BioSeqAnalysis("BBMap");
+          frm = new BioSeqAnalysis("BBMap", SampleList());
           rc = frm.ShowDialog();
           if (rc == DialogResult.OK) // then the config has the specs 
           {
@@ -867,7 +865,7 @@ namespace BioSeqDB
                       "BBMap analysis for " + (AppConfigHelper.SampleChecked("BBMap") ? AppConfigHelper.SampleID("BBMap") : AppConfigHelper.InputPath("BBMap")) + "." :
                       AppConfigHelper.TaskMemo;
 
-            CreateNewTask("BBMap", memo);
+            CreateNewTask("BBMap", memo, AppConfigHelper.CurrentDBName());
             UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
 
             backgroundWorker.RunWorkerAsync();
@@ -876,7 +874,7 @@ namespace BioSeqDB
           break;
 
         case "VFabricate...":
-          frm = new BioSeqAnalysis(cmbAnalysis.Text);
+          frm = new BioSeqAnalysis(cmbAnalysis.Text, SampleList());
           rc = frm.ShowDialog();
           if (rc == DialogResult.OK) // then the config has the specs 
           {
@@ -887,7 +885,7 @@ namespace BioSeqDB
                       "VFabricate analysis for " + (AppConfigHelper.SampleChecked("VFabricate") ? AppConfigHelper.SampleID("VFabricate") : AppConfigHelper.InputPath("VFabricate")) + "." :
                       AppConfigHelper.TaskMemo;
 
-            CreateNewTask("VFabricate", memo);
+            CreateNewTask("VFabricate", memo, AppConfigHelper.CurrentDBName());
             UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
 
             backgroundWorker.RunWorkerAsync();
@@ -896,6 +894,17 @@ namespace BioSeqDB
           break;
       }
       cmbAnalysis.SelectedIndex = 0; // Position back to -- Select analysis --.
+    }
+
+    private List<string> SampleList()
+    {
+      var list = new List<string>();
+      foreach (var item in lstSampleIDs.Items)
+      {
+        list.Add(item.ToString());
+      }
+
+      return list;
     }
 
     private void backgroundWorker_Versions_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -950,14 +959,18 @@ namespace BioSeqDB
     private void panel1_Click(object sender, EventArgs e)
     {
       // Test DirectoryHelper
-      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Server File Explorer...", false, "C:\\",
-                                            "All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
-      Explorer.frmExplorer.ShowDialog();
+      string path = AppConfigHelper.LastExplorerServerPath;
+      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Server File Explorer...", 
+                                          DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path), "All files (*.*)|*.*", 
+                                                                                          null, AppConfigHelper.UbuntuPrefix());
+      Explorer.frmExplorer.lastPath = LastPathCallback;
+      Explorer.frmExplorer.Show(); // Show modeless
     }
 
-    private void panel1_Paint(object sender, PaintEventArgs e)
+    private void LastPathCallback(string serverPath, string localPath)
     {
-
+      AppConfigHelper.LastExplorerServerPath = serverPath;
+      AppConfigHelper.LastExplorerLocalPath = localPath;
     }
   }
 }

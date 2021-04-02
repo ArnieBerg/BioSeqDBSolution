@@ -91,7 +91,8 @@ namespace BioSeqDB
       AppConfigHelper.AssembleVirusReference = txtVirusReference.Text.Trim();
 
       AppConfigHelper.AssembleSample(querySamples, chkFastPolish.Checked, radRA.Checked, radFlye.Checked, radTrinity.Checked,
-                                     chkKraken2.Checked, chkBBmap.Checked, chkQuast.Checked, chkVFabricate.Checked, txtGeneXRef.Text.Trim(), txtMemo.Text.Trim());
+                                     chkKraken2.Checked, chkBBmap.Checked, chkQuast.Checked, chkVFabricate.Checked, txtGeneXRef.Text.Trim(),
+                                     txtMemo.Text.Trim(), txtMaxFastq.Text.Trim());
     }
 
     private void EnableOK()
@@ -109,6 +110,15 @@ namespace BioSeqDB
       btnOK.Enabled = false;
     }
 
+    private void lstSamples_ItemCheck(object sender, ItemCheckEventArgs e)
+    {   
+      lstSamples.ItemCheck -= lstSamples_ItemCheck;   // Switch off event handler while we update the (un)checked value.
+      lstSamples.SetItemCheckState(e.Index, e.NewValue);   
+      lstSamples.ItemCheck += lstSamples_ItemCheck;   // Switch on event handler
+
+      lstSamples_SelectedValueChanged(sender, e);
+    }
+
     private void lstSamples_SelectedValueChanged(object sender, EventArgs e)
     {
       EnableOK();
@@ -120,13 +130,22 @@ namespace BioSeqDB
       if (IsServiceClass.IsService)
       {
         path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(path)) + "\\"; // We want an actual file, so don't append "\\". No, we want folder.
-        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folders containing .fastq contig file(s)",
-                                 DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                                 "Fastq files (*.fastq)|*.fastq|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
-        while (Explorer.frmExplorer.ShowDialog() != DialogResult.Cancel)
+
+        List<string> genomeList = new List<string>();
+        for (int i = 0; i < lstSamples.Items.Count; i++)
         {
-          path = AppConfigHelper.GetDirectoryName(Explorer.PresentServerPath + Explorer.PresentLocalPath + "\\"); // One of these is empty.
+          genomeList.Add(Path.GetFileName(DirectoryHelper.CleanPath(lstSamples.Items[i].ToString())));
+        }
+
+        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folders containing .fastq contig file(s)",
+                                 DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path) + "\\",
+                                 "Fastq files (*.fastq)|*.fastq|All files (*.*)|*.*", genomeList, AppConfigHelper.UbuntuPrefix());
+        DialogResult result = Explorer.frmExplorer.ShowDialog();
+        if (result != DialogResult.Cancel)
+        {
           bool ServerPath = string.IsNullOrEmpty(Explorer.PresentLocalPath);
+
+          path = AppConfigHelper.GetDirectoryName(Explorer.PresentServerPath + Explorer.PresentLocalPath) + "\\"; // One of these is empty.
 
           // Make sure the folders contain .fastq files.
           if (ValidFastqFiles(DirectoryHelper.CleanPath(path), ServerPath))
@@ -139,15 +158,7 @@ namespace BioSeqDB
             {
               AppConfigHelper.AssembleLastQueryFolder = path;
             }
-            break;
           }
-
-          Explorer.frmExplorer = null;
-          path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(AppConfigHelper.NormalizePathToWindows(radTrinity.Checked ? 
-                                    AppConfigHelper.AssembleLastQueryFolderTrinity : AppConfigHelper.AssembleLastQueryFolder))) + "\\"; // We want folder, so append "\\".
-          Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folders containing .fastq contig file(s)",
-                             DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                             "Fastq files (*.fastq)|*.fastq|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
         }
       }
       else
@@ -257,11 +268,11 @@ namespace BioSeqDB
         string path = string.Empty;
         if (DirectoryHelper.FileExists(AppConfigHelper.AssembleVirusReference))
         {
-          path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(AppConfigHelper.AssembleVirusReference)); // We want an actual file, so don't append "\\".
+          path = AppConfigHelper.NormalizePathToWindows(AppConfigHelper.AssembleVirusReference); // We want an actual file, so don't append "\\".
         }
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to virus reference genome file",
                                  DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                                 "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+                                 "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
         Explorer.frmExplorer.ShowDialog();
         if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
         {
@@ -277,7 +288,7 @@ namespace BioSeqDB
         }
         ofn.Title = "Input path to virus reference genome file";
         ofn.CheckFileExists = true;
-        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*";
+        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*";
 
         if (ofn.ShowDialog() != DialogResult.Cancel)
         {
@@ -293,11 +304,11 @@ namespace BioSeqDB
         string path = string.Empty;
         if (!string.IsNullOrEmpty(AppConfigHelper.FileExists(AppConfigHelper.AssembleHostReference)))
         {
-          path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(AppConfigHelper.AssembleHostReference)); // We want an actual file, so don't append "\\".
+          path = AppConfigHelper.NormalizePathToWindows(AppConfigHelper.AssembleHostReference); // We want an actual file, so don't append "\\".
         }
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to host reference genome file",
                                  DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                                 "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+                                 "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
         Explorer.frmExplorer.ShowDialog();
         if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
         {
@@ -313,7 +324,7 @@ namespace BioSeqDB
         }
         ofn.Title = "Input path to host reference genome file";
         ofn.CheckFileExists = true;
-        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*";
+        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*";
 
         if (ofn.ShowDialog() != DialogResult.Cancel)
         {
@@ -334,7 +345,7 @@ namespace BioSeqDB
         string path = string.Empty;
         if (!string.IsNullOrEmpty(AppConfigHelper.FileExists(AppConfigHelper.AssembleVFGeneXRef)))
         {
-          path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(AppConfigHelper.AssembleVFGeneXRef)); // We want an actual file, so don't append "\\".
+          path = AppConfigHelper.NormalizePathToWindows(AppConfigHelper.AssembleVFGeneXRef); // We want an actual file, so don't append "\\".
         }
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to gene cross-reference file",
                                  DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
@@ -361,6 +372,17 @@ namespace BioSeqDB
           AppConfigHelper.AssembleVFGeneXRef = txtGeneXRef.Text = ofn.FileName;
         }
       }
+    }
+
+    private void txtMaxFastq_KeyPress(object sender, KeyPressEventArgs e)
+    {
+      e.Handled = (!Char.IsNumber(e.KeyChar) && e.KeyChar != (Char)Keys.Back &&
+              e.KeyChar != (Char)Keys.Delete);  // Numerics only  isNumeric
+    }
+
+    private void BioSeqAssemble_Shown(object sender, EventArgs e)
+    {
+      lstSamples.ItemCheck += lstSamples_ItemCheck;
     }
   }
 }

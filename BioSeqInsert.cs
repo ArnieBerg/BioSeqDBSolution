@@ -44,7 +44,7 @@ namespace BioSeqDB
         string path = txtInputPath.Text;
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folder with .fasta contig file",
                                  DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                                 "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+                                 "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
         Explorer.frmExplorer.ShowDialog();
         if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
         {

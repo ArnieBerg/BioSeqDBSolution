@@ -2,11 +2,11 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="BioSeqDB.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="ModelServer" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">localhost</Value>
-    </Setting>
-    <Setting Name="DestinationURL" Type="System.String" Scope="Application">
+    <Setting Name="DestinationURL" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ModelServer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.100.189</Value>
     </Setting>
   </Settings>
 </SettingsFile>

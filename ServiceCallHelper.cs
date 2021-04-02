@@ -179,7 +179,7 @@ namespace BioSeqDB
       return SeqDBHelper.SampleIDs();
     }
 
-    public static int BuildTree(string loggedOnUser, string cfg)
+    public static WSLProxyResponse BuildTree(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -189,7 +189,7 @@ namespace BioSeqDB
       return SeqDBHelper.BuildTree();
     }
 
-    public static int Assemble(string loggedOnUser, string cfg, string config)
+    public static WSLProxyResponse Assemble(string loggedOnUser, string cfg, string config)
     {
       if (IsServiceClass.IsService)
       {
@@ -199,7 +199,7 @@ namespace BioSeqDB
       return SeqDBHelper.AssembleSamples(config);
     }
 
-    internal static int Salmonella(string loggedOnUser, string config)
+    internal static WSLProxyResponse Salmonella(string loggedOnUser, string config)
     {
       if (IsServiceClass.IsService)
       {
@@ -213,7 +213,7 @@ namespace BioSeqDB
       return SeqDBHelper.InfluenzaA();
     }
 
-    internal static int InfluenzaA(string loggedOnUser, string config)
+    internal static WSLProxyResponse InfluenzaA(string loggedOnUser, string config)
     {
       if (IsServiceClass.IsService)
       {
@@ -227,15 +227,15 @@ namespace BioSeqDB
       return SeqDBHelper.InfluenzaA();
     }
 
-    //internal static void KillTask(string loggedOnUser, string cfg)
-    //{
-    //  if (IsServiceClass.IsService)
-    //  {
-    //    BioSeqDBModel.Instance.KillTask(loggedOnUser, cfg);
-    //  }
-    //}
+    internal static void KillTask(string loggedOnUser, string cfg)
+    {
+      if (IsServiceClass.IsService)
+      {
+        BioSeqDBModel.Instance.KillTask(loggedOnUser, cfg);
+      }
+    }
 
-    public static int Kraken2(string loggedOnUser, string cfg)
+    public static WSLProxyResponse Kraken2(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -245,7 +245,7 @@ namespace BioSeqDB
       return SeqDBHelper.Kraken2();
     }
 
-    public static int Extract(string loggedOnUser, string cfg)
+    public static WSLProxyResponse Extract(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -255,7 +255,7 @@ namespace BioSeqDB
       return SeqDBHelper.ExtractSample(AppConfigHelper.ExtractSampleID(), AppConfigHelper.NormalizePathToLinux(AppConfigHelper.ExtractOutputPath()));
     }
 
-    public static int SearchSample(string loggedOnUser, string cfg)
+    public static WSLProxyResponse SearchSample(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -265,7 +265,7 @@ namespace BioSeqDB
       return SeqDBHelper.SearchSample();
     }
 
-    internal static int Build_DB(string loggedOnUser, string cfg)
+    internal static WSLProxyResponse Build_DB(string loggedOnUser, string cfg)
     {     
       if (IsServiceClass.IsService)
       {
@@ -340,7 +340,7 @@ namespace BioSeqDB
       return fCount;
     }
 
-    internal static int Quast(string loggedOnUser, string cfg)
+    internal static WSLProxyResponse Quast(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -350,7 +350,7 @@ namespace BioSeqDB
       return SeqDBHelper.Quast();
     }
 
-    internal static int BBMap(string loggedOnUser, string cfg)
+    internal static WSLProxyResponse BBMap(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -360,7 +360,7 @@ namespace BioSeqDB
       return SeqDBHelper.BBMap();
     }
 
-    internal static int VFabricate(string loggedOnUser, string cfg)
+    internal static WSLProxyResponse VFabricate(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -370,7 +370,7 @@ namespace BioSeqDB
       return SeqDBHelper.VFabricate();
     }
 
-    internal static int BackupDatabase(string loggedOnUser, string cfg)
+    internal static WSLProxyResponse BackupDatabase(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -380,7 +380,7 @@ namespace BioSeqDB
       return SeqDBHelper.BackupDatabase();
     }
 
-    internal static int RestoreDatabase(string loggedOnUser, string cfg)
+    internal static WSLProxyResponse RestoreDatabase(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -390,7 +390,7 @@ namespace BioSeqDB
       return SeqDBHelper.RestoreDatabase();
     }
 
-    internal static int ReplaceSample(string loggedOnUser, string cfg)
+    internal static WSLProxyResponse ReplaceSample(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -400,7 +400,7 @@ namespace BioSeqDB
       return SeqDBHelper.ReplaceSample();
     }
 
-    internal static int InsertSample(string loggedOnUser, string cfg)
+    internal static WSLProxyResponse InsertSample(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {
@@ -410,7 +410,7 @@ namespace BioSeqDB
       return SeqDBHelper.InsertSample();
     }
 
-    internal static int RemoveSample(string loggedOnUser, string cfg)
+    internal static WSLProxyResponse RemoveSample(string loggedOnUser, string cfg)
     {
       if (IsServiceClass.IsService)
       {

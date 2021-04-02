@@ -39,7 +39,8 @@ namespace BioSeqDB
       }
       labelVersion.Text = string.Format("Version {0} ", Assembly.GetExecutingAssembly().GetName().Version.ToString() + " v." + currentVersion);
       labelVersion.Visible = true;
-
+      lblServer.Text = "Server: " + Properties.Settings.Default.ModelServer;
+      lblServer.Visible = true;
       ShowStats();
     }
 

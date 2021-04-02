@@ -61,6 +61,8 @@
       this.chkAll = new System.Windows.Forms.CheckBox();
       this.txtMemo = new System.Windows.Forms.TextBox();
       this.label2 = new System.Windows.Forms.Label();
+      this.txtMaxFastq = new System.Windows.Forms.TextBox();
+      this.label6 = new System.Windows.Forms.Label();
       this.groupBox2.SuspendLayout();
       this.pnlBacterial.SuspendLayout();
       this.grpViral.SuspendLayout();
@@ -73,7 +75,7 @@
       this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.label4.Location = new System.Drawing.Point(12, 9);
       this.label4.Name = "label4";
-      this.label4.Size = new System.Drawing.Size(565, 54);
+      this.label4.Size = new System.Drawing.Size(695, 54);
       this.label4.TabIndex = 13;
       this.label4.Text = resources.GetString("label4.Text");
       // 
@@ -84,7 +86,7 @@
       this.btnOK.FlatAppearance.BorderSize = 2;
       this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
       this.btnOK.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnOK.Location = new System.Drawing.Point(642, 583);
+      this.btnOK.Location = new System.Drawing.Point(654, 569);
       this.btnOK.Name = "btnOK";
       this.btnOK.Size = new System.Drawing.Size(53, 22);
       this.btnOK.TabIndex = 7;
@@ -99,7 +101,7 @@
       this.btnCancel.FlatAppearance.BorderSize = 2;
       this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
       this.btnCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnCancel.Location = new System.Drawing.Point(773, 583);
+      this.btnCancel.Location = new System.Drawing.Point(785, 569);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Size = new System.Drawing.Size(61, 22);
       this.btnCancel.TabIndex = 8;
@@ -108,12 +110,13 @@
       // 
       // lstSamples
       // 
-      this.lstSamples.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.lstSamples.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lstSamples.FormattingEnabled = true;
       this.lstSamples.Location = new System.Drawing.Point(12, 102);
       this.lstSamples.Name = "lstSamples";
-      this.lstSamples.Size = new System.Drawing.Size(683, 169);
+      this.lstSamples.Size = new System.Drawing.Size(695, 154);
       this.lstSamples.Sorted = true;
       this.lstSamples.TabIndex = 25;
       this.lstSamples.SelectedValueChanged += new System.EventHandler(this.lstSamples_SelectedValueChanged);
@@ -132,7 +135,7 @@
       // 
       this.btnSamplePicker.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnSamplePicker.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnSamplePicker.Location = new System.Drawing.Point(701, 102);
+      this.btnSamplePicker.Location = new System.Drawing.Point(713, 102);
       this.btnSamplePicker.Name = "btnSamplePicker";
       this.btnSamplePicker.Size = new System.Drawing.Size(122, 23);
       this.btnSamplePicker.TabIndex = 27;
@@ -144,7 +147,7 @@
       // 
       this.btnDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnDelete.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnDelete.Location = new System.Drawing.Point(701, 131);
+      this.btnDelete.Location = new System.Drawing.Point(713, 131);
       this.btnDelete.Name = "btnDelete";
       this.btnDelete.Size = new System.Drawing.Size(122, 23);
       this.btnDelete.TabIndex = 28;
@@ -154,7 +157,7 @@
       // 
       // groupBox2
       // 
-      this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.groupBox2.Controls.Add(this.pnlBacterial);
       this.groupBox2.Controls.Add(this.chkFastPolish);
@@ -163,9 +166,9 @@
       this.groupBox2.Controls.Add(this.radFlye);
       this.groupBox2.Controls.Add(this.radRA);
       this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.groupBox2.Location = new System.Drawing.Point(12, 277);
+      this.groupBox2.Location = new System.Drawing.Point(12, 263);
       this.groupBox2.Name = "groupBox2";
-      this.groupBox2.Size = new System.Drawing.Size(683, 289);
+      this.groupBox2.Size = new System.Drawing.Size(695, 289);
       this.groupBox2.TabIndex = 30;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Select assembler:";
@@ -184,14 +187,14 @@
       this.pnlBacterial.Controls.Add(this.chkKraken2);
       this.pnlBacterial.Location = new System.Drawing.Point(156, 14);
       this.pnlBacterial.Name = "pnlBacterial";
-      this.pnlBacterial.Size = new System.Drawing.Size(507, 93);
+      this.pnlBacterial.Size = new System.Drawing.Size(519, 93);
       this.pnlBacterial.TabIndex = 34;
       // 
       // btnGeneXRef
       // 
       this.btnGeneXRef.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnGeneXRef.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnGeneXRef.Location = new System.Drawing.Point(468, 66);
+      this.btnGeneXRef.Location = new System.Drawing.Point(480, 66);
       this.btnGeneXRef.Name = "btnGeneXRef";
       this.btnGeneXRef.Size = new System.Drawing.Size(31, 23);
       this.btnGeneXRef.TabIndex = 51;
@@ -205,7 +208,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtGeneXRef.Location = new System.Drawing.Point(11, 67);
       this.txtGeneXRef.Name = "txtGeneXRef";
-      this.txtGeneXRef.Size = new System.Drawing.Size(456, 20);
+      this.txtGeneXRef.Size = new System.Drawing.Size(468, 20);
       this.txtGeneXRef.TabIndex = 50;
       // 
       // label5
@@ -308,7 +311,7 @@
       this.grpViral.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.grpViral.Location = new System.Drawing.Point(27, 172);
       this.grpViral.Name = "grpViral";
-      this.grpViral.Size = new System.Drawing.Size(639, 110);
+      this.grpViral.Size = new System.Drawing.Size(651, 110);
       this.grpViral.TabIndex = 32;
       this.grpViral.TabStop = false;
       this.grpViral.Text = "Reference genomes:";
@@ -329,14 +332,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtHostReference.Location = new System.Drawing.Point(15, 75);
       this.txtHostReference.Name = "txtHostReference";
-      this.txtHostReference.Size = new System.Drawing.Size(589, 20);
+      this.txtHostReference.Size = new System.Drawing.Size(601, 20);
       this.txtHostReference.TabIndex = 45;
       // 
       // btnFindHostReferenceGenome
       // 
       this.btnFindHostReferenceGenome.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnFindHostReferenceGenome.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnFindHostReferenceGenome.Location = new System.Drawing.Point(605, 73);
+      this.btnFindHostReferenceGenome.Location = new System.Drawing.Point(617, 73);
       this.btnFindHostReferenceGenome.Name = "btnFindHostReferenceGenome";
       this.btnFindHostReferenceGenome.Size = new System.Drawing.Size(31, 23);
       this.btnFindHostReferenceGenome.TabIndex = 46;
@@ -360,14 +363,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtVirusReference.Location = new System.Drawing.Point(15, 37);
       this.txtVirusReference.Name = "txtVirusReference";
-      this.txtVirusReference.Size = new System.Drawing.Size(589, 20);
+      this.txtVirusReference.Size = new System.Drawing.Size(601, 20);
       this.txtVirusReference.TabIndex = 43;
       // 
       // btnFindVirusReferenceGenome
       // 
       this.btnFindVirusReferenceGenome.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnFindVirusReferenceGenome.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnFindVirusReferenceGenome.Location = new System.Drawing.Point(605, 35);
+      this.btnFindVirusReferenceGenome.Location = new System.Drawing.Point(617, 35);
       this.btnFindVirusReferenceGenome.Name = "btnFindVirusReferenceGenome";
       this.btnFindVirusReferenceGenome.Size = new System.Drawing.Size(31, 23);
       this.btnFindVirusReferenceGenome.TabIndex = 44;
@@ -413,7 +416,7 @@
       this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.pictureBox1.BackgroundImage = global::BioSeqDB.Properties.Resources._5130___Assembly_Line_512;
       this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-      this.pictureBox1.Location = new System.Drawing.Point(708, 173);
+      this.pictureBox1.Location = new System.Drawing.Point(720, 173);
       this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
       this.pictureBox1.Name = "pictureBox1";
       this.pictureBox1.Size = new System.Drawing.Size(114, 97);
@@ -433,22 +436,43 @@
       // 
       // txtMemo
       // 
-      this.txtMemo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.txtMemo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtMemo.Location = new System.Drawing.Point(12, 585);
+      this.txtMemo.Location = new System.Drawing.Point(12, 571);
       this.txtMemo.Name = "txtMemo";
-      this.txtMemo.Size = new System.Drawing.Size(545, 20);
+      this.txtMemo.Size = new System.Drawing.Size(557, 20);
       this.txtMemo.TabIndex = 33;
       // 
       // label2
       // 
+      this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.label2.AutoSize = true;
       this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label2.Location = new System.Drawing.Point(12, 569);
+      this.label2.Location = new System.Drawing.Point(12, 555);
       this.label2.Name = "label2";
       this.label2.Size = new System.Drawing.Size(255, 13);
       this.label2.TabIndex = 34;
       this.label2.Text = "Memo (to help identify task in notifications):";
+      // 
+      // txtMaxFastq
+      // 
+      this.txtMaxFastq.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.txtMaxFastq.Location = new System.Drawing.Point(641, 80);
+      this.txtMaxFastq.Name = "txtMaxFastq";
+      this.txtMaxFastq.Size = new System.Drawing.Size(66, 20);
+      this.txtMaxFastq.TabIndex = 36;
+      this.txtMaxFastq.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtMaxFastq_KeyPress);
+      // 
+      // label6
+      // 
+      this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.label6.AutoSize = true;
+      this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label6.Location = new System.Drawing.Point(530, 83);
+      this.label6.Name = "label6";
+      this.label6.Size = new System.Drawing.Size(105, 13);
+      this.label6.TabIndex = 37;
+      this.label6.Text = "Max # fastq files:";
       // 
       // BioSeqAssemble
       // 
@@ -456,7 +480,9 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.CancelButton = this.btnCancel;
-      this.ClientSize = new System.Drawing.Size(862, 614);
+      this.ClientSize = new System.Drawing.Size(874, 600);
+      this.Controls.Add(this.txtMaxFastq);
+      this.Controls.Add(this.label6);
       this.Controls.Add(this.txtMemo);
       this.Controls.Add(this.label2);
       this.Controls.Add(this.chkAll);
@@ -473,6 +499,7 @@
       this.Name = "BioSeqAssemble";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "BioSeqDB Assemble Samples";
+      this.Shown += new System.EventHandler(this.BioSeqAssemble_Shown);
       this.groupBox2.ResumeLayout(false);
       this.groupBox2.PerformLayout();
       this.pnlBacterial.ResumeLayout(false);
@@ -519,5 +546,7 @@
     private System.Windows.Forms.CheckBox chkKraken2;
     private System.Windows.Forms.TextBox txtMemo;
     private System.Windows.Forms.Label label2;
+    private System.Windows.Forms.TextBox txtMaxFastq;
+    private System.Windows.Forms.Label label6;
   }
 }

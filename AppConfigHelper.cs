@@ -152,7 +152,12 @@ namespace BioSeqDB
         if (query.StartsWith("1"))
         {
           // The last subfolder becomes the sample name.
-          config += query.Substring(query.LastIndexOf("\\") + 1) + "," + NormalizePathToLinux(DirectoryHelper.CleanPath(query.Substring(1))) + Environment.NewLine;
+          string q = query;
+          if (q.EndsWith("\\"))
+          {
+            q = q.Substring(0, q.Length - 1);
+          }
+          config += q.Substring(q.LastIndexOf("\\") + 1) + "," + NormalizePathToLinux(DirectoryHelper.CleanPath(q.Substring(1))) + Environment.NewLine;
         }
       }
       return config;
@@ -228,11 +233,11 @@ namespace BioSeqDB
     internal static void DeleteTask(int index, bool kill)
     {
       BioSeqTask task = TaskOfIndex(index); // Task to delete.
-      //if (kill)
-      //{
-      //  seqdbConfig.TaskToDelete = task;
-      //  ServiceCallHelper.KillTask(LoggedOnUser, JsonConfig());
-      //}
+      if (kill)
+      {
+        seqdbConfig.TaskToDelete = task;
+        ServiceCallHelper.KillTask(LoggedOnUser, JsonConfig());
+      }
 
       seqdbConfig.Tasks.Remove(task.TaskID);
       SaveConfig();
@@ -343,7 +348,7 @@ namespace BioSeqDB
     {
       seqdbConfig.Tasks.Add(task.TaskID, task);
       seqdbConfig.LastTaskID = int.Parse(task.TaskID);
-      //seqdbConfig.TaskToDelete = task; // For the benefit of WSLProxy if task is deleted from Notifications.
+      seqdbConfig.TaskToDelete = task; // For the benefit of WSLProxy if task is deleted from Notifications.
       SaveConfig();
     }
 
@@ -551,13 +556,16 @@ namespace BioSeqDB
       return db.BBMapFastqPath ?? string.Empty;
     }
 
-    internal static void InfluenzaAParms(string CentrifugePath, string OutputPath, string Memo, bool Trim, string Threads)
+    internal static void InfluenzaAParms(string CentrifugePath, string OutputPath, string Memo, bool Trim, string Threads, 
+                                                                                    string SegmentsToAssemble, string model)
     {
       seqdbConfig.InfluenzaACentrifugePath = CentrifugePath;
       seqdbConfig.InfluenzaAChooseTrim = Trim;
       seqdbConfig.TaskMemo = Memo;
       seqdbConfig.InfluenzaAOutputPath = OutputPath;
       seqdbConfig.InfluenzaAThreads = int.Parse(Threads);
+      seqdbConfig.InfluenzaASegmentsToAssemble = SegmentsToAssemble;
+      seqdbConfig.InfluenzaAModel = model;
       SaveConfig();
     }
 
@@ -1188,12 +1196,12 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static Point Location()
+    internal static Point UILocation()
     {
       return new Point(seqdbConfig.X, seqdbConfig.Y);
     }
 
-    internal static Size Size()
+    internal static Size UISize()
     {
       return new Size(seqdbConfig.W, seqdbConfig.H);
     }
@@ -1372,6 +1380,19 @@ namespace BioSeqDB
       }
     }
 
+    public static string InfluenzaAModel
+    {
+      get
+      {
+        return seqdbConfig.InfluenzaAModel ?? "r9";
+      }
+      set
+      {
+        seqdbConfig.InfluenzaAModel = value;
+        SaveConfig();
+      }
+    }
+
     public static string InfluenzaAThreads
     {
       get
@@ -1449,6 +1470,32 @@ namespace BioSeqDB
       }
     }
 
+    public static string LastExplorerServerPath
+    {
+      get
+      {
+        return seqdbConfig.LastExplorerServerPath == null ? "[S]C:\\" : seqdbConfig.LastExplorerServerPath;
+      }
+      set
+      {
+        seqdbConfig.LastExplorerServerPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static string LastExplorerLocalPath
+    {
+      get
+      {
+        return seqdbConfig.LastExplorerLocalPath == null ? "[S]C:\\" : seqdbConfig.LastExplorerLocalPath;
+      }
+      set
+      {
+        seqdbConfig.LastExplorerLocalPath = value;
+        SaveConfig();
+      }
+    }
+
     internal static string BuildTreeOutputPath()
     {
       SeqDB db = seqdbConfig.Current();
@@ -1506,7 +1553,6 @@ namespace BioSeqDB
     {
       task.TaskStatus = "Ready";
       task.TaskComplete = DateTime.Now;
-      SaveConfig();
     }
 
     internal static string RestoreOutputPath()
@@ -1545,7 +1591,8 @@ namespace BioSeqDB
     }
 
     internal static void AssembleSample(List<string> QuerySamples, bool FastPolish, bool RA, bool Flye, bool Trinity,
-                                                  bool Kraken2, bool BBmap, bool Quast, bool VFabricate, string GeneXRef, string memo)
+                                                  bool Kraken2, bool BBmap, bool Quast, bool VFabricate, string GeneXRef, 
+                                                                                           string memo, string maxFastq)
     {
       if (RA || Flye)
       {
@@ -1565,6 +1612,7 @@ namespace BioSeqDB
       seqdbConfig.AssembleVFabricate = VFabricate;
       seqdbConfig.AssembleVFGeneXRef = GeneXRef;
       seqdbConfig.TaskMemo = memo;
+      seqdbConfig.AssembleMaxFastq = maxFastq.Length > 0 ? int.Parse(maxFastq) : 0;
       SaveConfig();
     }
 

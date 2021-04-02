@@ -47,22 +47,24 @@
       this.colSampleID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.colPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.panel1 = new System.Windows.Forms.Panel();
+      this.btnUpdate = new System.Windows.Forms.Button();
       this.lblPath = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
       this.txtSampleID = new System.Windows.Forms.TextBox();
       this.lblSampleID = new System.Windows.Forms.Label();
       this.btnDelete = new System.Windows.Forms.Button();
-      this.btnUpdate = new System.Windows.Forms.Button();
       this.panel1.SuspendLayout();
       this.SuspendLayout();
       // 
       // label4
       // 
+      this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.label4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.label4.Location = new System.Drawing.Point(12, 9);
       this.label4.Name = "label4";
-      this.label4.Size = new System.Drawing.Size(565, 37);
+      this.label4.Size = new System.Drawing.Size(565, 48);
       this.label4.TabIndex = 13;
       this.label4.Text = resources.GetString("label4.Text");
       // 
@@ -72,9 +74,9 @@
       this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.label2.Location = new System.Drawing.Point(9, 61);
       this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(251, 13);
+      this.label2.Size = new System.Drawing.Size(254, 13);
       this.label2.TabIndex = 15;
-      this.label2.Text = "Sample <analysis> .fastq folder(s) to insert.";
+      this.label2.Text = "Sample <analysis> .fastq folder(s) to select:";
       // 
       // btnFindInputPath
       // 
@@ -211,6 +213,20 @@
       this.panel1.Size = new System.Drawing.Size(547, 88);
       this.panel1.TabIndex = 69;
       // 
+      // btnUpdate
+      // 
+      this.btnUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnUpdate.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.btnUpdate.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+      this.btnUpdate.Location = new System.Drawing.Point(442, 9);
+      this.btnUpdate.Margin = new System.Windows.Forms.Padding(2);
+      this.btnUpdate.Name = "btnUpdate";
+      this.btnUpdate.Size = new System.Drawing.Size(86, 20);
+      this.btnUpdate.TabIndex = 41;
+      this.btnUpdate.Text = "Update";
+      this.btnUpdate.UseVisualStyleBackColor = true;
+      this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
+      // 
       // lblPath
       // 
       this.lblPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -268,20 +284,6 @@
       this.btnDelete.Text = "Delete Sample";
       this.btnDelete.UseVisualStyleBackColor = true;
       this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
-      // 
-      // btnUpdate
-      // 
-      this.btnUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.btnUpdate.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnUpdate.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-      this.btnUpdate.Location = new System.Drawing.Point(442, 9);
-      this.btnUpdate.Margin = new System.Windows.Forms.Padding(2);
-      this.btnUpdate.Name = "btnUpdate";
-      this.btnUpdate.Size = new System.Drawing.Size(86, 20);
-      this.btnUpdate.TabIndex = 41;
-      this.btnUpdate.Text = "Update";
-      this.btnUpdate.UseVisualStyleBackColor = true;
-      this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
       // 
       // BioSeqInfluenzaAFastq
       // 

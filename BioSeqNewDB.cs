@@ -32,15 +32,10 @@ namespace BioSeqDB
 
     private void EnableOK()
     {
-      btnOK.Enabled = txtDBPath.Text.Trim().Length > 0 && txtInputPath.Text.Trim().Length > 0 && txtDBName.Text.Trim().Length > 0;
+      btnOK.Enabled = txtDBPath.Text.Trim().Length > 0 && txtDBName.Text.Trim().Length > 0;
     }
 
     private void txtDBPath_TextChanged(object sender, EventArgs e)
-    {
-      EnableOK();
-    }
-
-    private void txtInputPath_TextChanged(object sender, EventArgs e)
     {
       EnableOK();
     }
@@ -228,7 +223,7 @@ namespace BioSeqDB
         string path = AppConfigHelper.NormalizePathToWindows(txtStandardReferenceGenome.Text); // We want an actual file, so don't append "\\".
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Path to standard reference genome file",
                                             DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                                            "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+                                            "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
         Cursor.Current = Cursors.Default;
 
         Explorer.frmExplorer.ShowDialog();
@@ -248,7 +243,7 @@ namespace BioSeqDB
         }
         ofn.Title = "Path to standard reference genome file";
         ofn.CheckFileExists = true;
-        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*";
+        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*";
 
         if (ofn.ShowDialog() != DialogResult.Cancel)
         {

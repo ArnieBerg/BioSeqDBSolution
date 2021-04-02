@@ -1,6 +1,7 @@
 ﻿using BioSeqDB.ModelClient;
 using BioSeqDBConfigModel;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -199,15 +200,16 @@ namespace BioSeqDB
       Cursor.Current = Cursors.WaitCursor;
       if (IsServiceClass.IsService)
       {
-        ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // Get any changes made by the service.
+        //ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // Get any changes made by the service.
+        AppConfigHelper.LastCommand = (string)BioSeqDBModel.Instance.UserConfigAttributeValue("LastCommand", AppConfigHelper.LoggedOnUser);
       }
 
       BioSeqTask task = AppConfigHelper.TaskOfIndex(lstTasks.SelectedIndex);
       Cursor.Current = Cursors.Default;
 
-      if (task == null)
+      if (task == null || task.LastExitCode == -999)
       {
-        MessageBox.Show("Task output is no longer available.", "Warning", MessageBoxButtons.OK);
+        MessageBox.Show("Task output is no longer available but may have completed.", "Warning", MessageBoxButtons.OK);
         return;
       }
 
@@ -227,17 +229,17 @@ namespace BioSeqDB
 
             string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("VFabricate"),
                                                      new string[] { sampleName + ".VFList.tsv" });
-            MessageBox.Show(AppConfigHelper.StandardOutput + Environment.NewLine + "VFabricate completed successfully. Result is in " +
+            MessageBox.Show(task.StandardOutput + Environment.NewLine + "VFabricate completed successfully. Result is in " +
                             destination + "\\" + sampleName + ".VFList.tsv", "Success", MessageBoxButtons.OK);
 
             destination = DirectoryHelper.CleanPath(destination);
             Process.Start(destination + "\\" + sampleName + ".VFList.tsv");
           }
-          else
-          {
-            MessageBox.Show("VFabricate completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-                                 AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
-          }
+          //else
+          //{
+          //  MessageBox.Show("VFabricate completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          //                       task.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
+          //}
           break;
 
         case "Quast":
@@ -252,14 +254,14 @@ namespace BioSeqDB
               sampleName = AppConfigHelper.SampleID("Quast");
             }
 
-            MessageBox.Show(AppConfigHelper.StandardOutput + Environment.NewLine + "Quast completed successfully. Result is in the " +
+            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Quast completed successfully. Result is in the " +
                             AppConfigHelper.OutputPath("Quast") + "\\Quast" + sampleName + " folder.", "Success", MessageBoxButtons.OK);
           }
-          else
-          {
-            MessageBox.Show("Quast completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-                                 AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
-          }
+          //else
+          //{
+          //  MessageBox.Show("Quast completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
+          //}
           break;
 
         case "Kraken2":
@@ -270,11 +272,11 @@ namespace BioSeqDB
           {
             // /usr/local/kraken2/kraken2 --db /data/referenceDB/minikraken2_v1_8GB/ --threads 64 --report kraken.aggregates.txt --use-names --output kraken.txt $contig
             // conda run -n refseq_masher-0.1.1 refseq_masher matches --output-type tab -o RefseqIdent.txt $contig
-            string sampleName = string.Empty;
-            if (AppConfigHelper.SampleChecked("Kraken2"))
-            {
-              sampleName = AppConfigHelper.SampleID("Kraken2");
-            }
+            //string sampleName = string.Empty;
+            //if (AppConfigHelper.SampleChecked("Kraken2"))
+            //{
+            //  sampleName = AppConfigHelper.SampleID("Kraken2");
+            //}
             string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Kraken2"), new string[] { "kraken.aggregates.txt" });
 
             destination = DirectoryHelper.CleanPath(destination);
@@ -282,11 +284,11 @@ namespace BioSeqDB
                                                                              destination + ".", "Success", MessageBoxButtons.OK);
             if (File.Exists(destination + "kraken.aggregates.txt")) Process.Start(destination + "kraken.aggregates.txt");
           }
-          else
-          {
-            MessageBox.Show("Kraken2 completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-                                 AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
-          }
+          //else
+          //{
+          //  MessageBox.Show("Kraken2 completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
+          //}
           break;
 
         case "BBMap":
@@ -306,11 +308,11 @@ namespace BioSeqDB
             if (File.Exists(destination + "basecov.txt")) Process.Start(destination + "basecov.txt");
             if (File.Exists(destination + "RefseqIdent.txt")) Process.Start(destination + "RefseqIdent.txt");
           }
-          else
-          {
-            MessageBox.Show("BBMap completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-                                 task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
-          }
+          //else
+          //{
+          //  MessageBox.Show("BBMap completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
+          //}
           break;
 
         case "Search":
@@ -332,11 +334,11 @@ namespace BioSeqDB
 
             Process.Start(DirectoryHelper.CleanPath(destination) + AppConfigHelper.SearchOutputSampleName() + ".txt");
           }
-          else
-          {
-            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Search completed with error code " + task.LastExitCode.ToString() + "." +
-                          Environment.NewLine + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
-          }
+          //else
+          //{
+          //  MessageBox.Show(task.StandardOutput + Environment.NewLine + "Search completed with error code " + task.LastExitCode.ToString() + "." +
+          //                Environment.NewLine + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
+          //}
           break;
 
         case "Assemble":
@@ -349,33 +351,35 @@ namespace BioSeqDB
           Cursor.Current = Cursors.Default;
           if (task.LastExitCode == 0)
           {
-            MessageBox.Show(AppConfigHelper.StandardOutput + Environment.NewLine + "InfluenzaA completed successfully. Result is in the " +
-                            AppConfigHelper.InfluenzaAOutputPath + " folder.", "Success", MessageBoxButtons.OK);
+            //MessageBox.Show(task.StandardOutput + Environment.NewLine + "InfluenzaA completed successfully. Result is in the " +
+            //                AppConfigHelper.InfluenzaAOutputPath + " folder.", "Success", MessageBoxButtons.OK);
             if (IsServiceClass.IsService)
             {
-              int filesCopied = 0;
               if (AppConfigHelper.InfluenzaAOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
               {
                 // For each sample that was processed, there is a subfolder in the UserFolder on the server named after the sample name. 
-                // That subfolder needs to be copied to the local output folder.
+                // That subfolder needs to be copied to the local output folder. Note that we only copy the <sample>\consensus contents.
                 foreach (string sampleName in AppConfigHelper.InfluenzaASamplesList.Keys)
                 {
                   if (AppConfigHelper.InfluenzaASamplesList[sampleName].Substring(0, 1) == "1")
                   {
-                    string sourceFolderName = "[S]" + AppConfigHelper.UserFolder() + sampleName + "\\";
-                    //MessageBox.Show("Copy from " + sourceFolderName + " to " + AppConfigHelper.InfluenzaAOutputPath + "\\" + sampleName + "\\", "COPY", MessageBoxButtons.OK);
-                    filesCopied += DirectoryHelper.FolderCopy(sourceFolderName, AppConfigHelper.InfluenzaAOutputPath + "\\" + sampleName + "\\");
+                    string sourceFolderName = "[S]" + AppConfigHelper.UserFolder() + sampleName + "\\consensus\\";
+                    Directory.CreateDirectory(DirectoryHelper.CleanPath(AppConfigHelper.InfluenzaAOutputPath) + "\\" + sampleName + "\\");
+                    //Logger.Log.Debug("Copy from " + sourceFolderName + " to " + AppConfigHelper.InfluenzaAOutputPath + "\\");
+                    DirectoryHelper.FolderCopy(sourceFolderName, AppConfigHelper.InfluenzaAOutputPath + "\\" + sampleName + "\\");
                   }
                 }
               }
-              MessageBox.Show("Files copied: " + filesCopied.ToString(), "Files copied", MessageBoxButtons.OK);
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "Influenza A pipeline completed successfully. Results copied to " + 
+                              AppConfigHelper.InfluenzaAOutputPath + "\\, including consensus fasta files in sample name subfolder[s].", 
+                                                                                              "Files copied", MessageBoxButtons.OK);
             }
           }
-          else
-          {
-            MessageBox.Show("InfluenzaA completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-                                 AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
-          }
+          //else
+          //{
+          //  MessageBox.Show("InfluenzaA completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
+          //}
           break;
 
         case "Salmonella":
@@ -384,7 +388,7 @@ namespace BioSeqDB
           Cursor.Current = Cursors.Default;
           if (task.LastExitCode == 0)
           {
-            MessageBox.Show(AppConfigHelper.StandardOutput + Environment.NewLine + "Salmonella serotyping completed successfully. Result is in " +
+            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Salmonella serotyping completed successfully. Result is in " +
                                                                AppConfigHelper.SalmonellaOutputPath, "Success", MessageBoxButtons.OK);
             if (IsServiceClass.IsService)
             {
@@ -404,11 +408,11 @@ namespace BioSeqDB
               }
             }
           }
-          else
-          {
-            MessageBox.Show("Salmonella completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-                                 AppConfigHelper.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
-          }
+          //else
+          //{
+          //  MessageBox.Show("Salmonella completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
+          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
+          //}
           break;
 
         case "BuildTree":
@@ -493,7 +497,16 @@ namespace BioSeqDB
     private void TaskCompletion(BioSeqTask task, string taskName, string successMsg)
     {
       // Called by the user from the Push button when task status is Ready.
+      TimeSpan duration = task.TaskComplete - task.TaskTime;
+      string db = string.IsNullOrEmpty(task.TaskDB) ? string.Empty : "Sequence database: " + task.TaskDB;
+      string memo = string.IsNullOrEmpty(task.TaskMemo) ? string.Empty : "Memo: " + task.TaskMemo;
+      string subject = "Task completed: " + taskName + " at " + task.TaskComplete.ToString("MMM d, yyyy HH:mm") + " after " + 
+                        duration.Minutes.ToString() + " minutes." + Environment.NewLine + (db + " " + Environment.NewLine + memo).Trim();
+      string message = subject + Environment.NewLine + AppConfigHelper.LastCommand + Environment.NewLine;
+      subject = subject.Replace(Environment.NewLine, "  ");
+      List<string> attachments = new List<string>();
       string output = task.StandardOutput + Environment.NewLine + task.LastError;
+      message += "Standard output: " + output + Environment.NewLine;
 
       // Read and delete the output file from the command.
       string linuxCapture = string.Empty;
@@ -510,8 +523,8 @@ namespace BioSeqDB
           linuxCapture = "[Full text truncated; see saved log file " + tasklog + "]" + Environment.NewLine + Environment.NewLine +
                                           linuxCapture.Substring(linuxCapture.Length - residual);  // Display the last residual chars.
           Process.Start(tasklog);
+          attachments.Add(tasklog);
         }
-        File.Delete(filename);
       }
 
       SuccessDialog.MainInstruction = successMsg;
@@ -521,15 +534,33 @@ namespace BioSeqDB
         SuccessDialog.Content += (output.Length > 0 ? Environment.NewLine : string.Empty) + linuxCapture;
       }
 
-      if (task.LastExitCode != 0)
+      if (task.LastExitCode != 0 && task.LastExitCode != -999)  // We handle -999 elsewhere (lost task status after completion, likely because BioSeqDB was restarted).
       {
         SuccessDialog.WindowTitle = "ERROR";
         SuccessDialog.MainInstruction = taskName + " completed with error code " + task.LastExitCode.ToString() + ".";
+        message += SuccessDialog.MainInstruction + Environment.NewLine;
       }
       SuccessDialog.ShowDialog(this);
 
-      RemoveTask(false);
       StatusChangeEvent?.Invoke(this, null); // Notify parent we have a potential status change.
+
+      message += linuxCapture;
+      User user = AppConfigHelper.seqdbConfigGlobal.Users[AppConfigHelper.LoggedOnUser];
+      if (user.EmailNotifications)
+      {
+        string s1 = Emailer.SendEmail(AppConfigHelper.LoggedOnUser + "@mail.usask.ca", "BioSeqDB User: " + task.TaskUser + " " + subject, message, attachments, null);
+        if (!string.IsNullOrEmpty(s1))
+        {
+          Logger.Log.Debug("Email error: " + s1);
+          //MessageBox.Show(s1, "ERROR", MessageBoxButtons.OK);
+        }
+      }
+
+      RemoveTask(false);
+      if (File.Exists(filename)) // Must do after email since it might be attached.
+      {
+        File.Delete(filename);
+      }
     }
 
     private void cmbTaskStatusFilter_SelectedIndexChanged(object sender, EventArgs e)

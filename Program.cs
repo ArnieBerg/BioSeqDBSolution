@@ -1,8 +1,8 @@
 ﻿using BioSeqDB.ModelClient;
 using System;
-using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using BioSeqDBUserCore;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
 
@@ -34,11 +34,17 @@ namespace BioSeqDB
       Cursor.Current = Cursors.WaitCursor;
       Logger.Initialize(logger);
 
+      UserProfileHelper.GetUserProfile(); // From C:\Temp\Remember.json.
+
+      Properties.Settings.Default.ModelServer = UserProfileHelper.userProfile.ServerIPAddress;
+      //MessageBox.Show("ServerIPAddress: " + Properties.Settings.Default.ModelServer, "ERROR", MessageBoxButtons.OK);
+      Properties.Settings.Default.Save();
+
       // Check if BioSeqService is listening.
-      string fiClientOnServer = string.Empty;
+      string IsClientOnServer = string.Empty;
       try
       {
-        fiClientOnServer = ServiceCallHelper.HelloBioSeqDBService();
+        IsClientOnServer = ServiceCallHelper.HelloBioSeqDBService();
       }
       catch (Exception ex)
       {
@@ -54,14 +60,15 @@ namespace BioSeqDB
       }
       catch (Exception ex)
       {
-        MessageBox.Show("It appears that the WSLProxy service is not running on the server.", "ERROR", MessageBoxButtons.OK);
+        MessageBox.Show("It appears that the WSLProxy service is not running on the '" + Properties.Settings.Default.ModelServer +
+                                                                                      "' server.", "ERROR", MessageBoxButtons.OK);
         Logger.Log.Debug("It appears that the WSLProxy service is not running on the server. Exception\n" + ex.ToString());
         return;
       }
 
       try
       {
-        BioSeqDBLogin frmLogin = new BioSeqDBLogin(fiClientOnServer);
+        BioSeqDBLogin frmLogin = new BioSeqDBLogin(IsClientOnServer);
         if (frmLogin.ShowDialog() == DialogResult.OK)
         {
           Application.Run(new BioSeqUI());

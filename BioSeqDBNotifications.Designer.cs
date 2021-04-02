@@ -63,10 +63,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.label4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label4.Location = new System.Drawing.Point(18, 14);
-      this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+      this.label4.Location = new System.Drawing.Point(12, 9);
       this.label4.Name = "label4";
-      this.label4.Size = new System.Drawing.Size(983, 88);
+      this.label4.Size = new System.Drawing.Size(656, 58);
       this.label4.TabIndex = 13;
       this.label4.Text = "The listed tasks are pending or have been completed (\'ready\').  Click on \'PUSH\' f" +
     "or \'Ready\' tasks to see their completion status.";
@@ -78,12 +77,11 @@
       this.btnCancel.FlatAppearance.BorderSize = 2;
       this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
       this.btnCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnCancel.Location = new System.Drawing.Point(906, 678);
-      this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+      this.btnCancel.Location = new System.Drawing.Point(604, 441);
       this.btnCancel.Name = "btnCancel";
-      this.btnCancel.Size = new System.Drawing.Size(92, 34);
+      this.btnCancel.Size = new System.Drawing.Size(61, 22);
       this.btnCancel.TabIndex = 6;
-      this.btnCancel.Text = "Cancel";
+      this.btnCancel.Text = "Close";
       this.btnCancel.UseVisualStyleBackColor = true;
       this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
       // 
@@ -91,9 +89,10 @@
       // 
       this.label2.AutoSize = true;
       this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label2.Location = new System.Drawing.Point(16, 168);
+      this.label2.Location = new System.Drawing.Point(11, 109);
+      this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(65, 20);
+      this.label2.Size = new System.Drawing.Size(45, 13);
       this.label2.TabIndex = 25;
       this.label2.Text = "Tasks:";
       // 
@@ -102,11 +101,9 @@
       this.lstTasks.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
       this.lstTasks.FormattingEnabled = true;
-      this.lstTasks.ItemHeight = 20;
-      this.lstTasks.Location = new System.Drawing.Point(16, 197);
-      this.lstTasks.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+      this.lstTasks.Location = new System.Drawing.Point(11, 128);
       this.lstTasks.Name = "lstTasks";
-      this.lstTasks.Size = new System.Drawing.Size(376, 444);
+      this.lstTasks.Size = new System.Drawing.Size(252, 290);
       this.lstTasks.TabIndex = 0;
       this.lstTasks.SelectedIndexChanged += new System.EventHandler(this.lstTasks_SelectedIndexChanged);
       // 
@@ -115,9 +112,10 @@
       this.btnDeleteTask.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.btnDeleteTask.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.btnDeleteTask.Image = global::BioSeqDB.Properties.Resources.DELETE;
-      this.btnDeleteTask.Location = new System.Drawing.Point(417, 529);
+      this.btnDeleteTask.Location = new System.Drawing.Point(278, 344);
+      this.btnDeleteTask.Margin = new System.Windows.Forms.Padding(2);
       this.btnDeleteTask.Name = "btnDeleteTask";
-      this.btnDeleteTask.Size = new System.Drawing.Size(96, 98);
+      this.btnDeleteTask.Size = new System.Drawing.Size(64, 64);
       this.btnDeleteTask.TabIndex = 3;
       this.toolTip1.SetToolTip(this.btnDeleteTask, "Delete selected task");
       this.btnDeleteTask.UseVisualStyleBackColor = true;
@@ -129,9 +127,10 @@
       this.btnPushTask.BackgroundImage = global::BioSeqDB.Properties.Resources.pushdull;
       this.btnPushTask.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
       this.btnPushTask.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnPushTask.Location = new System.Drawing.Point(902, 560);
+      this.btnPushTask.Location = new System.Drawing.Point(601, 364);
+      this.btnPushTask.Margin = new System.Windows.Forms.Padding(2);
       this.btnPushTask.Name = "btnPushTask";
-      this.btnPushTask.Size = new System.Drawing.Size(96, 98);
+      this.btnPushTask.Size = new System.Drawing.Size(64, 64);
       this.btnPushTask.TabIndex = 5;
       this.toolTip1.SetToolTip(this.btnPushTask, "Complete selected task");
       this.btnPushTask.UseVisualStyleBackColor = true;
@@ -141,9 +140,10 @@
       // 
       this.label1.AutoSize = true;
       this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label1.Location = new System.Drawing.Point(412, 202);
+      this.label1.Location = new System.Drawing.Point(275, 131);
+      this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.label1.Name = "label1";
-      this.label1.Size = new System.Drawing.Size(117, 20);
+      this.label1.Size = new System.Drawing.Size(78, 13);
       this.label1.TabIndex = 34;
       this.label1.Text = "Time issued:";
       // 
@@ -151,9 +151,10 @@
       // 
       this.label3.AutoSize = true;
       this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label3.Location = new System.Drawing.Point(412, 232);
+      this.label3.Location = new System.Drawing.Point(275, 151);
+      this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.label3.Name = "label3";
-      this.label3.Size = new System.Drawing.Size(55, 20);
+      this.label3.Size = new System.Drawing.Size(37, 13);
       this.label3.TabIndex = 35;
       this.label3.Text = "User:";
       // 
@@ -161,9 +162,10 @@
       // 
       this.label6.AutoSize = true;
       this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label6.Location = new System.Drawing.Point(412, 325);
+      this.label6.Location = new System.Drawing.Point(275, 211);
+      this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.label6.Name = "label6";
-      this.label6.Size = new System.Drawing.Size(69, 20);
+      this.label6.Size = new System.Drawing.Size(47, 13);
       this.label6.TabIndex = 37;
       this.label6.Text = "Status:";
       // 
@@ -171,9 +173,10 @@
       // 
       this.label7.AutoSize = true;
       this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label7.Location = new System.Drawing.Point(412, 294);
+      this.label7.Location = new System.Drawing.Point(275, 191);
+      this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.label7.Name = "label7";
-      this.label7.Size = new System.Drawing.Size(95, 20);
+      this.label7.Size = new System.Drawing.Size(65, 13);
       this.label7.TabIndex = 38;
       this.label7.Text = "Database:";
       // 
@@ -181,11 +184,12 @@
       // 
       this.label8.AutoSize = true;
       this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label8.Location = new System.Drawing.Point(412, 263);
+      this.label8.Location = new System.Drawing.Point(275, 171);
+      this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.label8.Name = "label8";
-      this.label8.Size = new System.Drawing.Size(55, 20);
+      this.label8.Size = new System.Drawing.Size(57, 13);
       this.label8.TabIndex = 39;
-      this.label8.Text = "Type:";
+      this.label8.Text = "Analysis:";
       // 
       // lblTime
       // 
@@ -193,9 +197,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lblTime.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.lblTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblTime.Location = new System.Drawing.Point(542, 202);
+      this.lblTime.Location = new System.Drawing.Point(361, 131);
+      this.lblTime.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.lblTime.Name = "lblTime";
-      this.lblTime.Size = new System.Drawing.Size(456, 24);
+      this.lblTime.Size = new System.Drawing.Size(305, 16);
       this.lblTime.TabIndex = 40;
       // 
       // lblUser
@@ -204,9 +209,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lblUser.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.lblUser.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblUser.Location = new System.Drawing.Point(542, 232);
+      this.lblUser.Location = new System.Drawing.Point(361, 151);
+      this.lblUser.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.lblUser.Name = "lblUser";
-      this.lblUser.Size = new System.Drawing.Size(456, 24);
+      this.lblUser.Size = new System.Drawing.Size(305, 16);
       this.lblUser.TabIndex = 41;
       // 
       // lblStatus
@@ -215,9 +221,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lblStatus.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.lblStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblStatus.Location = new System.Drawing.Point(542, 325);
+      this.lblStatus.Location = new System.Drawing.Point(361, 211);
+      this.lblStatus.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.lblStatus.Name = "lblStatus";
-      this.lblStatus.Size = new System.Drawing.Size(456, 24);
+      this.lblStatus.Size = new System.Drawing.Size(305, 16);
       this.lblStatus.TabIndex = 43;
       // 
       // lblDatabase
@@ -226,9 +233,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lblDatabase.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.lblDatabase.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblDatabase.Location = new System.Drawing.Point(542, 294);
+      this.lblDatabase.Location = new System.Drawing.Point(361, 191);
+      this.lblDatabase.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.lblDatabase.Name = "lblDatabase";
-      this.lblDatabase.Size = new System.Drawing.Size(456, 24);
+      this.lblDatabase.Size = new System.Drawing.Size(305, 16);
       this.lblDatabase.TabIndex = 44;
       // 
       // lblType
@@ -237,9 +245,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lblType.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.lblType.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblType.Location = new System.Drawing.Point(542, 263);
+      this.lblType.Location = new System.Drawing.Point(361, 171);
+      this.lblType.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.lblType.Name = "lblType";
-      this.lblType.Size = new System.Drawing.Size(456, 24);
+      this.lblType.Size = new System.Drawing.Size(305, 16);
       this.lblType.TabIndex = 45;
       // 
       // cmbTaskStatusFilter
@@ -250,9 +259,10 @@
             "All",
             "Pending",
             "Ready"});
-      this.cmbTaskStatusFilter.Location = new System.Drawing.Point(222, 163);
+      this.cmbTaskStatusFilter.Location = new System.Drawing.Point(148, 106);
+      this.cmbTaskStatusFilter.Margin = new System.Windows.Forms.Padding(2);
       this.cmbTaskStatusFilter.Name = "cmbTaskStatusFilter";
-      this.cmbTaskStatusFilter.Size = new System.Drawing.Size(168, 28);
+      this.cmbTaskStatusFilter.Size = new System.Drawing.Size(113, 21);
       this.cmbTaskStatusFilter.Sorted = true;
       this.cmbTaskStatusFilter.TabIndex = 2;
       this.cmbTaskStatusFilter.SelectedIndexChanged += new System.EventHandler(this.cmbTaskStatusFilter_SelectedIndexChanged);
@@ -263,9 +273,10 @@
       this.btnRefresh.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnRefresh.BackgroundImage")));
       this.btnRefresh.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
       this.btnRefresh.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnRefresh.Location = new System.Drawing.Point(783, 560);
+      this.btnRefresh.Location = new System.Drawing.Point(522, 364);
+      this.btnRefresh.Margin = new System.Windows.Forms.Padding(2);
       this.btnRefresh.Name = "btnRefresh";
-      this.btnRefresh.Size = new System.Drawing.Size(96, 98);
+      this.btnRefresh.Size = new System.Drawing.Size(64, 64);
       this.btnRefresh.TabIndex = 4;
       this.toolTip1.SetToolTip(this.btnRefresh, "Refresh task list");
       this.btnRefresh.UseVisualStyleBackColor = true;
@@ -275,9 +286,10 @@
       // 
       this.label5.AutoSize = true;
       this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label5.Location = new System.Drawing.Point(412, 355);
+      this.label5.Location = new System.Drawing.Point(275, 231);
+      this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.label5.Name = "label5";
-      this.label5.Size = new System.Drawing.Size(104, 20);
+      this.label5.Size = new System.Drawing.Size(70, 13);
       this.label5.TabIndex = 46;
       this.label5.Text = "Completed:";
       // 
@@ -287,9 +299,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lblCompleted.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.lblCompleted.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblCompleted.Location = new System.Drawing.Point(542, 355);
+      this.lblCompleted.Location = new System.Drawing.Point(361, 231);
+      this.lblCompleted.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.lblCompleted.Name = "lblCompleted";
-      this.lblCompleted.Size = new System.Drawing.Size(456, 24);
+      this.lblCompleted.Size = new System.Drawing.Size(305, 16);
       this.lblCompleted.TabIndex = 47;
       // 
       // SuccessDialog
@@ -311,27 +324,29 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lblMemo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.lblMemo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblMemo.Location = new System.Drawing.Point(542, 386);
+      this.lblMemo.Location = new System.Drawing.Point(361, 251);
+      this.lblMemo.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.lblMemo.Name = "lblMemo";
-      this.lblMemo.Size = new System.Drawing.Size(456, 147);
+      this.lblMemo.Size = new System.Drawing.Size(305, 96);
       this.lblMemo.TabIndex = 49;
       // 
       // lbl9
       // 
       this.lbl9.AutoSize = true;
       this.lbl9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lbl9.Location = new System.Drawing.Point(412, 389);
+      this.lbl9.Location = new System.Drawing.Point(275, 253);
+      this.lbl9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.lbl9.Name = "lbl9";
-      this.lbl9.Size = new System.Drawing.Size(65, 20);
+      this.lbl9.Size = new System.Drawing.Size(44, 13);
       this.lbl9.TabIndex = 48;
       this.lbl9.Text = "Memo:";
       // 
       // BioSeqDBNotifications
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+      this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.CancelButton = this.btnCancel;
-      this.ClientSize = new System.Drawing.Size(1047, 718);
+      this.ClientSize = new System.Drawing.Size(698, 467);
       this.Controls.Add(this.lblMemo);
       this.Controls.Add(this.lbl9);
       this.Controls.Add(this.lblCompleted);
@@ -354,7 +369,6 @@
       this.Controls.Add(this.label2);
       this.Controls.Add(this.btnCancel);
       this.Controls.Add(this.label4);
-      this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
       this.Name = "BioSeqDBNotifications";
       this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
       this.Text = "BioSeqDB Pending Notifications";

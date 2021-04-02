@@ -185,6 +185,7 @@
       this.lstQueryGenomes.Size = new System.Drawing.Size(504, 139);
       this.lstQueryGenomes.Sorted = true;
       this.lstQueryGenomes.TabIndex = 7;
+      this.lstQueryGenomes.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lstQueryGenomes_ItemCheck);
       this.lstQueryGenomes.SelectedValueChanged += new System.EventHandler(this.lstQueryGenomes_SelectedValueChanged);
       // 
       // btnGenomePicker
@@ -418,7 +419,7 @@
       // 
       // txtMemo
       // 
-      this.txtMemo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.txtMemo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtMemo.Location = new System.Drawing.Point(15, 646);
       this.txtMemo.Name = "txtMemo";
@@ -427,6 +428,7 @@
       // 
       // label5
       // 
+      this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.label5.AutoSize = true;
       this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.label5.Location = new System.Drawing.Point(15, 630);

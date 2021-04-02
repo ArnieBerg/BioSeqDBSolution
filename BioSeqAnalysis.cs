@@ -2,6 +2,7 @@
 using FSExplorer;
 using Ookii.Dialogs.WinForms;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
@@ -12,7 +13,7 @@ namespace BioSeqDB
   {
     private string analysis;
 
-    public BioSeqAnalysis(string Analysis)
+    public BioSeqAnalysis(string Analysis, List<string> sampleIDs)
     {
       InitializeComponent();
 
@@ -25,7 +26,8 @@ namespace BioSeqDB
       Cursor.Current = Cursors.WaitCursor;
 
       lstSampleIDs.Items.Clear();
-      lstSampleIDs.Items.AddRange(ServiceCallHelper.SampleIDs(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()).ToArray());
+      //lstSampleIDs.Items.AddRange(ServiceCallHelper.SampleIDs(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()).ToArray());
+      lstSampleIDs.Items.AddRange(sampleIDs.ToArray());
 
       // Set some defaults.
       radSample.Checked = AppConfigHelper.SampleChecked(analysis);
@@ -201,7 +203,7 @@ namespace BioSeqDB
         string path = AppConfigHelper.NormalizePathToWindows(txtInputPath.Text); // We want an actual file, so don't append "\\".
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folder with .fasta contig file",
                                             DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                                            "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+                                            "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
         Explorer.frmExplorer.ShowDialog();
         if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
         {
@@ -217,7 +219,7 @@ namespace BioSeqDB
         ofn.Title = "Input path to folder with .fasta contig file";
         ofn.CheckFileExists = true;
         ofn.FileName = ofn.InitialDirectory = AppConfigHelper.FileExists(path);
-        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*";
+        ofn.Filter = "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*";
 
         if (ofn.ShowDialog() != DialogResult.Cancel)
         {

@@ -39,6 +39,7 @@
       this.lblLastSeqDBCall = new System.Windows.Forms.Label();
       this.panel1 = new System.Windows.Forms.Panel();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+      this.btnChangeLog = new System.Windows.Forms.Button();
       this.labelVersion = new System.Windows.Forms.Label();
       this.label6 = new System.Windows.Forms.Label();
       this.lvThreads = new System.Windows.Forms.ListView();
@@ -54,7 +55,7 @@
       this.colLastActive = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.colLogout = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.label7 = new System.Windows.Forms.Label();
-      this.btnChangeLog = new System.Windows.Forms.Button();
+      this.lblServer = new System.Windows.Forms.Label();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
       this.SuspendLayout();
       // 
@@ -142,13 +143,28 @@
       this.toolTip1.SetToolTip(this.panel1, "Copy command to clipboard");
       this.panel1.Click += new System.EventHandler(this.panel1_Click);
       // 
+      // btnChangeLog
+      // 
+      this.btnChangeLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.btnChangeLog.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+      this.btnChangeLog.Location = new System.Drawing.Point(371, 99);
+      this.btnChangeLog.Margin = new System.Windows.Forms.Padding(2);
+      this.btnChangeLog.Name = "btnChangeLog";
+      this.btnChangeLog.Size = new System.Drawing.Size(111, 22);
+      this.btnChangeLog.TabIndex = 0;
+      this.btnChangeLog.Text = "Change log...";
+      this.toolTip1.SetToolTip(this.btnChangeLog, "Backup database");
+      this.btnChangeLog.UseVisualStyleBackColor = true;
+      this.btnChangeLog.Click += new System.EventHandler(this.btnChangeLog_Click);
+      // 
       // labelVersion
       // 
       this.labelVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.labelVersion.Location = new System.Drawing.Point(30, 104);
       this.labelVersion.Name = "labelVersion";
-      this.labelVersion.Size = new System.Drawing.Size(313, 17);
+      this.labelVersion.Size = new System.Drawing.Size(156, 17);
       this.labelVersion.TabIndex = 29;
+      this.labelVersion.Text = "version";
       // 
       // label6
       // 
@@ -162,7 +178,8 @@
       // 
       // lvThreads
       // 
-      this.lvThreads.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.lvThreads.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lvThreads.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colThreadIndex,
@@ -176,7 +193,7 @@
       this.lvThreads.Location = new System.Drawing.Point(27, 229);
       this.lvThreads.MultiSelect = false;
       this.lvThreads.Name = "lvThreads";
-      this.lvThreads.Size = new System.Drawing.Size(480, 199);
+      this.lvThreads.Size = new System.Drawing.Size(480, 245);
       this.lvThreads.TabIndex = 70;
       this.lvThreads.UseCompatibleStateImageBehavior = false;
       this.lvThreads.View = System.Windows.Forms.View.Details;
@@ -213,8 +230,7 @@
       // 
       // lvUsers
       // 
-      this.lvUsers.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+      this.lvUsers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lvUsers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colUsername,
@@ -223,7 +239,7 @@
             this.colLogout});
       this.lvUsers.FullRowSelect = true;
       this.lvUsers.HideSelection = false;
-      this.lvUsers.Location = new System.Drawing.Point(27, 453);
+      this.lvUsers.Location = new System.Drawing.Point(27, 499);
       this.lvUsers.MultiSelect = false;
       this.lvUsers.Name = "lvUsers";
       this.lvUsers.Size = new System.Drawing.Size(480, 169);
@@ -253,33 +269,30 @@
       // 
       // label7
       // 
+      this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.label7.AutoSize = true;
       this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label7.Location = new System.Drawing.Point(27, 437);
+      this.label7.Location = new System.Drawing.Point(27, 483);
       this.label7.Name = "label7";
       this.label7.Size = new System.Drawing.Size(43, 13);
       this.label7.TabIndex = 72;
       this.label7.Text = "Users:";
       // 
-      // btnChangeLog
+      // lblServer
       // 
-      this.btnChangeLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnChangeLog.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-      this.btnChangeLog.Location = new System.Drawing.Point(371, 99);
-      this.btnChangeLog.Margin = new System.Windows.Forms.Padding(2);
-      this.btnChangeLog.Name = "btnChangeLog";
-      this.btnChangeLog.Size = new System.Drawing.Size(111, 22);
-      this.btnChangeLog.TabIndex = 0;
-      this.btnChangeLog.Text = "Change log...";
-      this.toolTip1.SetToolTip(this.btnChangeLog, "Backup database");
-      this.btnChangeLog.UseVisualStyleBackColor = true;
-      this.btnChangeLog.Click += new System.EventHandler(this.btnChangeLog_Click);
+      this.lblServer.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.lblServer.Location = new System.Drawing.Point(192, 104);
+      this.lblServer.Name = "lblServer";
+      this.lblServer.Size = new System.Drawing.Size(156, 17);
+      this.lblServer.TabIndex = 73;
+      this.lblServer.Text = "server IP address";
       // 
       // BioSeqDBAbout
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(519, 634);
+      this.ClientSize = new System.Drawing.Size(519, 680);
+      this.Controls.Add(this.lblServer);
       this.Controls.Add(this.btnChangeLog);
       this.Controls.Add(this.label7);
       this.Controls.Add(this.lvUsers);
@@ -333,5 +346,6 @@
     private System.Windows.Forms.ColumnHeader colLogout;
     private System.Windows.Forms.Label label7;
     private System.Windows.Forms.Button btnChangeLog;
+    private System.Windows.Forms.Label lblServer;
   }
 }

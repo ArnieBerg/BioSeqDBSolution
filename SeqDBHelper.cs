@@ -1,4 +1,5 @@
-﻿using BioSeqDBConfigModel;
+﻿using BioSeqDB.ModelClient;
+using BioSeqDBConfigModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,7 +19,7 @@ namespace BioSeqDB
 
     //private static string TaskID; // For buildTree with fast_tree option, using FileSystemWatcher.
 
-    public static int bashcmd(string cmd)
+    public static WSLProxyResponse bashcmd(string cmd)
     {
       AppConfigHelper.LastCommand = cmd;
       //if (Environment.Is64BitProcess)
@@ -35,7 +36,7 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    public static int AssembleSamples(string config)
+    public static WSLProxyResponse AssembleSamples(string config)
     {
       // eg. ./assembleRANF.sh --fast_polish --flye –-bbmap skip|normal –-quast skip|normal –-kraken skip|normal --complete_signal /mnt/c/Temp/assemble000003.txt /mnt/c/Temp/samples.txt  
 
@@ -98,16 +99,18 @@ namespace BioSeqDB
 
       RunInBackground(AppConfigHelper.LastCommand, AppConfigHelper.LastTaskID);
 
-      return 0;
+      WSLProxyResponse WSLResponse = new WSLProxyResponse();
+      WSLResponse.ExitCode = 0;
+      return WSLResponse;
     }
 
-    public static int Printenv()
+    public static WSLProxyResponse Printenv()
     {
       AppConfigHelper.LastCommand = "printenv > printenv.wsl"; // For WSL this file ends up in the executable folder, not in the /home/arnie folder.
       return StandardCallToWSL();
     }
 
-    public static int BuildTree()
+    public static WSLProxyResponse BuildTree()
     {
       //string prefix = "cd;export PATH=/home/arnie/.local/bin:/home/arnie/bin:/snap/bin:/home/arnie/.dotnet/tools:$PATH;conda run -n phame "; // Prepend to each invocation of wsl.
       //prefix = "conda run -n phame ";
@@ -173,6 +176,8 @@ namespace BioSeqDB
           break;
       }
 
+      WSLProxyResponse WSLResponse = new WSLProxyResponse();
+      WSLResponse.ExitCode = 0;
       AppConfigHelper.LastCommand = AppConfigHelper.CondaPrefix() + " " + AppConfigHelper.PathToSeqDB() +
                               " build_tree " + (AppConfigHelper.BuildTreeFastTree() ? "--fast_tree " : string.Empty) +
                                          "--linkage " + linkage + cutoff +
@@ -205,13 +210,15 @@ namespace BioSeqDB
           RedirectStandardError = true
         };
 
-        Process.Start(info);
+        Process P = Process.Start(info);
+        WSLResponse.StandardError = P.StandardError.ReadToEnd();
+        WSLResponse.StandardOutput = P.StandardOutput.ReadToEnd();
       }
       else
       {
         RunInBackground(AppConfigHelper.LastCommand, AppConfigHelper.LastTaskID);
       }
-      return 0;
+      return WSLResponse;
     }
 
     internal static string CentrifugeDatabaseName(string centrifugeDBPath)
@@ -228,7 +235,7 @@ namespace BioSeqDB
       return filename.Substring(0, filename.LastIndexOf("."));
     }
 
-    internal static int InfluenzaA()
+    internal static WSLProxyResponse InfluenzaA()
     {
       throw new NotImplementedException();
     }
@@ -342,7 +349,7 @@ namespace BioSeqDB
       }
     }
 
-    public static int Build_DB(SeqDB db)
+    public static WSLProxyResponse Build_DB(SeqDB db)
     {
       // eg. ~/seqdb/seqdb build_db -i /data/amrDBinput/organism -o /data/amrDB/hpsuis/hpsuis.fasta
       if (db.BuildTreeWildReference.Length > 0)
@@ -533,7 +540,7 @@ namespace BioSeqDB
       AppConfigHelper.SaveConfig();
     }
 
-    public static int ExtractSample(string sampleID, string outputPath)
+    public static WSLProxyResponse ExtractSample(string sampleID, string outputPath)
     {
       // eg. ~/seqdb/seqdb extract -q 1616822_Hp -d /data/amrDB/hpsuis/hpsuis_db.fasta > /data/amrDB/hpsuis/extracted.fasta
       AppConfigHelper.LastCommand = AppConfigHelper.PathToSeqDB() + " extract -q " + sampleID + " -d " +
@@ -542,19 +549,21 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    public static int Kraken2()
+    public static WSLProxyResponse Kraken2()
     {
+      WSLProxyResponse WSLResponse = null;
       string inputFile = AppConfigHelper.NormalizePathToLinux(AppConfigHelper.InputPath("Kraken2"));
       if (AppConfigHelper.SampleChecked("Kraken2"))
       {
-        // First extract the fasta file from the database.          
-        if (ExtractSample(AppConfigHelper.SampleID("Kraken2"), AppConfigHelper.NormalizePathToLinux("C:\\Temp")) == 0)
+        // First extract the fasta file from the database.  
+        WSLResponse = ExtractSample(AppConfigHelper.SampleID("Kraken2"), AppConfigHelper.NormalizePathToLinux("C:\\Temp"));
+        if (WSLResponse.ExitCode == 0)
         {
           inputFile = AppConfigHelper.NormalizePathToLinux("C:\\Temp") + "/" + AppConfigHelper.SampleID("Kraken2") + ".fasta";
         }
         else
         {
-          return -1;
+          return WSLResponse;
         }
       }
 
@@ -563,7 +572,8 @@ namespace BioSeqDB
       AppConfigHelper.LastCommand = "/usr/local/kraken2/kraken2 --db /data/referenceDB/minikraken2_v1_8GB/ --threads 16 --report " +
                          AppConfigHelper.NormalizePathToLinux(AppConfigHelper.OutputPath("Kraken2") + "/kraken.aggregates.txt") + " --use-names --output " + 
                          AppConfigHelper.NormalizePathToLinux(AppConfigHelper.OutputPath("Kraken2") + "/kraken.txt") + " " + inputFile;
-      if (StandardCallToWSL() == 0)
+      WSLResponse = StandardCallToWSL();
+      if (WSLResponse.ExitCode == 0)
       {
         AppConfigHelper.LastCommand = "conda run -n refseq_masher-0.1.1 refseq_masher matches --output-type tab -o " +
                                 AppConfigHelper.NormalizePathToLinux(AppConfigHelper.OutputPath("Kraken2") + "/RefseqIdent.txt ") + inputFile;
@@ -574,18 +584,20 @@ namespace BioSeqDB
         return StandardCallToWSL();
       }
 
-      return -1;
+      return WSLResponse;
     }
 
-    internal static int BBMap()
+    internal static WSLProxyResponse BBMap()
     {
+      WSLProxyResponse WSLResponse = null;
       string inputFile = AppConfigHelper.NormalizePathToLinux(AppConfigHelper.InputPath("BBMap"));
       if (AppConfigHelper.SampleChecked("BBMap"))
       {
-        // First extract the fasta file from the database.          
-        if (ExtractSample(AppConfigHelper.SampleID("BBMap"), AppConfigHelper.NormalizePathToLinux("C:\\Temp")) != 0)
+        // First extract the fasta file from the database.   
+        WSLResponse = ExtractSample(AppConfigHelper.SampleID("BBMap"), AppConfigHelper.NormalizePathToLinux("C:\\Temp"));
+        if (WSLResponse.ExitCode != 0)
         {
-          return -1;
+          return WSLResponse;
         }
         inputFile = AppConfigHelper.NormalizePathToLinux("C:\\Temp") + "/" + AppConfigHelper.SampleID("BBMap") + ".fasta";
       }
@@ -595,7 +607,10 @@ namespace BioSeqDB
       string[] files = Directory.GetFiles(fastqPath, "*.fastq", SearchOption.TopDirectoryOnly);
       if (files.Length == 0)
       {
-        return -3;
+        WSLResponse = new WSLProxyResponse();
+        WSLResponse.ExitCode = -3;
+        WSLResponse.StandardError = "No *.fastq files found in " + fastqPath + ".";
+        return WSLResponse;
       }
 
       //     cat $samplePath/*.fastq > ${sampleName}.fastq
@@ -614,7 +629,12 @@ namespace BioSeqDB
       int result = P.ExitCode;
 
       if (result != 0)
-        return -2; // catenate failed.
+      {
+        WSLResponse = new WSLProxyResponse();
+        WSLResponse.ExitCode = -2;
+        WSLResponse.StandardError = "Catenate to output " + fastqOutput + " failed for " + fastqPath + ".";
+        return WSLResponse;
+      }
 
       // Convert fastq to fastq
       // seqtk seq -A BC87_reads.fastq > sample.fasta
@@ -631,7 +651,13 @@ namespace BioSeqDB
       P.WaitForExit();
       result = P.ExitCode;
       if (result != 0)
-        return -4;
+      {
+        WSLResponse = new WSLProxyResponse();
+        WSLResponse.ExitCode = -4;
+        WSLResponse.StandardError = P.StandardError.ReadToEnd();
+        WSLResponse.StandardOutput = P.StandardOutput.ReadToEnd();
+        return WSLResponse;
+      }
 
       P.Close();
 
@@ -646,10 +672,12 @@ namespace BioSeqDB
       }
       AppConfigHelper.LastCommand = bbmapInvocation + " nodisk=f ref=" + inputFile + " in=" + fastaReads + " covstats=" + outputPath + 
                         "/covstats.txt covhist=" + outputPath + "/covhist.txt basecov=" + outputPath + "/basecov.txt bincov=" + outputPath + "/bincov.txt";
-      if (StandardCallToWSL() == 0)
+      WSLResponse = StandardCallToWSL();
+      if (WSLResponse.ExitCode == 0)
       {
         AppConfigHelper.LastCommand = "conda run -n refseq_masher-0.1.1 refseq_masher matches --output-type tab -o " + outputPath + "/RefseqIdent.txt " + inputFile;
-        if (StandardCallToWSL() == 0)
+        WSLResponse = StandardCallToWSL();
+        if (WSLResponse.ExitCode == 0)
         {
           if (AppConfigHelper.SampleChecked("BBMap"))
           {
@@ -665,15 +693,13 @@ namespace BioSeqDB
           {
             File.Delete(@"c:\Temp\sample.fasta");
           }
-
-          return 0;
         }
       }
 
-      return -1;
+      return WSLResponse;
     }
 
-    internal static int VFabricate()
+    internal static WSLProxyResponse VFabricate()
     {
       // ./VFabricateBioSeqDB.sh ${samplepath} $contig $vfabricate $output path
       //# $1 Sample name (Use 'Abricate' when no sample picked).
@@ -686,9 +712,10 @@ namespace BioSeqDB
       {
         // First extract the fasta file from the database.          
         sampleName = AppConfigHelper.SampleID("VFabricate");
-        if (ExtractSample(sampleName, AppConfigHelper.NormalizePathToLinux("C:\\Temp")) != 0)
+        WSLProxyResponse WSLResponse = ExtractSample(sampleName, AppConfigHelper.NormalizePathToLinux("C:\\Temp"));
+        if (WSLResponse.ExitCode != 0)
         {
-          return -1;
+          return WSLResponse;
         }
         inputFile = AppConfigHelper.NormalizePathToLinux("C:\\Temp") + "/" + AppConfigHelper.SampleID("VFabricate") + ".fasta";
       }
@@ -701,7 +728,7 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    internal static int Quast()
+    internal static WSLProxyResponse Quast()
     {
       //   /usr/local/quast-5.0.2/quast.py -o quastRA --glimmer $contig
 
@@ -711,9 +738,10 @@ namespace BioSeqDB
       {
         // First extract the fasta file from the database.          
         sampleName = AppConfigHelper.SampleID("Quast");
-        if (ExtractSample(sampleName, AppConfigHelper.NormalizePathToLinux("C:\\Temp")) != 0)
+        WSLProxyResponse WSLResponse = ExtractSample(sampleName, AppConfigHelper.NormalizePathToLinux("C:\\Temp"));
+        if (WSLResponse.ExitCode != 0)
         {
-          return -1;
+          return WSLResponse;
         }
         inputFile = AppConfigHelper.NormalizePathToLinux("C:\\Temp") + "/" + AppConfigHelper.SampleID("Quast") + ".fasta";
       }
@@ -725,7 +753,7 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    public static int SearchSample()
+    public static WSLProxyResponse SearchSample()
     {
       // eg. ~/seqdb/seqdb search -q 1808103_Hp -c 1 -t 16 -i /home/arnie/1808103_Hp.fasta -d /data/amrDB/hpsuis/hpsuis_db.fasta -o /c/Temp/1808103_Hp.txt
       AppConfigHelper.LastCommand = AppConfigHelper.PathToSeqDB() + " search -q " + AppConfigHelper.SearchSampleID() +
@@ -738,7 +766,7 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    public static int RemoveSample()
+    public static WSLProxyResponse RemoveSample()
     {
       // eg. ~/seqdb/seqdb remove -q 1616822_Hp -d /data/amrDB/hpsuis/hpsuis_db.fasta
       AppConfigHelper.LastCommand = AppConfigHelper.PathToSeqDB() + " remove -q " + AppConfigHelper.RemoveSampleID() + 
@@ -746,7 +774,7 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    public static int InsertSample()
+    public static WSLProxyResponse InsertSample()
     {
       // eg. ~/seqdb/seqdb insert -q 1616822_Hp -i /data/amrDB/hpsuis/extracted.fasta -d /data/amrDB/hpsuis/hpsuis_db.fasta
       AppConfigHelper.LastCommand = AppConfigHelper.PathToSeqDB() + " insert -q " + AppConfigHelper.InsertSampleID() +
@@ -755,7 +783,7 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    public static int ReplaceSample()
+    public static WSLProxyResponse ReplaceSample()
     {
       // This uses the same parameters as the InsertSample function.
       // eg. ~/seqdb/seqdb replace -q 1616822_Hp -i /data/amrDB/hpsuis/extracted.fasta -d /data/amrDB/hpsuis/hpsuis_db.fasta
@@ -765,7 +793,7 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    public static int BackupDatabase()
+    public static WSLProxyResponse BackupDatabase()
     {
       // eg. ~/seqdb/seqdb kipper -b  -i /data/amrDB/hpsuis/hpsuis_db.fasta -d ~/hpsuis_db/db/hpsuis
       AppConfigHelper.LastCommand = AppConfigHelper.PathToSeqDB() + " kipper -b -i " + AppConfigHelper.NormalizePathToLinux(AppConfigHelper.CurrentDBPath()) +
@@ -774,7 +802,7 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    internal static int RestoreDatabase()
+    internal static WSLProxyResponse RestoreDatabase()
     {
       // eg. ~/seqdb/seqdb kipper <archive path> -e -n <version> -o <output path> 
       AppConfigHelper.LastCommand = AppConfigHelper.PathToSeqDB() + " kipper -r -v " + AppConfigHelper.RestoreVersion() + " -d " +
@@ -783,7 +811,7 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    private static int StandardCallToWSL()
+    private static WSLProxyResponse StandardCallToWSL()
     {
       //string prefix = "cd;export PATH=/home/arnie/.local/bin:/home/arnie/bin:/snap/bin:/home/arnie/.dotnet/tools:$PATH;"; // Prepend to each invocation of wsl.
 
@@ -803,16 +831,20 @@ namespace BioSeqDB
         RedirectStandardError = true
       };
 
+      WSLProxyResponse WSLResponse = new WSLProxyResponse();
       int rc = -1;
       using (var p = Process.Start(info))
       {
         p.WaitForExit();
         RecordStandardOutput(p);
         rc = p.ExitCode;
+        WSLResponse.ExitCode = rc;
+        WSLResponse.StandardOutput = p.StandardOutput.ReadToEnd();
+        WSLResponse.StandardError = p.StandardError.ReadToEnd();
         p.Close();
       }
 
-      return rc;
+      return WSLResponse;
     }
 
     public static void ExecuteCommandLine(string fullCommandLine,

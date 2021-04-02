@@ -20,6 +20,7 @@ namespace BioSeqDB
       txtOutputPath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.InfluenzaAOutputPath);
       txtThreads.Text = string.IsNullOrEmpty(AppConfigHelper.InfluenzaAThreads) ? "4" : AppConfigHelper.InfluenzaAThreads.ToString();
       chkTrim.Checked = AppConfigHelper.InfluenzaAChooseTrim;
+      cmbModel.SelectedIndex = AppConfigHelper.InfluenzaAModel == "r10" ? 1 : 0;
       ReloadSampleList();
       EnableOK();
     }
@@ -90,7 +91,27 @@ namespace BioSeqDB
         }
       }
 
-      AppConfigHelper.InfluenzaAParms(txtCentrifugePath.Text.Trim(), txtOutputPath.Text.Trim(), txtMemo.Text.Trim(), chkTrim.Checked, txtThreads.Text);
+      string segmentsToAssemble = string.Empty;
+      if (chkSeg1.Checked) segmentsToAssemble += "1,";
+      if (chkSeg2.Checked) segmentsToAssemble += "2,";
+      if (chkSeg3.Checked) segmentsToAssemble += "3,";
+      if (chkSeg4.Checked) segmentsToAssemble += "4,";
+      if (chkSeg5.Checked) segmentsToAssemble += "5,";
+      if (chkSeg6.Checked) segmentsToAssemble += "6,";
+      if (chkSeg7.Checked) segmentsToAssemble += "7,";
+      if (chkSeg8.Checked) segmentsToAssemble += "8,";
+      if (string.IsNullOrEmpty(segmentsToAssemble))
+      {
+        segmentsToAssemble = "1,2,3,4,5,6,7,8";
+      }
+      else
+      {
+        segmentsToAssemble = segmentsToAssemble.Substring(0, segmentsToAssemble.Length - 1);
+      }
+
+      AppConfigHelper.InfluenzaAParms(txtCentrifugePath.Text.Trim(), txtOutputPath.Text.Trim(), 
+                                      txtMemo.Text.Trim(), chkTrim.Checked, txtThreads.Text, segmentsToAssemble,
+                                                                    cmbModel.SelectedIndex == 0 ? "r9" : "r10");
     }
 
     private void btnCentrifugePath_Click(object sender, EventArgs e)
@@ -238,6 +259,12 @@ namespace BioSeqDB
       {
         item.Checked = chkAll.Checked;
       }
+    }
+
+    private void chkAllSegments_CheckedChanged(object sender, EventArgs e)
+    {
+      chkSeg1.Checked = chkSeg2.Checked = chkSeg3.Checked = chkSeg4.Checked = chkSeg5.Checked = 
+                        chkSeg6.Checked = chkSeg7.Checked = chkSeg7.Checked = chkSeg8.Checked = chkAllSegments.Checked;
     }
   }
 }

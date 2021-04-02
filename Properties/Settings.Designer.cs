@@ -23,21 +23,27 @@ namespace BioSeqDB.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
-        public string ModelServer {
-            get {
-                return ((string)(this["ModelServer"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string DestinationURL {
             get {
                 return ((string)(this["DestinationURL"]));
+            }
+            set {
+                this["DestinationURL"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.100.189")]
+        public string ModelServer {
+            get {
+                return ((string)(this["ModelServer"]));
+            }
+            set {
+                this["ModelServer"] = value;
             }
         }
     }

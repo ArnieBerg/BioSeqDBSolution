@@ -13,6 +13,7 @@ namespace BioSeqDB
     public Dictionary<string, string> items; // Folders selected in this run.
     public Dictionary<string, string> alreadySelected; // This is a list of those that have already been selected.
     private bool IsSalmonella;
+    private string currentSampleSelection = null;
 
     // Prompt for a Influenza A fastq sample for pipeline to analyze. Or Salmonella.
 
@@ -33,17 +34,45 @@ namespace BioSeqDB
       Text = Text.Replace("<analysis>", functionUsage);
       label4.Text = label4.Text.Replace("<analysis>", functionUsage);
       label2.Text = label2.Text.Replace("<analysis>", functionUsage);
+      if (alreadySelected.Count > 0)
+      {
+        foreach (string key in alreadySelected.Keys)
+        {
+          currentSampleSelection = key; // Choose the last sample in those already selected.
+        }
+      }
+      ReloadSampleList();
     }
 
     private void ReloadSampleList()
     {
       lvSamples.Items.Clear();
+      foreach (string item in alreadySelected.Keys)
+      {
+        ListViewItem lvItem = new ListViewItem(item);
+        lvItem.SubItems.Add(alreadySelected[item].Substring(1));
+
+        lvSamples.Items.Insert(lvSamples.Items.Count, lvItem);
+      }
+
       foreach (string item in items.Keys)
       {
         ListViewItem lvItem = new ListViewItem(item);
         lvItem.SubItems.Add(items[item]);
 
         lvSamples.Items.Insert(lvSamples.Items.Count, lvItem);
+      }
+      for (int i = 0; i < lvSamples.Items.Count; i++)
+      {
+        if (lvSamples.Items[i].Text == currentSampleSelection)
+        {
+          lvSamples.Items[i].Focused = true;
+          lvSamples.Items[i].Selected = true;
+          lvSamples.Items[i].EnsureVisible();
+
+          lvSamples.Select();
+          break;
+        }
       }
       EnableOK();
     }
@@ -107,7 +136,7 @@ namespace BioSeqDB
 
       if (result != DialogResult.Cancel)
       {
-        samplePath = samplePath.Substring(0, samplePath.LastIndexOf("\\") + 1); // Chop off last folder name.
+        samplePath = samplePath.Substring(0, samplePath.LastIndexOf("\\") + 1);
 
         // If the selection already exists, boot it out.
         string msg = "Folders already selected or having no .fastq files (will be ignored): " + Environment.NewLine;
@@ -138,7 +167,8 @@ namespace BioSeqDB
           {
             string path = samplePath.Substring(0, samplePath.Length - 1);
             path = path.Substring(path.LastIndexOf("\\") + 1);
-            samplePath = samplePath.Substring(0, samplePath.Length - 2 + path.Length); // Chop off last folder name.
+            //samplePath = samplePath.Substring(0, samplePath.Length - 1 - path.Length); // Chop off last folder name.
+            currentSampleSelection = path;
             items.Add(path, samplePath);
           }
         }
@@ -169,6 +199,7 @@ namespace BioSeqDB
 
             if (!isSelected)
             {
+              currentSampleSelection = folder;
               items.Add(folder, samplePath + folder);
             }
           }
@@ -224,8 +255,15 @@ namespace BioSeqDB
     {
       if (lvSamples.SelectedItems != null && lvSamples.SelectedItems.Count > 0)
       {
-        txtSampleID.Text = lvSamples.SelectedItems[0].Text;
-        lblPath.Text = lvSamples.SelectedItems[0].SubItems[1].Text;
+        ListViewItem item = lvSamples.SelectedItems[0];
+        btnUpdate.Enabled = btnDelete.Enabled = true;
+        if (alreadySelected.ContainsKey(item.Text))
+        {
+          btnUpdate.Enabled = btnDelete.Enabled = false;
+        }
+        txtSampleID.Text = item.Text;
+        lblPath.Text = item.SubItems[1].Text;
+        currentSampleSelection = txtSampleID.Text;
       }
     }
 
@@ -234,7 +272,8 @@ namespace BioSeqDB
       if (txtSampleID.Text.Trim().Length > 0 && txtSampleID.Text.Trim() != lvSamples.SelectedItems[0].Text)
       {
         items.Remove(lvSamples.SelectedItems[0].Text);
-        items.Add(txtSampleID.Text, lblPath.Text);
+        currentSampleSelection = txtSampleID.Text;
+        items.Add(currentSampleSelection, lblPath.Text);
         ReloadSampleList();
       }
     }
@@ -244,7 +283,7 @@ namespace BioSeqDB
       if (txtSampleID.Text.Trim().Length > 0 && txtSampleID.Text.Trim() == lvSamples.SelectedItems[0].Text)
       {
         items.Remove(lvSamples.SelectedItems[0].Text);
-        txtSampleID.Text = lblPath.Text = string.Empty;
+        txtSampleID.Text = lblPath.Text = currentSampleSelection = string.Empty;
         ReloadSampleList();
       }
     }

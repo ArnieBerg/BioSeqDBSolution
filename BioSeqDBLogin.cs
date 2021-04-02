@@ -1,9 +1,9 @@
 ﻿//using aejw.Network;
 using BioSeqDB.ModelClient;
 using BioSeqDBConfigModel;
+using BioSeqDBUserCore;
 using FSExplorer;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -13,20 +13,23 @@ namespace BioSeqDB
   {
     private string UserName;
 
-    public BioSeqDBLogin(string username, string fiClientOnServer)
+    public BioSeqDBLogin(string username, string fiClientOnServer) // This is called from the main dialog when switching users. Username is the newly selected user.
     {
       InitializeComponent();
       InitConfig();
-      UserName = username;
-
-      CheckIfClientIsCurrent(fiClientOnServer);
+      Login(username, fiClientOnServer);
     }
 
-    public BioSeqDBLogin(string fiClientOnServer)
+    public BioSeqDBLogin(string fiClientOnServer) // This is called on initial login.
     {
       InitializeComponent();
       InitConfig();
-      UserName = AppConfigHelper.LastUser;
+      Login(AppConfigHelper.LastUser, fiClientOnServer);
+    }
+
+    private void Login(string user, string fiClientOnServer)
+    {
+      UserName = user;
 
       CheckIfClientIsCurrent(fiClientOnServer);
     }
@@ -37,6 +40,8 @@ namespace BioSeqDB
 
       chkRemember.Checked = CheckForRemember();
       chkRemember.CheckedChanged += chkRemember_CheckedChanged;
+
+      chkEmailNotifications.Checked = CheckForEmailNotifications();
 
       if (fiClientOnServer == null)
       {
@@ -54,19 +59,20 @@ namespace BioSeqDB
       //}
     }
 
+    private bool CheckForEmailNotifications()
+    {
+      User user = AppConfigHelper.seqdbConfigGlobal.Users[cmb.Text.ToUpper()];
+      return user.EmailNotifications;
+    }
+
     private bool CheckForRemember()
     {
-      bool remember = false;
-      if (File.Exists(@"C:\Temp\Remember.txt"))
+      if (UserProfileHelper.userProfile.Remember == UserName)
       {
-        string rememberName = File.ReadAllText(@"C:\Temp\Remember.txt");
-        if (rememberName == UserName)
-        {
-          txt.Text = AppConfigHelper.Password(UserName);
-          return true;
-        }
+        txt.Text = AppConfigHelper.Password(UserName);
+        return true;
       }
-      return remember;
+      return false;
     }
 
     private static void InitConfig()
@@ -170,6 +176,11 @@ namespace BioSeqDB
       DialogResult = DialogResult.OK;
       AppConfigHelper.LastUser = cmb.Text.ToString().ToUpper().Trim();
 
+      // Only update email notifications on valid login, otherwise one user can change the preference of another.
+      User user = AppConfigHelper.seqdbConfigGlobal.Users[AppConfigHelper.LastUser];
+      user.EmailNotifications = chkEmailNotifications.Checked;
+      AppConfigHelper.SaveConfigGlobal();
+
       //// Start by copying the local copy of <loggedOnUser>_appsettings.json to the server.      
       //DirectoryHelper.FileCopy("[L]" + AppConfigHelper.executablePath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json",
       //                                                                      "[S]" + AppConfigHelper.PathToServerAppsettings, true);
@@ -189,7 +200,7 @@ namespace BioSeqDB
     {
       // Test DirectoryHelper
       Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Server File Explorer...", false, string.Empty, 
-                                            "Fasta files (*.fasta)|*.fasta;*.fna|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+                                            "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
       Explorer.frmExplorer.ShowDialog();
       if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
       {        
@@ -199,20 +210,18 @@ namespace BioSeqDB
 
     private void chkRemember_CheckedChanged(object sender, EventArgs e)
     {
-      if (chkRemember.Checked) // Record username in C:\Temp\remember.txt (should really encrypt it).
+      if (chkRemember.Checked) // Record username in C:\Temp\remember.json (should really encrypt it).
       {
-        if (!Directory.Exists(@"C:\Temp"))
-        {
-          Directory.CreateDirectory(@"C:\Temp");
-        }
-        File.WriteAllText(@"C:\Temp\remember.txt", UserName);
+        UserProfileHelper.userProfile.Remember = UserName;
+        UserProfileHelper.SaveUserProfile();
         txt.Text = AppConfigHelper.Password(UserName);
       }
-      else
+      else // Unchecked
       {
         try
         {
-          File.Delete(@"C:\Temp\remember.txt");
+          UserProfileHelper.userProfile.Remember = string.Empty;
+          UserProfileHelper.SaveUserProfile();
           txt.Text = string.Empty;
         }
         catch (Exception)
