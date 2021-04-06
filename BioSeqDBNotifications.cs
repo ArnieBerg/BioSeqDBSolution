@@ -375,11 +375,6 @@ namespace BioSeqDB
                                                                                               "Files copied", MessageBoxButtons.OK);
             }
           }
-          //else
-          //{
-          //  MessageBox.Show("InfluenzaA completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
-          //}
           break;
 
         case "Salmonella":
@@ -408,11 +403,6 @@ namespace BioSeqDB
               }
             }
           }
-          //else
-          //{
-          //  MessageBox.Show("Salmonella completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
-          //}
           break;
 
         case "BuildTree":
@@ -501,7 +491,7 @@ namespace BioSeqDB
       string db = string.IsNullOrEmpty(task.TaskDB) ? string.Empty : "Sequence database: " + task.TaskDB;
       string memo = string.IsNullOrEmpty(task.TaskMemo) ? string.Empty : "Memo: " + task.TaskMemo;
       string subject = "Task completed: " + taskName + " at " + task.TaskComplete.ToString("MMM d, yyyy HH:mm") + " after " + 
-                        duration.Minutes.ToString() + " minutes." + Environment.NewLine + (db + " " + Environment.NewLine + memo).Trim();
+                        duration.TotalMinutes.ToString() + " minutes." + Environment.NewLine + (db + " " + Environment.NewLine + memo).Trim();
       string message = subject + Environment.NewLine + AppConfigHelper.LastCommand + Environment.NewLine;
       subject = subject.Replace(Environment.NewLine, "  ");
       List<string> attachments = new List<string>();

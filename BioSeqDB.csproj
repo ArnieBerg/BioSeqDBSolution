@@ -28,7 +28,7 @@
     <ProductName>BioSeqDB</ProductName>
     <PublisherName>Prairie Diagnostic Services</PublisherName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>51</ApplicationRevision>
+    <ApplicationRevision>52</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -205,9 +205,6 @@
     <Compile Include="BioSeqSplash.designer.cs">
       <DependentUpon>BioSeqSplash.cs</DependentUpon>
     </Compile>
-    <Compile Include="DragAndDropListView.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="ISplashForm.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
@@ -293,9 +290,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="BioSeqSplash.resx">
       <DependentUpon>BioSeqSplash.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DragAndDropListView.resx">
-      <DependentUpon>DragAndDropListView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
