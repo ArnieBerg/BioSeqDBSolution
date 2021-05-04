@@ -1,5 +1,6 @@
 ﻿using BioSeqDB.ModelClient;
 using BioSeqDBConfigModel;
+using BioSeqDBUserCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,6 +18,33 @@ namespace BioSeqDB
     public static string executablePath;
 
     private static string loggedOnUser = string.Empty;
+
+    public static NextstrainProfile GetNextstrainProfile()
+    {
+      //public string MetadataPath { get; set; }
+      //public string ReferencePath { get; set; }
+      //public string OuputPath { get; set; }
+      //public int SNPCutoff { get; set; }
+      //public int ClusterCutoff { get; set; }
+      //public int MinGenomeLength { get; set; }
+      //public int MaskFromBeginning { get; set; }
+      //public int MaskFromEnd { get; set; }
+      //public int NumberOfThreads { get; set; }
+      //public string MaskSites { get; set; }
+      //public string RootNode { get; set; }
+      //public DateTime MinDateFilter { get; set; }
+      //public DateTime MinDate { get; set; }
+
+      SeqDB db = seqdbConfig.Current();
+      NextstrainProfile nextstrainProfile = db.NextstrainProfile == null ? new NextstrainProfile() : db.NextstrainProfile;
+      nextstrainProfile.SNPCutoff = nextstrainProfile.SNPCutoff == 0 ? 25 : nextstrainProfile.SNPCutoff;
+      nextstrainProfile.MinGenomeLength = nextstrainProfile.MinGenomeLength == 0 ? 27000 : nextstrainProfile.MinGenomeLength;
+      nextstrainProfile.MaskFromBeginning = nextstrainProfile.MaskFromBeginning == 0 ? 1 : nextstrainProfile.MaskFromBeginning;
+      nextstrainProfile.MaskFromEnd = nextstrainProfile.MaskFromEnd == 0 ? 1 : nextstrainProfile.MaskFromEnd;
+      nextstrainProfile.NumberOfThreads = nextstrainProfile.NumberOfThreads == 0 ? 2 : nextstrainProfile.NumberOfThreads;
+
+      return nextstrainProfile;
+    }
 
     public static string LoggedOnUser
     {
@@ -63,7 +91,7 @@ namespace BioSeqDB
       }
     }
 
-    internal static void Logout()
+    public static void Logout()
     {
       seqdbConfigGlobal.Users[LoggedOnUser].LogoutTime = DateTime.Now; // This information will eventually get to the service for permanent recording.
       SaveConfigGlobal();
@@ -82,7 +110,7 @@ namespace BioSeqDB
     //  task.Start();
     //}
 
-    internal static int MaxTaskID()
+    public static int MaxTaskID()
     {
       int maxID = seqdbConfig.LastTaskID;
       foreach (BioSeqTask task in seqdbConfig.Tasks.Values)
@@ -101,6 +129,14 @@ namespace BioSeqDB
       set { seqdbConfig.ShowDetailedList = value; SaveConfig(); }
     }
 
+    internal static void NextstrainParms(NextstrainProfile nextstrainProfile, string memo)
+    {
+      SeqDB db = seqdbConfig.Current();
+      db.NextstrainProfile = nextstrainProfile;
+      seqdbConfig.TaskMemo = memo;
+      SaveConfig();
+    }
+
     public static string LinuxHomeDirectory
     {
       get { return seqdbConfigGlobal.LinuxHomeDirectory ?? "/home/arnie"; }
@@ -113,7 +149,7 @@ namespace BioSeqDB
       set { seqdbConfig.TaskFilter = value; SaveConfig(); }
     }
 
-    internal static string LIMSDuplicate(string CaseNumber, string LIMSTestID, string LIMSSampleID)
+    public static string LIMSDuplicate(string CaseNumber, string LIMSTestID, string LIMSSampleID)
     {
       // We check to see if we already have a duplicate LIMS identifier, and if so, return the information in msg.
       string msg = string.Empty;
@@ -204,7 +240,7 @@ namespace BioSeqDB
       set { seqdbConfig.LastCommand = value; SaveConfig(); }
     }
 
-    internal static BioSeqTask TaskOfIndex(int selectedIndex)
+    public static BioSeqTask TaskOfIndex(int selectedIndex)
     {
       foreach (BioSeqTask task in seqdbConfig.Tasks.Values)
       {
@@ -217,7 +253,7 @@ namespace BioSeqDB
       return null;
     }
 
-    internal static BioSeqTask TaskOfID(int ID)
+    public static BioSeqTask TaskOfID(int ID)
     {
       foreach (BioSeqTask task in seqdbConfig.Tasks.Values)
       {
@@ -230,7 +266,7 @@ namespace BioSeqDB
       return null;
     }
 
-    internal static void DeleteTask(int index, bool kill)
+    public static void DeleteTask(int index, bool kill)
     {
       BioSeqTask task = TaskOfIndex(index); // Task to delete.
       if (kill)
@@ -384,12 +420,12 @@ namespace BioSeqDB
       }
     }
 
-    internal static bool AssembleFastPolish()
+    public static bool AssembleFastPolish()
     {
       return seqdbConfig.AssembleFastPolish;
     }
 
-    internal static bool AssembleBBmap()
+    public static bool AssembleBBmap()
     {
       return seqdbConfig.AssembleBBMap;
     }
@@ -414,17 +450,17 @@ namespace BioSeqDB
       return destination;
     }
 
-    internal static bool AssembleVFabricate()
+    public static bool AssembleVFabricate()
     {
       return seqdbConfig.AssembleVFabricate;
     }
 
-    internal static bool AssembleKraken2()
+    public static bool AssembleKraken2()
     {
       return seqdbConfig.AssembleKraken2;
     }
 
-    internal static bool AssembleQuast()
+    public static bool AssembleQuast()
     {
       return seqdbConfig.AssembleQuast;
     }
@@ -454,7 +490,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static bool SampleChecked(string analysis)
+    public static bool SampleChecked(string analysis)
     {
       SeqDB db = seqdbConfig.Current();
       switch (analysis)
@@ -473,28 +509,28 @@ namespace BioSeqDB
       return false;
     }
 
-    internal static bool AssembleFlye()
+    public static bool AssembleFlye()
     {
       return seqdbConfig.AssembleFlye;
     }
 
-    internal static bool AssembleRA()
+    public static bool AssembleRA()
     {
       return seqdbConfig.AssembleRA;
     }
 
-    internal static bool AssembleTrinity()
+    public static bool AssembleTrinity()
     {
       return seqdbConfig.AssembleTrinity;
     }
 
-    internal static bool BuildTreeFastTree()
+    public static bool BuildTreeFastTree()
     {
       SeqDB db = seqdbConfig.Current();
       return db.BuildTreeFastTree;
     }
 
-    internal static string Build_DBName()
+    public static string Build_DBName()
     {
       SeqDB db = seqdbConfig.Current();
       return db.Build_DBName;
@@ -514,12 +550,12 @@ namespace BioSeqDB
       }
     }
 
-    internal static int TaskCount()
+    public static int TaskCount()
     {
       return seqdbConfig.Tasks.Count;
     }
 
-    internal static string Build_DBInput()
+    public static string Build_DBInput()
     {
       SeqDB db = seqdbConfig.Current();
       return db.Build_DBInput;
@@ -544,19 +580,19 @@ namespace BioSeqDB
       return db.SearchOutputSampleName ?? string.Empty;
     }
 
-    internal static string SearchInputPath()
+    public static string SearchInputPath()
     {
       SeqDB db = seqdbConfig.Current();
       return db.SearchInputPath ?? string.Empty;
     }
 
-    internal static string BBMapFastqPath()
+    public static string BBMapFastqPath()
     {
       SeqDB db = seqdbConfig.Current();
       return db.BBMapFastqPath ?? string.Empty;
     }
 
-    internal static void InfluenzaAParms(string CentrifugePath, string OutputPath, string Memo, bool Trim, string Threads, 
+    public static void InfluenzaAParms(string CentrifugePath, string OutputPath, string Memo, bool Trim, string Threads, 
                                                                                     string SegmentsToAssemble, string model)
     {
       seqdbConfig.InfluenzaACentrifugePath = CentrifugePath;
@@ -569,7 +605,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static void InsertSample(string caseNumber, string LIMStestID, string LIMSsampleID, string inputPath, string sampleID, bool replace)
+    public static void InsertSample(string caseNumber, string LIMStestID, string LIMSsampleID, string inputPath, string sampleID, bool replace)
     {
       SeqDB db = seqdbConfig.Current();
       db.InsertInputPath = inputPath;
@@ -639,7 +675,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static string SampleID(string analysis)
+    public static string SampleID(string analysis)
     {
       SeqDB db = seqdbConfig.Current();
       string sample = string.Empty;
@@ -664,7 +700,7 @@ namespace BioSeqDB
       return sample;
     }
 
-    internal static string InsertSampleID()
+    public static string InsertSampleID()
     {
       SeqDB db = seqdbConfig.Current();
       string sample = db.InsertSampleID ?? string.Empty;
@@ -712,7 +748,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static string InputPath(string analysis)
+    public static string InputPath(string analysis)
     {
       SeqDB db = seqdbConfig.Current();
       switch (analysis)
@@ -756,7 +792,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static string OutputPath(string analysis)
+    public static string OutputPath(string analysis)
     {
       SeqDB db = seqdbConfig.Current();
       switch (analysis)
@@ -775,13 +811,13 @@ namespace BioSeqDB
       return string.Empty;
     }
 
-    internal static string InsertInputPath()
+    public static string InsertInputPath()
     {
       SeqDB db = seqdbConfig.Current();
       return db.InsertInputPath ?? string.Empty;
     }
 
-    internal static string InsertCaseNumber()
+    public static string InsertCaseNumber()
     {
       SeqDB db = seqdbConfig.Current();
       return db.InsertCaseNumber ?? string.Empty;
@@ -830,7 +866,7 @@ namespace BioSeqDB
       return prefix + path;
     }
 
-    internal static string GetDirectoryName(string path)
+    public static string GetDirectoryName(string path)
     {
       // Path.GetDirectoryName works well as long as path is not an Ubuntu path reference.
       if (string.IsNullOrEmpty(path))
@@ -855,7 +891,7 @@ namespace BioSeqDB
       return prefix + path;
     }
 
-    internal static string NormalizePathToWindows(string path)
+    public static string NormalizePathToWindows(string path)
     {
       if (path.IndexOf("/") > -1)
       {
@@ -876,17 +912,17 @@ namespace BioSeqDB
       return path.Replace("/", "\\");
     }
 
-    internal static string CondaPrefixAbricate()
+    public static string CondaPrefixAbricate()
     {
       return seqdbConfigGlobal.CondaPrefixAbricate ?? string.Empty;
     }
 
-    internal static string CondaPrefix()
+    public static string CondaPrefix()
     {
       return seqdbConfigGlobal.CondaPrefix ?? string.Empty;
     }
 
-    internal static string UbuntuPrefix()
+    public static string UbuntuPrefix()
     {
       string prefix = seqdbConfigGlobal.UbuntuPrefix ?? string.Empty;
       if (prefix.Length == 0)
@@ -897,7 +933,7 @@ namespace BioSeqDB
       return seqdbConfigGlobal.UbuntuPrefix ?? string.Empty;
     }
 
-    internal static string PathToWSL()
+    public static string PathToWSL()
     {
       string path = seqdbConfigGlobal.PathToWSL ?? string.Empty;
       if (path.Length == 0)
@@ -908,7 +944,7 @@ namespace BioSeqDB
       return seqdbConfigGlobal.PathToWSL ?? string.Empty;
     }
 
-    internal static string PathToDendroscope()
+    public static string PathToDendroscope()
     {
       string path = seqdbConfig.PathToDendroscope ?? string.Empty;
       if (path.Length == 0)
@@ -919,7 +955,7 @@ namespace BioSeqDB
       return seqdbConfig.PathToDendroscope ?? string.Empty;
     }
 
-    internal static string WSLProxyRoot()
+    public static string WSLProxyRoot()
     {
       string path = seqdbConfigGlobal.WSLProxyRoot ?? string.Empty;
       if (path.Length == 0)
@@ -930,12 +966,12 @@ namespace BioSeqDB
       return seqdbConfigGlobal.WSLProxyRoot ?? string.Empty;
     }
 
-    internal static string UserFolder()
+    public static string UserFolder()
     {
       return WSLProxyRoot() + "\\" + LoggedOnUser + "\\";
     }
 
-    internal static string LinuxCDrive()
+    public static string LinuxCDrive()
     {
       string path = seqdbConfigGlobal.LinuxCDrive ?? string.Empty;
       if (path.Length == 0)
@@ -957,7 +993,7 @@ namespace BioSeqDB
     //  return seqdbConfigGlobal.LinuxDDrive ?? string.Empty;
     //}
 
-    //internal static string LinuxEDrive()
+    //public static string LinuxEDrive()
     //{
     //  string path = seqdbConfigGlobal.LinuxEDrive ?? string.Empty;
     //  if (path.Length == 0)
@@ -968,7 +1004,7 @@ namespace BioSeqDB
     //  return seqdbConfigGlobal.LinuxEDrive ?? string.Empty;
     //}
 
-    internal static string LinuxDrivePrefix()
+    public static string LinuxDrivePrefix()
     {
       if (seqdbConfigGlobal.LinuxDrivePrefix == null)
       {
@@ -978,7 +1014,7 @@ namespace BioSeqDB
       return seqdbConfigGlobal.LinuxDrivePrefix ?? string.Empty;
     }
 
-    internal static string PathToSeqDB()
+    public static string PathToSeqDB()
     {
       string path = seqdbConfigGlobal.PathToSeqDB ?? string.Empty;
       if (path.Length == 0)
@@ -989,7 +1025,7 @@ namespace BioSeqDB
       return seqdbConfigGlobal.PathToSeqDB ?? string.Empty;
     }
 
-    internal static string PathToNextFlowScript()
+    public static string PathToNextFlowScript()
     {
       string path = seqdbConfigGlobal.PathToNextFlowScript ?? string.Empty;
       if (path.Length == 0)
@@ -1018,19 +1054,19 @@ namespace BioSeqDB
       return db.ExtractOutputPath ?? string.Empty;
     }
 
-    internal static string SearchThreads()
+    public static string SearchThreads()
     {
       SeqDB db = seqdbConfig.Current();
       return db.SearchThreads ?? "1";
     }
 
-    internal static string SearchCutoff()
+    public static string SearchCutoff()
     {
       SeqDB db = seqdbConfig.Current();
       return db.SearchCutoff ?? "1.0";
     }
 
-    internal static void LoadConfig(string user) // This loads the local appsettings.
+    public static void LoadConfig(string user) // This loads the local appsettings.
     {
       //MessageBox.Show("Looking for appsettings.json in " + executablePath);
       string filename = executablePath + "\\" + user + "appsettings.json";
@@ -1038,6 +1074,24 @@ namespace BioSeqDB
       {
         // Then make a copy of appsettings.json for this user.
         File.Copy(executablePath + "\\appsettings.json", executablePath + "\\" + user + "appsettings.json");
+      }
+
+      // If we are running in the dev environment, and the server in Remember.json is different from the 
+      // last server we referenced, swap appSettings files for the other server.
+      if (Debugger.IsAttached)
+      {
+        string requestedServer = UserProfileHelper.userProfile.ServerIPAddress; // From Remember.json.
+        if (requestedServer != Properties.Settings.Default.LastServer) // localhost != WIMMER
+        {
+          // Save current appSettings 
+          File.Copy(filename, Path.GetDirectoryName(filename) + "\\" + Path.GetFileNameWithoutExtension(filename) + "_" + 
+                                                                      Properties.Settings.Default.LastServer + ".json", true);
+          // Load requested appSettings
+          File.Copy(Path.GetDirectoryName(filename) + "\\" + Path.GetFileNameWithoutExtension(filename) + "_" + requestedServer + ".json", 
+                                                                                                               filename, true);
+          Properties.Settings.Default.LastServer = requestedServer;
+          Properties.Settings.Default.Save();
+        }
       }
 
       string cfg = File.ReadAllText(filename);
@@ -1050,9 +1104,14 @@ namespace BioSeqDB
       {
         seqdbConfig.seqDBs = new Dictionary<string, SeqDB>();
       }
+
+      // Apr-14-2021 Set the PathToWSL in the user config to whatever is in the global config. The reason is that it is the
+      // user config that gets passed to WSLProxy, and for when this runs on the dev machine, it passes the wrong path.
+      seqdbConfig.PathToWSL = PathToWSL();
+      SaveConfig();
     }
 
-    internal static void LoadConfig()
+    public static void LoadConfig()
     {
       //MessageBox.Show("Looking for appsettings.json in " + executablePath);
       string filename = executablePath + "\\" + loggedOnUser + "appsettings.json";
@@ -1122,13 +1181,19 @@ namespace BioSeqDB
       SaveConfigGlobal();
     }
 
-    public static void NewDatabase(string dbname, string dbpath, string inputPath, string standardReferenceGenomePath)
+    public static void NewDatabase(string dbname, string dbpath, bool IsFastaInput, string inputPath, string standardReferenceGenomePath)
     {
       seqdbConfig.LastDBSelected = dbname;
       if (seqdbConfig.seqDBs.ContainsKey(dbname))
       {
         seqdbConfig.seqDBs.Remove(dbname);
       }
+
+      NewDBPath = dbpath;
+      NewDBName = dbname;
+      NewDBImportFasta = IsFastaInput;
+      NewDBInputPath = inputPath;
+      NewDBReference = standardReferenceGenomePath;
 
       SeqDB db = new SeqDB();
       db.Build_DBName = dbname;
@@ -1144,41 +1209,41 @@ namespace BioSeqDB
       PostNewDatabaseToGlobalConfig(db);
     }
 
-    internal static string CurrentDBName()
+    public static string CurrentDBName()
     {
       SeqDB db = seqdbConfig.Current();
       return db.DBName ?? string.Empty;
     }
 
-    internal static List<string> BuildTreeQueryList()
+    public static List<string> BuildTreeQueryList()
     {
       SeqDB db = seqdbConfig.Current();
       return db.BuildTreeQueryList ?? null;
     }
 
-    internal static List<string> AssembleQueryListRAFlye()
+    public static List<string> AssembleQueryListRAFlye()
     {
       return seqdbConfig.AssembleQueryListRAFlye ?? null;
     }
 
-    internal static List<string> AssembleQueryListTrinity()
+    public static List<string> AssembleQueryListTrinity()
     {
       return seqdbConfig.AssembleQueryListTrinity ?? null;
     }
 
-    internal static string BuildTreeThreads()
+    public static string BuildTreeThreads()
     {
       SeqDB db = seqdbConfig.Current();
       return db.BuildTreeThreads ?? "1";
     }
 
-    internal static string BuildTreeWildReference()
+    public static string BuildTreeWildReference()
     {
       SeqDB db = seqdbConfig.Current();
       return db.BuildTreeWildReference ?? string.Empty;
     }
 
-    internal static void SaveUIForm(Point location, Size size)
+    public static void SaveUIForm(Point location, Size size)
     {
       seqdbConfig.X = location.X;
       seqdbConfig.Y = location.Y;
@@ -1187,7 +1252,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static void SaveNotificationUIForm(Point location, Size size)
+    public static void SaveNotificationUIForm(Point location, Size size)
     {
       seqdbConfig.NotificationX = location.X;
       seqdbConfig.NotificationY = location.Y;
@@ -1196,24 +1261,43 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static Point UILocation()
+    public static void SaveInfluenzaAUIForm(Point location, Size size)
+    {
+      seqdbConfig.InfluenzaAX = location.X;
+      seqdbConfig.InfluenzaAY = location.Y;
+      seqdbConfig.InfluenzaAW = size.Width;
+      seqdbConfig.InfluenzaAH = size.Height;
+      SaveConfig();
+    }
+
+    public static Point UILocation()
     {
       return new Point(seqdbConfig.X, seqdbConfig.Y);
     }
 
-    internal static Size UISize()
+    public static Size UISize()
     {
       return new Size(seqdbConfig.W, seqdbConfig.H);
     }
 
-    internal static Point NotificationLocation()
+    public static Point NotificationLocation()
     {
       return new Point(seqdbConfig.NotificationX, seqdbConfig.NotificationY);
     }
 
-    internal static Size NotificationSize()
+    public static Size NotificationSize()
     {
       return new Size(seqdbConfig.NotificationW, seqdbConfig.NotificationH);
+    }
+
+    public static Point InfluenzaALocation()
+    {
+      return new Point(seqdbConfig.InfluenzaAX, seqdbConfig.InfluenzaAY);
+    }
+
+    public static Size InfluenzaASize()
+    {
+      return new Size(seqdbConfig.InfluenzaAW, seqdbConfig.InfluenzaAH);
     }
 
     public static string VFabricateGeneXref
@@ -1332,7 +1416,72 @@ namespace BioSeqDB
       }
     }
 
-    internal static void SalmonellaParms(string OutputPath, string Memo, bool Trim, string Threads)
+    public static string NewDBPath
+    {
+      get
+      {
+        return seqdbConfig.NewDBPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.NewDBPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static string NewDBReference
+    {
+      get
+      {
+        return seqdbConfig.NewDBReference ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.NewDBReference = value;
+        SaveConfig();
+      }
+    }
+
+    public static string NewDBName
+    {
+      get
+      {
+        return seqdbConfig.NewDBName ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.NewDBName = value;
+        SaveConfig();
+      }
+    }
+
+    public static string NewDBInputPath
+    {
+      get
+      {
+        return seqdbConfig.NewDBInputPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.NewDBInputPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static bool NewDBImportFasta
+    {
+      get
+      {
+        return seqdbConfig.NewDBImportFasta;
+      }
+      set
+      {
+        seqdbConfig.NewDBImportFasta = value;
+        SaveConfig();
+      }
+    }
+
+    public static void SalmonellaParms(string OutputPath, string Memo, bool Trim, string Threads)
     {
       seqdbConfig.SalmonellaChooseTrim = Trim;
       seqdbConfig.TaskMemo = Memo;
@@ -1496,37 +1645,41 @@ namespace BioSeqDB
       }
     }
 
-    internal static string BuildTreeOutputPath()
+    //public static string NextstrainReference { get; internal set; }
+    //public static string NextstrainOutputPath { get; internal set; }
+    //public static string NextstrainThreads { get; internal set; }
+
+    public static string BuildTreeOutputPath()
     {
       SeqDB db = seqdbConfig.Current();
       return db.BuildTreeOutputPath ?? string.Empty;
     }
 
-    internal static string CurrentDBPath()
+    public static string CurrentDBPath()
     {
       SeqDB db = seqdbConfig.Current();
       return db.DBPath ?? string.Empty;
     }
 
-    internal static string CurrentSelectedSample()
+    public static string CurrentSelectedSample()
     {
       SeqDB db = seqdbConfig.Current();
       return db.SampleSelected ?? string.Empty;
     }
 
-    internal static string CurrentKipperPath()
+    public static string CurrentKipperPath()
     {
       SeqDB db = seqdbConfigGlobal.seqDBs[seqdbConfig.LastDBSelected];
       return db.KipperPath ?? string.Empty;
     }
 
-    internal static string CurrentKipperFilenamePrefix()
+    public static string CurrentKipperFilenamePrefix()
     {
       SeqDB db = seqdbConfigGlobal.seqDBs[seqdbConfig.LastDBSelected];
       return db.KipperFilenamePrefix ?? string.Empty;
     }
 
-    internal static void UpdateKipperPath(string dbFilenamePrefix, string dbPath)
+    public static void UpdateKipperPath(string dbFilenamePrefix, string dbPath)
     {
       SeqDB db = seqdbConfigGlobal.seqDBs[seqdbConfig.LastDBSelected];
       db.KipperPath = dbPath;
@@ -1534,12 +1687,12 @@ namespace BioSeqDB
       SaveConfigGlobal();
     }
 
-    internal static void BackupDatabase(string backupFilenamePrefix, string backupPath)
+    public static void BackupDatabase(string backupFilenamePrefix, string backupPath)
     {
       UpdateKipperPath(backupFilenamePrefix, backupPath);
     }
 
-    internal static void RestoreDatabase(string ArchiveFilename, string ArchiveDBPath, string Version, string OutputDBPath)
+    public static void RestoreDatabase(string ArchiveFilename, string ArchiveDBPath, string Version, string OutputDBPath)
     {
       SeqDB db = seqdbConfigGlobal.seqDBs[seqdbConfig.LastDBSelected];
       db.RestoreArchiveDBPath = ArchiveDBPath;
@@ -1555,31 +1708,31 @@ namespace BioSeqDB
       task.TaskComplete = DateTime.Now;
     }
 
-    internal static string RestoreOutputPath()
+    public static string RestoreOutputPath()
     {
       SeqDB db = seqdbConfigGlobal.seqDBs[seqdbConfig.LastDBSelected];
       return db.RestoreArchiveDBOutputPath ?? db.DBPath; // If the restore output path has not been used before, use the current DB path.
     }
 
-    internal static string RestoreKipperFilenamePrefix()
+    public static string RestoreKipperFilenamePrefix()
     {
       SeqDB db = seqdbConfigGlobal.seqDBs[seqdbConfig.LastDBSelected];
       return db.RestoreArchiveDBFilenamePrefix ?? db.KipperFilenamePrefix; // If the restore prefix has not been used before, use the current prefix.
     }
 
-    internal static string RestoreVersion()
+    public static string RestoreVersion()
     {
       SeqDB db = seqdbConfigGlobal.seqDBs[seqdbConfig.LastDBSelected];
       return db.RestoreArchiveDBVersion.Substring(0, db.RestoreArchiveDBVersion.IndexOf(":")) ?? string.Empty;
     }
 
-    internal static string RestoreKipperPath()
+    public static string RestoreKipperPath()
     {
       SeqDB db = seqdbConfigGlobal.seqDBs[seqdbConfig.LastDBSelected];
       return db.RestoreArchiveDBPath ?? db.KipperPath; // If the restore DB path has not been used before, use the current path.
     }
 
-    internal static void UpdateSampleSelected(string sample)
+    public static void UpdateSampleSelected(string sample)
     {
       SeqDB db = seqdbConfig.Current();
       if (ShowDetail && sample.Length > 0)
@@ -1590,7 +1743,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static void AssembleSample(List<string> QuerySamples, bool FastPolish, bool RA, bool Flye, bool Trinity,
+    public static void AssembleSample(List<string> QuerySamples, bool FastPolish, bool RA, bool Flye, bool Trinity,
                                                   bool Kraken2, bool BBmap, bool Quast, bool VFabricate, string GeneXRef, 
                                                                                            string memo, string maxFastq)
     {
@@ -1616,7 +1769,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static void BuildTreeSample(string OutputPath, string ReferenceGenome, string StandardReference, bool ReferenceChoice,
+    public static void BuildTreeSample(string OutputPath, string ReferenceGenome, string StandardReference, bool ReferenceChoice,
                                                                       string Hits, string Threads, List<string> QueryList, bool FastTree, string memo)
     {
       SeqDB db = seqdbConfig.Current();
@@ -1632,7 +1785,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static void SearchSample(string OutputSampleName, string OutputPath, string InputPath, string Cutoff, string Threads)
+    public static void SearchSample(string OutputSampleName, string OutputPath, string InputPath, string Cutoff, string Threads)
     {
       SeqDB db = seqdbConfig.Current();
       db.SearchOutputPath = OutputPath;
@@ -1643,7 +1796,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static void ExtractSample(string outputPath, string sampleID)
+    public static void ExtractSample(string outputPath, string sampleID)
     {
       SeqDB db = seqdbConfig.Current();
       db.ExtractOutputPath = outputPath;
@@ -1651,7 +1804,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    internal static void RemoveSample(string sampleID)
+    public static void RemoveSample(string sampleID)
     {
       SeqDB db = seqdbConfig.Current();
       db.RemoveSampleID = sampleID;
@@ -1686,20 +1839,20 @@ namespace BioSeqDB
       return sample;
     }
 
-    internal static string Password(string username)
+    public static string Password(string username)
     {
       User user = seqdbConfigGlobal.Users[username];
       return Utility.DecryptSupports(user.Password, username);
     }
 
-    internal static void ChangePassword(string username, string newPassword)
+    public static void ChangePassword(string username, string newPassword)
     {
       User user = seqdbConfigGlobal.Users[username];
       user.Password = Utility.DecryptSupports(newPassword, username);
       SaveConfigGlobal();
     }
 
-    internal static bool ValidPassword(string Username, string Password)
+    public static bool ValidPassword(string Username, string Password)
     {
       foreach (string key in seqdbConfigGlobal.Users.Keys)
       {
@@ -1713,7 +1866,7 @@ namespace BioSeqDB
       return false;
     }
 
-    internal static string FileExists(string path)
+    public static string FileExists(string path)
     {
       if (!File.Exists(path))
       {

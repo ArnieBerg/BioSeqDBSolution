@@ -18,21 +18,37 @@ namespace BioSeqDB
       InitializeComponent();
       btnOK.Enabled = false;
 
-      SeqDB db = AppConfigHelper.seqdbConfigGlobal.Current();
-      if (db != null) // Default the new database path to the same as the current db.
+      string dbPath = AppConfigHelper.NewDBPath;
+      if (string.IsNullOrEmpty(dbPath))
       {
-        txtDBPath.Text = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(DirectoryHelper.UnCleanPath(db.DBPath)));
-        txtDBPath.Text = AppConfigHelper.NormalizePathToLinux(AppConfigHelper.GetDirectoryName(txtDBPath.Text)); // DB path much be on the server.
-        if (!txtDBPath.Text.StartsWith("["))
+        SeqDB db = AppConfigHelper.seqdbConfigGlobal.Current();
+        if (db != null) // Default the new database path to the same as the current db.
         {
-          txtDBPath.Text = "[S]" + txtDBPath.Text;
+          txtDBPath.Text = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(DirectoryHelper.UnCleanPath(db.DBPath)));
+          txtDBPath.Text = AppConfigHelper.NormalizePathToLinux(AppConfigHelper.GetDirectoryName(txtDBPath.Text)); // DB path much be on the server.
+          if (!txtDBPath.Text.StartsWith("["))
+          {
+            txtDBPath.Text = "[S]" + txtDBPath.Text;
+          }
         }
       }
+      else
+      {
+        txtDBPath.Text = dbPath;
+      }
+      txtDBName.Text = AppConfigHelper.NewDBName;
+      chkImportFasta.Checked = AppConfigHelper.NewDBImportFasta;
+      txtInputPath.Text = AppConfigHelper.NewDBInputPath;
+      txtStandardReferenceGenome.Text = AppConfigHelper.NewDBReference;
+      EnableOK();
     }
 
     private void EnableOK()
     {
-      btnOK.Enabled = txtDBPath.Text.Trim().Length > 0 && txtDBName.Text.Trim().Length > 0;
+      // If importing fasta file, it must be present.
+      btnOK.Enabled = !chkImportFasta.Checked || (chkImportFasta.Checked && txtInputPath.Text.Trim().Length > 0);
+
+      btnOK.Enabled = btnOK.Enabled && txtDBPath.Text.Trim().Length > 0 && txtDBName.Text.Trim().Length > 0;
     }
 
     private void txtDBPath_TextChanged(object sender, EventArgs e)
@@ -82,46 +98,67 @@ namespace BioSeqDB
       if (IsServiceClass.IsService)
       {
         Cursor.Current = Cursors.WaitCursor;
-        string path = "C:\\"; // Need to indicate we are looking for a folder by ending with "\\".
-        if (!string.IsNullOrEmpty(txtInputPath.Text.Trim()))
+        string path = AppConfigHelper.NormalizePathToWindows(txtInputPath.Text); // Need to indicate we are looking for a folder by ending with "\\".
+        string prompt = "Path to input fasta file";
+        if (!chkImportFasta.Checked) // Looking for a path to subfolders.
         {
-          path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(txtInputPath.Text)) + "\\";
+          prompt = "Input path to sub-folders containing .fasta contig file(s)";
+          if (!string.IsNullOrEmpty(txtInputPath.Text.Trim()))
+          {
+            path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(txtInputPath.Text)) + "\\";
+          }
+        }
+        else
+        {
+          if (path.EndsWith("\\"))
+          {
+            path += "*.fasta";
+            //path = path.Substring(0, path.Length - 1);
+          }
         }
 
-        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to sub-folders containing .fasta contig file(s)",
+        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), prompt,
                                   DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
                                  "Fasta files (*.fasta)|*.fasta|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
         Cursor.Current = Cursors.Default;
 
         while (Explorer.frmExplorer.ShowDialog() != DialogResult.Cancel)
         {
-          path = AppConfigHelper.GetDirectoryName(Explorer.PresentServerPath + Explorer.PresentLocalPath); // One of these is empty.
-          bool ServerPath = string.IsNullOrEmpty(Explorer.PresentLocalPath);
-
-          // Make sure the sub-folders contain .fasta files.
-          int fCount = ValidFastaFiles(DirectoryHelper.CleanPath(path), ServerPath);
-          if (fCount > 0)
+          if (!chkImportFasta.Checked)
           {
-            txtInputPath.Text = path;
-            if (MessageBox.Show("There are " + fCount.ToString() + " *.fasta (or *.fna) files in the sub-folders of the " + txtInputPath.Text +
-                          " folder. Continue with building the " + txtDBName.Text.Trim() + " database?", "Confirm new " + txtDBName.Text.Trim() +
-                                                                                      " database", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            path = AppConfigHelper.GetDirectoryName(Explorer.PresentServerPath + Explorer.PresentLocalPath); // One of these is empty.
+            bool ServerPath = string.IsNullOrEmpty(Explorer.PresentLocalPath);
+
+            // Make sure the sub-folders contain .fasta files.
+            int fCount = ValidFastaFiles(DirectoryHelper.CleanPath(path), ServerPath);
+            if (fCount > 0)
             {
-              break;
+              txtInputPath.Text = path;
+              if (MessageBox.Show("There are " + fCount.ToString() + " *.fasta (or *.fna) files in the sub-folders of the " + txtInputPath.Text +
+                            " folder. Continue with building the " + txtDBName.Text.Trim() + " database?", "Confirm new " + txtDBName.Text.Trim() +
+                                                                                        " database", MessageBoxButtons.YesNo) == DialogResult.Yes)
+              {
+                break;
+              }
             }
-          }
 
-          Cursor.Current = Cursors.WaitCursor;
-          Explorer.frmExplorer = null;
-          path = "C:\\"; // Need to indicate we are looking for a folder by ending with "\\".
-          if (!string.IsNullOrEmpty(txtInputPath.Text.Trim()))
-          {
-            path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(txtInputPath.Text)) + "\\";
+            Cursor.Current = Cursors.WaitCursor;
+            Explorer.frmExplorer = null;
+            path = "C:\\"; // Need to indicate we are looking for a folder by ending with "\\".
+            if (!string.IsNullOrEmpty(txtInputPath.Text.Trim()))
+            {
+              path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(txtInputPath.Text)) + "\\";
+            }
+            Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to sub-folders containing .fasta contig file(s)",
+                                     DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
+                                     "Fasta files (*.fasta)|*.fasta|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+            Cursor.Current = Cursors.Default;
           }
-          Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to sub-folders containing .fasta contig file(s)",
-                                   DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                                   "Fasta files (*.fasta)|*.fasta|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
-          Cursor.Current = Cursors.Default;
+          else // Looking for fasta file
+          {
+            txtInputPath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
+            break;
+          }
         }
       }
       else
@@ -147,15 +184,9 @@ namespace BioSeqDB
               return;
             }
           }
-
-          //int fCount = ServiceCallHelper.TraverseTree(ofn.SelectedPath.Trim(), false, "fasta");
-          //if (fCount == 0)
-          //{
-          //  MessageBox.Show("There are no *.fasta or *.fna files in the subfolders of the " + ofn.SelectedPath.Trim() + " folder.", "Wrong folder", MessageBoxButtons.OK);
-          //  return;
-          //}
         }
       }
+      EnableOK();
     }
 
     private int ValidFastaFiles(string root, bool IsServerPath)
@@ -207,7 +238,7 @@ namespace BioSeqDB
       }
 
       // Update config to reflect selection.
-      AppConfigHelper.NewDatabase(dbname, txtDBPath.Text.Trim(), txtInputPath.Text.Trim(), txtStandardReferenceGenome.Text.Trim());
+      AppConfigHelper.NewDatabase(dbname, txtDBPath.Text.Trim(), chkImportFasta.Checked, txtInputPath.Text.Trim(), txtStandardReferenceGenome.Text.Trim());
     }
 
     private void txtDBName_TextChanged(object sender, EventArgs e)
@@ -250,6 +281,18 @@ namespace BioSeqDB
           txtStandardReferenceGenome.Text = ofn.FileName.Trim();
         }
       }
+    }
+
+    private void chkImportFasta_CheckedChanged(object sender, EventArgs e)
+    {
+      // Swap the contents of .text and .tag.
+      string temp = lblAbout.Text;
+      lblAbout.Text = (string)lblAbout.Tag;
+      lblAbout.Tag = temp;
+      temp = lblFastaInput.Text;
+      lblFastaInput.Text = (string)lblFastaInput.Tag;
+      lblFastaInput.Tag = temp;
+      EnableOK();
     }
   }
 }

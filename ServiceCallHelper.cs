@@ -199,6 +199,11 @@ namespace BioSeqDB
       return SeqDBHelper.AssembleSamples(config);
     }
 
+    internal static WSLProxyResponse Nextstrain(string loggedOnUser, string config)
+    {
+      return BioSeqDBModel.Instance.Nextstrain(loggedOnUser, config);
+    }
+
     internal static WSLProxyResponse Salmonella(string loggedOnUser, string config)
     {
       if (IsServiceClass.IsService)

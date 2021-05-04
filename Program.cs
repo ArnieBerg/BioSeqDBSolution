@@ -49,7 +49,7 @@ namespace BioSeqDB
       catch (Exception ex)
       {
         MessageBox.Show("It appears that the BioSeqDB service is not running on the '" + Properties.Settings.Default.ModelServer + 
-                                                                                      "' server.", "ERROR", MessageBoxButtons.OK);
+                                                 "' server.  Check VPN if running remotely?", "ERROR", MessageBoxButtons.OK);
         return;
       }
 

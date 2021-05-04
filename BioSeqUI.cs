@@ -269,6 +269,11 @@ namespace BioSeqDB
                 {
                   DirectoryHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastaFiles", true);
                 }
+                files = Directory.GetFiles(folder, "*.fa", SearchOption.TopDirectoryOnly);
+                foreach (string file in files)
+                {
+                  DirectoryHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastaFiles", true);
+                }
               }
             }
           }
@@ -279,7 +284,18 @@ namespace BioSeqDB
             DirectoryHelper.FileCopy(AppConfigHelper.BuildTreeWildReference(), "[S]" + AppConfigHelper.UserFolder(), true);
           }
 
-          ServiceCallHelper.Build_DB(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+          /////////// Call Build_DB in SeqDB.
+          try
+          {
+            ServiceCallHelper.Build_DB(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+          }
+          catch (Exception ex)
+          {
+            Cursor.Current = Cursors.Default;
+            MessageBox.Show("Error: " + ex.ToString(), "ERROR", MessageBoxButtons.OK);
+            return;
+          }
+
           if (AppConfigHelper.LastError.Length > 0)
           {
             Cursor.Current = Cursors.Default;
@@ -287,6 +303,11 @@ namespace BioSeqDB
             return;
           }
 
+          if (string.IsNullOrEmpty(AppConfigHelper.BuildTreeDomesticReference))
+          {
+            AppConfigHelper.BuildTreeDomesticReference = AppConfigHelper.BuildTreeWildReference();
+            AppConfigHelper.SaveConfig();
+          }
           ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser);
           PopulateDBDropdownAndSelect();
           Cursor.Current = Cursors.Default;
@@ -360,7 +381,7 @@ namespace BioSeqDB
           DirectoryHelper.FileCopy(AppConfigHelper.InsertInputPath(), "[S]" + AppConfigHelper.UserFolder(), true);
         }
 
-        WSLProxyResponse WSLResponse = new WSLProxyResponse();
+        WSLProxyResponse WSLResponse;
         if (AppConfigHelper.InsertSampleReplace)
         {
           WSLResponse = ServiceCallHelper.ReplaceSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // Parameters are in appsettings.
@@ -605,6 +626,10 @@ namespace BioSeqDB
         case "InfluenzaA":
           WSLResponse = ServiceCallHelper.InfluenzaA(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
+
+        case "Nextstrain":
+          WSLResponse = ServiceCallHelper.Nextstrain(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+          break;
       }
 
       task.LastError = WSLResponse.StandardError;
@@ -656,6 +681,7 @@ namespace BioSeqDB
           case "Assemble":
           case "InfluenzaA":
           case "Salmonella":
+          case "Nextstrain":
             break;
         }
       }
@@ -757,9 +783,25 @@ namespace BioSeqDB
     {
       switch (cmbAnalysis.Text)
       {
+        case "Nextstrain...":
+          BioSeqNextstrain frmNextstrain = new BioSeqNextstrain();
+          DialogResult rc = frmNextstrain.ShowDialog();
+          if (rc == DialogResult.OK) // then the config has the specs 
+          {
+            Cursor.Current = Cursors.WaitCursor;
+            SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
+
+            CreateNewTask("Nextstrain", AppConfigHelper.TaskMemo, string.Empty);
+            UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
+
+            backgroundWorker.RunWorkerAsync();
+            Cursor.Current = Cursors.Default;
+          }
+          break;
+
         case "Salmonella Serotyping...":
           BioSeqSalmonella frmSalmonella = new BioSeqSalmonella();
-          DialogResult rc = frmSalmonella.ShowDialog();
+          rc = frmSalmonella.ShowDialog();
           if (rc == DialogResult.OK) // then the config has the specs 
           {
             Cursor.Current = Cursors.WaitCursor;

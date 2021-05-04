@@ -38,13 +38,6 @@
       this.txtFastqPath = new System.Windows.Forms.TextBox();
       this.lblFastqPath = new System.Windows.Forms.Label();
       this.panel1 = new System.Windows.Forms.Panel();
-      this.pnlSearch = new System.Windows.Forms.Panel();
-      this.txtOutputSampleName = new System.Windows.Forms.TextBox();
-      this.label3 = new System.Windows.Forms.Label();
-      this.txtThreads = new System.Windows.Forms.TextBox();
-      this.label6 = new System.Windows.Forms.Label();
-      this.txtCutoff = new System.Windows.Forms.TextBox();
-      this.label5 = new System.Windows.Forms.Label();
       this.radSample = new System.Windows.Forms.RadioButton();
       this.radContig = new System.Windows.Forms.RadioButton();
       this.btnFindInputPath = new System.Windows.Forms.Button();
@@ -55,6 +48,13 @@
       this.btnGeneXref = new System.Windows.Forms.Button();
       this.txtMemo = new System.Windows.Forms.TextBox();
       this.label2 = new System.Windows.Forms.Label();
+      this.pnlSearch = new System.Windows.Forms.Panel();
+      this.txtOutputSampleName = new System.Windows.Forms.TextBox();
+      this.label3 = new System.Windows.Forms.Label();
+      this.txtThreads = new System.Windows.Forms.TextBox();
+      this.label6 = new System.Windows.Forms.Label();
+      this.txtCutoff = new System.Windows.Forms.TextBox();
+      this.label5 = new System.Windows.Forms.Label();
       this.panel1.SuspendLayout();
       this.pnlSearch.SuspendLayout();
       this.SuspendLayout();
@@ -102,7 +102,7 @@
       // 
       this.btnFindOutputPath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.btnFindOutputPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnFindOutputPath.Location = new System.Drawing.Point(606, 493);
+      this.btnFindOutputPath.Location = new System.Drawing.Point(605, 493);
       this.btnFindOutputPath.Name = "btnFindOutputPath";
       this.btnFindOutputPath.Size = new System.Drawing.Size(31, 23);
       this.btnFindOutputPath.TabIndex = 8;
@@ -135,7 +135,7 @@
       // 
       this.btnFastqPath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.btnFastqPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnFastqPath.Location = new System.Drawing.Point(606, 454);
+      this.btnFastqPath.Location = new System.Drawing.Point(605, 454);
       this.btnFastqPath.Name = "btnFastqPath";
       this.btnFastqPath.Size = new System.Drawing.Size(31, 23);
       this.btnFastqPath.TabIndex = 6;
@@ -182,83 +182,6 @@
       this.panel1.Name = "panel1";
       this.panel1.Size = new System.Drawing.Size(629, 340);
       this.panel1.TabIndex = 42;
-      // 
-      // pnlSearch
-      // 
-      this.pnlSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlSearch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.pnlSearch.Controls.Add(this.txtOutputSampleName);
-      this.pnlSearch.Controls.Add(this.label3);
-      this.pnlSearch.Controls.Add(this.txtThreads);
-      this.pnlSearch.Controls.Add(this.label6);
-      this.pnlSearch.Controls.Add(this.txtCutoff);
-      this.pnlSearch.Controls.Add(this.label5);
-      this.pnlSearch.Location = new System.Drawing.Point(192, 281);
-      this.pnlSearch.Name = "pnlSearch";
-      this.pnlSearch.Size = new System.Drawing.Size(606, 76);
-      this.pnlSearch.TabIndex = 44;
-      this.pnlSearch.Visible = false;
-      // 
-      // txtOutputSampleName
-      // 
-      this.txtOutputSampleName.Location = new System.Drawing.Point(342, 4);
-      this.txtOutputSampleName.Name = "txtOutputSampleName";
-      this.txtOutputSampleName.Size = new System.Drawing.Size(172, 20);
-      this.txtOutputSampleName.TabIndex = 34;
-      this.txtOutputSampleName.TextChanged += new System.EventHandler(this.txtSampleID_TextChanged);
-      // 
-      // label3
-      // 
-      this.label3.AutoSize = true;
-      this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label3.Location = new System.Drawing.Point(24, 7);
-      this.label3.Name = "label3";
-      this.label3.Size = new System.Drawing.Size(300, 13);
-      this.label3.TabIndex = 35;
-      this.label3.Text = "Output sample ID? (used to name output result file):";
-      // 
-      // txtThreads
-      // 
-      this.txtThreads.Location = new System.Drawing.Point(469, 50);
-      this.txtThreads.Name = "txtThreads";
-      this.txtThreads.Size = new System.Drawing.Size(45, 20);
-      this.txtThreads.TabIndex = 31;
-      this.txtThreads.Text = "1";
-      this.txtThreads.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-      this.txtThreads.TextChanged += new System.EventHandler(this.txtThreads_TextChanged);
-      this.txtThreads.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtThreads_KeyPress);
-      // 
-      // label6
-      // 
-      this.label6.AutoSize = true;
-      this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label6.Location = new System.Drawing.Point(348, 53);
-      this.label6.Name = "label6";
-      this.label6.Size = new System.Drawing.Size(115, 13);
-      this.label6.TabIndex = 33;
-      this.label6.Text = "Number of threads:";
-      // 
-      // txtCutoff
-      // 
-      this.txtCutoff.Location = new System.Drawing.Point(469, 26);
-      this.txtCutoff.Name = "txtCutoff";
-      this.txtCutoff.Size = new System.Drawing.Size(45, 20);
-      this.txtCutoff.TabIndex = 30;
-      this.txtCutoff.Text = "1";
-      this.txtCutoff.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-      this.txtCutoff.TextChanged += new System.EventHandler(this.txtCutoff_TextChanged);
-      this.txtCutoff.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtCutoff_KeyPress);
-      // 
-      // label5
-      // 
-      this.label5.AutoSize = true;
-      this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label5.Location = new System.Drawing.Point(24, 29);
-      this.label5.Name = "label5";
-      this.label5.Size = new System.Drawing.Size(439, 13);
-      this.label5.TabIndex = 32;
-      this.label5.Text = "Filter results by a maximum distance cutoff [Default: 1] (Ranges from 0 to 1):";
       // 
       // radSample
       // 
@@ -342,7 +265,7 @@
       this.btnGeneXref.FlatAppearance.BorderSize = 2;
       this.btnGeneXref.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
       this.btnGeneXref.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnGeneXref.Location = new System.Drawing.Point(302, 431);
+      this.btnGeneXref.Location = new System.Drawing.Point(442, 435);
       this.btnGeneXref.Name = "btnGeneXref";
       this.btnGeneXref.Size = new System.Drawing.Size(195, 22);
       this.btnGeneXref.TabIndex = 43;
@@ -371,6 +294,77 @@
       this.label2.TabIndex = 60;
       this.label2.Text = "Memo (to help identify task in notifications):";
       // 
+      // pnlSearch
+      // 
+      this.pnlSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.pnlSearch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.pnlSearch.Controls.Add(this.txtOutputSampleName);
+      this.pnlSearch.Controls.Add(this.label3);
+      this.pnlSearch.Controls.Add(this.txtThreads);
+      this.pnlSearch.Controls.Add(this.label6);
+      this.pnlSearch.Controls.Add(this.txtCutoff);
+      this.pnlSearch.Controls.Add(this.label5);
+      this.pnlSearch.Location = new System.Drawing.Point(459, 160);
+      this.pnlSearch.Name = "pnlSearch";
+      this.pnlSearch.Size = new System.Drawing.Size(606, 76);
+      this.pnlSearch.TabIndex = 61;
+      // 
+      // txtOutputSampleName
+      // 
+      this.txtOutputSampleName.Location = new System.Drawing.Point(342, 4);
+      this.txtOutputSampleName.Name = "txtOutputSampleName";
+      this.txtOutputSampleName.Size = new System.Drawing.Size(172, 20);
+      this.txtOutputSampleName.TabIndex = 34;
+      // 
+      // label3
+      // 
+      this.label3.AutoSize = true;
+      this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label3.Location = new System.Drawing.Point(24, 7);
+      this.label3.Name = "label3";
+      this.label3.Size = new System.Drawing.Size(300, 13);
+      this.label3.TabIndex = 35;
+      this.label3.Text = "Output sample ID? (used to name output result file):";
+      // 
+      // txtThreads
+      // 
+      this.txtThreads.Location = new System.Drawing.Point(469, 50);
+      this.txtThreads.Name = "txtThreads";
+      this.txtThreads.Size = new System.Drawing.Size(45, 20);
+      this.txtThreads.TabIndex = 31;
+      this.txtThreads.Text = "1";
+      this.txtThreads.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+      // 
+      // label6
+      // 
+      this.label6.AutoSize = true;
+      this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label6.Location = new System.Drawing.Point(348, 53);
+      this.label6.Name = "label6";
+      this.label6.Size = new System.Drawing.Size(115, 13);
+      this.label6.TabIndex = 33;
+      this.label6.Text = "Number of threads:";
+      // 
+      // txtCutoff
+      // 
+      this.txtCutoff.Location = new System.Drawing.Point(469, 26);
+      this.txtCutoff.Name = "txtCutoff";
+      this.txtCutoff.Size = new System.Drawing.Size(45, 20);
+      this.txtCutoff.TabIndex = 30;
+      this.txtCutoff.Text = "1";
+      this.txtCutoff.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+      // 
+      // label5
+      // 
+      this.label5.AutoSize = true;
+      this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label5.Location = new System.Drawing.Point(24, 29);
+      this.label5.Name = "label5";
+      this.label5.Size = new System.Drawing.Size(439, 13);
+      this.label5.TabIndex = 32;
+      this.label5.Text = "Filter results by a maximum distance cutoff [Default: 1] (Ranges from 0 to 1):";
+      // 
       // BioSeqAnalysis
       // 
       this.AcceptButton = this.btnOK;
@@ -394,6 +388,7 @@
       this.Name = "BioSeqAnalysis";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
       this.Text = "BioSeqDB Analysis";
+      this.Shown += new System.EventHandler(this.BioSeqAnalysis_Shown);
       this.panel1.ResumeLayout(false);
       this.panel1.PerformLayout();
       this.pnlSearch.ResumeLayout(false);
@@ -423,6 +418,8 @@
     private System.Windows.Forms.ListBox lstSampleIDs;
     private System.Windows.Forms.Label lblSampleID;
     private System.Windows.Forms.Button btnGeneXref;
+    private System.Windows.Forms.TextBox txtMemo;
+    private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Panel pnlSearch;
     private System.Windows.Forms.TextBox txtOutputSampleName;
     private System.Windows.Forms.Label label3;
@@ -430,7 +427,5 @@
     private System.Windows.Forms.Label label6;
     private System.Windows.Forms.TextBox txtCutoff;
     private System.Windows.Forms.Label label5;
-    private System.Windows.Forms.TextBox txtMemo;
-    private System.Windows.Forms.Label label2;
   }
 }

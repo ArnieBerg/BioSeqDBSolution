@@ -434,5 +434,10 @@ namespace BioSeqDB
     {
       EnableOK();
     }
+
+    private void BioSeqAnalysis_Shown(object sender, EventArgs e)
+    {
+      pnlSearch.Visible = analysis == "Search";
+    }
   }
 }

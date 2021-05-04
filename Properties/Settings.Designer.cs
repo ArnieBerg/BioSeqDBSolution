@@ -37,13 +37,25 @@ namespace BioSeqDB.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.100.189")]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
         public string ModelServer {
             get {
                 return ((string)(this["ModelServer"]));
             }
             set {
                 this["ModelServer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
+        public string LastServer {
+            get {
+                return ((string)(this["LastServer"]));
+            }
+            set {
+                this["LastServer"] = value;
             }
         }
     }

@@ -2,6 +2,7 @@
 using FSExplorer;
 using Ookii.Dialogs.WinForms;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace BioSeqDB
@@ -21,8 +22,32 @@ namespace BioSeqDB
       txtThreads.Text = string.IsNullOrEmpty(AppConfigHelper.InfluenzaAThreads) ? "4" : AppConfigHelper.InfluenzaAThreads.ToString();
       chkTrim.Checked = AppConfigHelper.InfluenzaAChooseTrim;
       cmbModel.SelectedIndex = AppConfigHelper.InfluenzaAModel == "r10" ? 1 : 0;
+      string segmentsToAssemble = AppConfigHelper.seqdbConfig.InfluenzaASegmentsToAssemble + ",";
+      chkSeg1.Checked = segmentsToAssemble.IndexOf("1,") > -1;
+      chkSeg2.Checked = segmentsToAssemble.IndexOf("2,") > -1;
+      chkSeg3.Checked = segmentsToAssemble.IndexOf("3,") > -1;
+      chkSeg4.Checked = segmentsToAssemble.IndexOf("4,") > -1;
+      chkSeg5.Checked = segmentsToAssemble.IndexOf("5,") > -1;
+      chkSeg6.Checked = segmentsToAssemble.IndexOf("6,") > -1;
+      chkSeg7.Checked = segmentsToAssemble.IndexOf("7,") > -1;
+      chkSeg8.Checked = segmentsToAssemble.IndexOf("8,") > -1;
+
       ReloadSampleList();
       EnableOK();
+
+      if (Size.Width != 0)
+      {
+        Location = AppConfigHelper.InfluenzaALocation();
+        if (Location.X <= 0)
+        {
+          Location = new Point(100, 100);
+        }
+        Size = AppConfigHelper.InfluenzaASize();
+        if (Size.Height <= 0 || Size.Width <= 0)
+        {
+          Size = new Size(1000, 1000);
+        }
+      }
     }
 
     private void ReloadSampleList()
@@ -265,6 +290,11 @@ namespace BioSeqDB
     {
       chkSeg1.Checked = chkSeg2.Checked = chkSeg3.Checked = chkSeg4.Checked = chkSeg5.Checked = 
                         chkSeg6.Checked = chkSeg7.Checked = chkSeg7.Checked = chkSeg8.Checked = chkAllSegments.Checked;
+    }
+
+    private void BioSeqInfluenzaA_FormClosing(object sender, FormClosingEventArgs e)
+    {
+      AppConfigHelper.SaveInfluenzaAUIForm(Location, Size);
     }
   }
 }

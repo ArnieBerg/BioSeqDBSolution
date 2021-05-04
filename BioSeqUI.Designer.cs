@@ -62,6 +62,7 @@
       this.mnuExtract = new System.Windows.Forms.ToolStripMenuItem();
       this.mnuRemove = new System.Windows.Forms.ToolStripMenuItem();
       this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.cmbAnalysis = new System.Windows.Forms.ToolStripComboBox();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
       this.ConfirmDBDelete = new Ookii.Dialogs.WinForms.TaskDialog(this.components);
       this.btnDeleteDBYes = new Ookii.Dialogs.WinForms.TaskDialogButton(this.components);
@@ -69,7 +70,6 @@
       this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
       this.backgroundWorker_Versions = new System.ComponentModel.BackgroundWorker();
       this.backgroundWorker_SampleIDs = new System.ComponentModel.BackgroundWorker();
-      this.cmbAnalysis = new System.Windows.Forms.ToolStripComboBox();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
@@ -499,6 +499,27 @@
       this.aboutToolStripMenuItem.Size = new System.Drawing.Size(44, 36);
       this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
       // 
+      // cmbAnalysis
+      // 
+      this.cmbAnalysis.BackColor = System.Drawing.Color.PeachPuff;
+      this.cmbAnalysis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbAnalysis.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+      this.cmbAnalysis.Items.AddRange(new object[] {
+            "-- Select analysis --",
+            "BBMap...",
+            "Build tree...",
+            "InfluenzaA...",
+            "Kraken2...",
+            "Nextstrain...",
+            "Quast...",
+            "Salmonella Serotyping...",
+            "Search...",
+            "VFabricate..."});
+      this.cmbAnalysis.Name = "cmbAnalysis";
+      this.cmbAnalysis.Size = new System.Drawing.Size(200, 36);
+      this.cmbAnalysis.Sorted = true;
+      this.cmbAnalysis.SelectedIndexChanged += new System.EventHandler(this.cmbAnalysis_SelectedIndexChanged);
+      // 
       // ConfirmDBDelete
       // 
       this.ConfirmDBDelete.Buttons.Add(this.btnDeleteDBYes);
@@ -530,26 +551,6 @@
       // 
       this.backgroundWorker_SampleIDs.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker_SampleIDs_DoWork);
       this.backgroundWorker_SampleIDs.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker_SampleIDs_RunWorkerCompleted);
-      // 
-      // cmbAnalysis
-      // 
-      this.cmbAnalysis.BackColor = System.Drawing.Color.PeachPuff;
-      this.cmbAnalysis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cmbAnalysis.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-      this.cmbAnalysis.Items.AddRange(new object[] {
-            "-- Select analysis --",
-            "BBMap...",
-            "Build tree...",
-            "InfluenzaA...",
-            "Kraken2...",
-            "Quast...",
-            "Salmonella Serotyping...",
-            "Search...",
-            "VFabricate..."});
-      this.cmbAnalysis.Name = "cmbAnalysis";
-      this.cmbAnalysis.Size = new System.Drawing.Size(200, 36);
-      this.cmbAnalysis.Sorted = true;
-      this.cmbAnalysis.SelectedIndexChanged += new System.EventHandler(this.cmbAnalysis_SelectedIndexChanged);
       // 
       // BioSeqUI
       // 

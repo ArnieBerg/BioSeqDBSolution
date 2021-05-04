@@ -91,6 +91,7 @@ namespace BioSeqDB
                           DirectoryHelper.CleanPath(AppConfigHelper.NormalizePathToWindows(AppConfigHelper.PathToWSL())) +
                           ") does not exist. Correct PathToWSL in appsettings.json before continuing.", "ERROR", MessageBoxButtons.OK);
         }
+
         string path = DirectoryHelper.CleanPath(AppConfigHelper.NormalizePathToWindows(AppConfigHelper.PathToSeqDB()));
         if (!File.Exists(path))
         {
@@ -101,7 +102,7 @@ namespace BioSeqDB
                        Environment.NewLine + "issue 'wsl --shutdown' in PowerShell.", "ERROR", MessageBoxButtons.OK);
         }
       }
-      else
+      else // IsService
       {
         try
         {

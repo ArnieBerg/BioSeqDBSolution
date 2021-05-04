@@ -117,7 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblAbout.Text" xml:space="preserve">
-    <value>A new sequence database is defined as being associated with a single organism. It requires a path to where to construct the database, and a path to where the initial data comes from to populate the database. The path to the constructed database will contain a single multi-fasta file representing the database.  The path to the initial data contains a list of subfolders each containing one or more .fasta files representing contigs of the organism.  The names of those subfolders become the sample names of the contigs represented by the .fasta files.</value>
-  </data>
 </root>

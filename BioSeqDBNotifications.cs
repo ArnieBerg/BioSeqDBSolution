@@ -156,6 +156,7 @@ namespace BioSeqDB
         return;
       }
 
+      Cursor.Current = Cursors.WaitCursor;
       foreach (BioSeqTask task in AppConfigHelper.TaskList.Values)
       {
         if (string.IsNullOrEmpty(TaskFilter) || TaskFilter == "All" || TaskFilter == task.TaskStatus)
@@ -188,6 +189,7 @@ namespace BioSeqDB
       btnDeleteTask.Enabled = lstTasks.Items.Count > 0;
 
       StatusChangeEvent?.Invoke(this, null); // Notify parent we have a potential status change.
+      Cursor.Current = Cursors.Default;
     }
 
     private void btnCancel_Click(object sender, EventArgs e)
@@ -235,11 +237,6 @@ namespace BioSeqDB
             destination = DirectoryHelper.CleanPath(destination);
             Process.Start(destination + "\\" + sampleName + ".VFList.tsv");
           }
-          //else
-          //{
-          //  MessageBox.Show("VFabricate completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-          //                       task.StandardOutput + Environment.NewLine + AppConfigHelper.LastError, "Error", MessageBoxButtons.OK);
-          //}
           break;
 
         case "Quast":
@@ -257,11 +254,6 @@ namespace BioSeqDB
             MessageBox.Show(task.StandardOutput + Environment.NewLine + "Quast completed successfully. Result is in the " +
                             AppConfigHelper.OutputPath("Quast") + "\\Quast" + sampleName + " folder.", "Success", MessageBoxButtons.OK);
           }
-          //else
-          //{
-          //  MessageBox.Show("Quast completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
-          //}
           break;
 
         case "Kraken2":
@@ -284,11 +276,6 @@ namespace BioSeqDB
                                                                              destination + ".", "Success", MessageBoxButtons.OK);
             if (File.Exists(destination + "kraken.aggregates.txt")) Process.Start(destination + "kraken.aggregates.txt");
           }
-          //else
-          //{
-          //  MessageBox.Show("Kraken2 completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
-          //}
           break;
 
         case "BBMap":
@@ -308,11 +295,6 @@ namespace BioSeqDB
             if (File.Exists(destination + "basecov.txt")) Process.Start(destination + "basecov.txt");
             if (File.Exists(destination + "RefseqIdent.txt")) Process.Start(destination + "RefseqIdent.txt");
           }
-          //else
-          //{
-          //  MessageBox.Show("BBMap completed with error code " + task.LastExitCode.ToString() + "." + Environment.NewLine + Environment.NewLine +
-          //                       task.StandardOutput + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
-          //}
           break;
 
         case "Search":
@@ -334,11 +316,6 @@ namespace BioSeqDB
 
             Process.Start(DirectoryHelper.CleanPath(destination) + AppConfigHelper.SearchOutputSampleName() + ".txt");
           }
-          //else
-          //{
-          //  MessageBox.Show(task.StandardOutput + Environment.NewLine + "Search completed with error code " + task.LastExitCode.ToString() + "." +
-          //                Environment.NewLine + Environment.NewLine + task.LastError, "Error", MessageBoxButtons.OK);
-          //}
           break;
 
         case "Assemble":
@@ -401,6 +378,62 @@ namespace BioSeqDB
                 DirectoryHelper.FileMove(AppConfigHelper.SalmonellaOutputPath + "\\sistr_res_aggregate.csv",
                                          AppConfigHelper.SalmonellaOutputPath + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
               }
+            }
+          }
+          break;
+
+        case "Nextstrain":
+          TaskCompletion(task, "Nextstrain", "Nextstrain phylogenetic processing completed.");
+
+          Cursor.Current = Cursors.Default;
+          if (task.LastExitCode == 0)
+          {
+            NextstrainProfile nextstrainProfile = AppConfigHelper.GetNextstrainProfile(); // for current database.
+            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Nextstrain completed successfully. Result is in " + 
+                                                                 nextstrainProfile.OuputPath, "Success", MessageBoxButtons.OK);
+            if (IsServiceClass.IsService)
+            {
+              //string browser = string.Empty;
+              //RegistryKey key = null;
+              //try
+              //{
+              //  key = Registry.ClassesRoot.OpenSubKey(@"HTTP\shell\open\command");
+              //  if (key != null)
+              //  {
+              //    // Get default Browser
+              //    browser = key.GetValue(null).ToString().ToLower().Trim(new[] { '"' });
+              //  }
+              //  if (!browser.EndsWith("exe"))
+              //  {
+              //    //Remove all after the ".exe"
+              //    browser = browser.Substring(0, browser.LastIndexOf(".exe", StringComparison.InvariantCultureIgnoreCase) + 4);
+              //  }
+              //}
+              //finally
+              //{
+              //  if (key != null)
+              //  {
+              //    key.Close();
+              //  }
+              //}
+
+              // Open the browser.
+              Process proc = Process.Start("http://localhost:4000/ncov/global");
+
+              //if (nextstrainProfile.OuputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+              //{
+              //  string sourceFolderName = "[S]" + AppConfigHelper.UserFolder() + "\\ncov_global.json";
+              //  string destinationFolderName = nextstrainProfile.OuputPath;
+              //  DirectoryHelper.FileCopy(sourceFolderName, destinationFolderName, true);
+              //  File.Move(DirectoryHelper.CleanPath(destinationFolderName) + "\\ncov_global.json",
+              //            DirectoryHelper.CleanPath(destinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");  // Rename
+              //  Process.Start(DirectoryHelper.CleanPath(destinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
+              //}
+              //else // Rename on server.
+              //{
+              //  DirectoryHelper.FileMove(nextstrainProfile.OuputPath + "\\sistr_res_aggregate.csv",
+              //                           nextstrainProfile.OuputPath + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
+              //}
             }
           }
           break;
@@ -482,16 +515,20 @@ namespace BioSeqDB
           }
           break;
       }
+      UIThreadRefresh(sender, e);
     }
 
     private void TaskCompletion(BioSeqTask task, string taskName, string successMsg)
     {
       // Called by the user from the Push button when task status is Ready.
+      Cursor.Current = Cursors.WaitCursor;
+
       TimeSpan duration = task.TaskComplete - task.TaskTime;
+
       string db = string.IsNullOrEmpty(task.TaskDB) ? string.Empty : "Sequence database: " + task.TaskDB;
       string memo = string.IsNullOrEmpty(task.TaskMemo) ? string.Empty : "Memo: " + task.TaskMemo;
       string subject = "Task completed: " + taskName + " at " + task.TaskComplete.ToString("MMM d, yyyy HH:mm") + " after " + 
-                        duration.TotalMinutes.ToString() + " minutes." + Environment.NewLine + (db + " " + Environment.NewLine + memo).Trim();
+                        duration.TotalMinutes.ToString("#.0") + " minutes." + Environment.NewLine + (db + " " + Environment.NewLine + memo).Trim();
       string message = subject + Environment.NewLine + AppConfigHelper.LastCommand + Environment.NewLine;
       subject = subject.Replace(Environment.NewLine, "  ");
       List<string> attachments = new List<string>();
@@ -501,9 +538,9 @@ namespace BioSeqDB
       // Read and delete the output file from the command.
       string linuxCapture = string.Empty;
       string filename = AppConfigHelper.NormalizePathToWindows(AppConfigHelper.LinuxHomeDirectory + "/output" + task.TaskID);
-      if (File.Exists(filename))
+      if (DirectoryHelper.FileExists("[S]" + filename))
       {
-        linuxCapture = File.ReadAllText(filename);
+        linuxCapture = BioSeqDBModel.Instance.ReadAllText(filename, AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // We know it is on the server.
         int residual = 6000;
         if (linuxCapture.Length > residual)
         {
@@ -532,6 +569,7 @@ namespace BioSeqDB
       }
       SuccessDialog.ShowDialog(this);
 
+      RemoveTask(false); // Do this as soon as possible to reflect the user's closing of the dialog.
       StatusChangeEvent?.Invoke(this, null); // Notify parent we have a potential status change.
 
       message += linuxCapture;
@@ -546,11 +584,11 @@ namespace BioSeqDB
         }
       }
 
-      RemoveTask(false);
       if (File.Exists(filename)) // Must do after email since it might be attached.
       {
         File.Delete(filename);
       }
+      Cursor.Current = Cursors.Default;
     }
 
     private void cmbTaskStatusFilter_SelectedIndexChanged(object sender, EventArgs e)
