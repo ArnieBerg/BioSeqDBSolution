@@ -1,7 +1,6 @@
 ﻿using BioSeqDB.ModelClient;
 using BioSeqDBConfigModel;
 using FSExplorer;
-using Ookii.Dialogs.WinForms;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -74,20 +73,6 @@ namespace BioSeqDB
         return;
       }
 
-      //public string MetadataPath { get; set; }
-      //public string ReferencePath { get; set; }
-      //public string OuputPath { get; set; }
-      //public int SNPCutoff { get; set; }
-      //public int ClusterCutoff { get; set; }
-      //public int MinGenomeLength { get; set; }
-      //public int MaskFromBeginning { get; set; }
-      //public int MaskFromEnd { get; set; }
-      //public int NumberOfThreads { get; set; }
-      //public string MaskSites { get; set; }
-      //public string RootNode { get; set; }
-      //public DateTime MinDateFilter { get; set; }
-      //public DateTime MinDate { get; set; }
-
       nextstrainProfile.MetadataPath = txtMetadataPath.Text.Trim();
       nextstrainProfile.ReferencePath = txtReferencePath.Text.Trim();
       nextstrainProfile.OuputPath = txtOutputPath.Text.Trim();
@@ -123,69 +108,37 @@ namespace BioSeqDB
 
     private void btnReferencePath_Click(object sender, EventArgs e)
     {
-      if (IsServiceClass.IsService)
+      string path = AppConfigHelper.NormalizePathToWindows(txtReferencePath.Text);
+      Cursor.Current = Cursors.WaitCursor;
+      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Path to Genbank reference file",
+                                          DirectoryHelper.IsServerPath(txtReferencePath.Text), DirectoryHelper.CleanPath(path),
+                                          "Genbank files (*.gb)|*.gb|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+      Explorer.frmExplorer.ServerOnly = true;
+      Cursor.Current = Cursors.Default;
+      Explorer.frmExplorer.ShowDialog();
+      if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
       {
-        string path = AppConfigHelper.NormalizePathToWindows(txtReferencePath.Text);
-        Cursor.Current = Cursors.WaitCursor;
-        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Path to Genbank reference file",
-                                            DirectoryHelper.IsServerPath(txtReferencePath.Text), DirectoryHelper.CleanPath(path),
-                                            "Genbank files (*.gb)|*.gb|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
-        Explorer.frmExplorer.ServerOnly = true;
-        Cursor.Current = Cursors.Default;
-        Explorer.frmExplorer.ShowDialog();
-        if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
-        {
-          txtReferencePath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
-        }
-        Explorer.frmExplorer = null;
+        txtReferencePath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
       }
-      else
-      {
-        VistaFolderBrowserDialog ofn = new VistaFolderBrowserDialog();
-        ofn.Description = "Path to reference database";
-        ofn.SelectedPath = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text);
-        ofn.ShowNewFolderButton = true;
-        ofn.UseDescriptionForTitle = true;
-
-        if (ofn.ShowDialog() != DialogResult.Cancel)
-        {
-          txtReferencePath.Text = ofn.SelectedPath.Trim();
-        }
-      }
+      Explorer.frmExplorer = null;
 
       EnableOK();
     }
 
     private void btnOutputPath_Click(object sender, EventArgs e)
     {
-      if (IsServiceClass.IsService)
+      string path = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text + "\\");
+      Cursor.Current = Cursors.WaitCursor;
+      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Output path",
+                                          DirectoryHelper.IsServerPath(txtOutputPath.Text), DirectoryHelper.CleanPath(path),
+                                          string.Empty, null, AppConfigHelper.UbuntuPrefix());
+      Cursor.Current = Cursors.Default;
+      Explorer.frmExplorer.ShowDialog();
+      if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
       {
-        string path = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text + "\\");
-        Cursor.Current = Cursors.WaitCursor;
-        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Output path",
-                                            DirectoryHelper.IsServerPath(txtOutputPath.Text), DirectoryHelper.CleanPath(path),
-                                            string.Empty, null, AppConfigHelper.UbuntuPrefix());
-        Cursor.Current = Cursors.Default;
-        Explorer.frmExplorer.ShowDialog();
-        if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
-        {
-          txtOutputPath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
-        }
-        Explorer.frmExplorer = null;
+        txtOutputPath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
       }
-      else
-      {
-        VistaFolderBrowserDialog ofn = new VistaFolderBrowserDialog();
-        ofn.Description = "Output path";
-        ofn.SelectedPath = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text);
-        ofn.ShowNewFolderButton = true;
-        ofn.UseDescriptionForTitle = true;
-
-        if (ofn.ShowDialog() != DialogResult.Cancel)
-        {
-          txtOutputPath.Text = ofn.SelectedPath.Trim();
-        }
-      }
+      Explorer.frmExplorer = null;
 
       EnableOK();
     }
@@ -311,7 +264,8 @@ namespace BioSeqDB
         DirectoryHelper.FileCopy(filename, "[L]C:\\Temp", true);
       }
 
-      Process p = Process.Start("excel.exe", DirectoryHelper.CleanPath(filename));
+      //Process p = Process.Start("excel.exe", DirectoryHelper.CleanPath(filename));
+      Process p = Process.Start(DirectoryHelper.CleanPath(filename));
       p.WaitForExit();
       p.Close();
 

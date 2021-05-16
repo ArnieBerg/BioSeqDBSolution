@@ -125,7 +125,7 @@ namespace BioSeqDB
           return;
         }
 
-        if (!DirectoryHelper.FileExists(AppConfigHelper.NormalizePathToWindows(txtInputPath.Text)))
+        if (radContig.Checked && !DirectoryHelper.FileExists(AppConfigHelper.NormalizePathToWindows(txtInputPath.Text)))
         {
           MessageBox.Show(txtInputPath.Text + " does not exist. Choose a valid input file.", "Invalid input file", MessageBoxButtons.OK);
           txtInputPath.Focus();
@@ -153,7 +153,7 @@ namespace BioSeqDB
           return;
         }
 
-        AppConfigHelper.SampleID(analysis, lstSampleIDs.SelectedItem.ToString());
+        AppConfigHelper.SampleID(analysis, lstSampleIDs.SelectedItem.ToString().Trim());
       }
       else   // If the txtInputPath is local, send it to the UserFolder() on the server.
       {
@@ -333,14 +333,14 @@ namespace BioSeqDB
 
     private void EnableOK()
     {
-      bool isOK = false;
-      if (radContig.Checked && txtInputPath.Text.Trim().Length > 0)
+      bool isOK = true;
+      if (radContig.Checked && txtInputPath.Text.Trim().Length == 0)
       {
-        isOK = true;
+        isOK = false;
       }
-      else if (radSample.Checked && lstSampleIDs.SelectedIndex > -1)
+      else if (radSample.Checked && lstSampleIDs.SelectedIndex < 0)
       {
-        isOK = true;
+        isOK = false;
       }
 
       if (txtOutputPath.Text.Trim().Length == 0)
@@ -353,8 +353,12 @@ namespace BioSeqDB
         isOK = false;
       }
 
-      if (isOK && analysis == "Search" && !(txtOutputPath.Text.Trim().Length > 0 && txtInputPath.Text.Trim().Length > 0 && txtOutputSampleName.Text.Trim().Length > 0 &&
+      if (isOK && analysis == "Search" && !(txtOutputPath.Text.Trim().Length > 0 && txtOutputSampleName.Text.Trim().Length > 0 &&
                                                                txtCutoff.Text.Trim().Length > 0 && txtThreads.Text.Trim().Length > 0))
+      {
+        isOK = false;
+      }
+      else if ((txtInputPath.Text.Trim().Length == 0 && radContig.Checked) || (radSample.Checked && lstSampleIDs.SelectedIndex == -1))
       {
         isOK = false;
       }
@@ -417,6 +421,7 @@ namespace BioSeqDB
     {
       e.Handled = (!Char.IsNumber(e.KeyChar) && e.KeyChar != (Char)Keys.Back &&
                     e.KeyChar != (Char)Keys.Delete);  // Numerics only  isNumeric
+      EnableOK();
     }
 
     private void txtCutoff_TextChanged(object sender, EventArgs e)
@@ -428,6 +433,7 @@ namespace BioSeqDB
     {
       e.Handled = (!Char.IsNumber(e.KeyChar) && e.KeyChar != (Char)Keys.Back &&
                       e.KeyChar != (Char)Keys.Delete) || e.KeyChar == '.';  // Numerics only  isNumeric
+      EnableOK();
     }
 
     private void txtThreads_TextChanged(object sender, EventArgs e)

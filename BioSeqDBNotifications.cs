@@ -251,8 +251,12 @@ namespace BioSeqDB
               sampleName = AppConfigHelper.SampleID("Quast");
             }
 
+            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Quast"), new string[] { "\\Quast" + sampleName }, false); // folder copy
+
+            //destination = DirectoryHelper.CleanPath(destination);
+
             MessageBox.Show(task.StandardOutput + Environment.NewLine + "Quast completed successfully. Result is in the " +
-                            AppConfigHelper.OutputPath("Quast") + "\\Quast" + sampleName + " folder.", "Success", MessageBoxButtons.OK);
+                                                                                      destination + " folder.", "Success", MessageBoxButtons.OK);
           }
           break;
 
@@ -271,10 +275,13 @@ namespace BioSeqDB
             //}
             string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Kraken2"), new string[] { "kraken.aggregates.txt" });
 
-            destination = DirectoryHelper.CleanPath(destination);
+            //destination = DirectoryHelper.CleanPath(destination);
             MessageBox.Show(task.StandardOutput + Environment.NewLine + "Kraken2 completed successfully. Result is in " +
                                                                              destination + ".", "Success", MessageBoxButtons.OK);
-            if (File.Exists(destination + "kraken.aggregates.txt")) Process.Start(destination + "kraken.aggregates.txt");
+            if (File.Exists(destination + "kraken.aggregates.txt"))
+            {
+              Process.Start(destination + "kraken.aggregates.txt");
+            }
           }
           break;
 
@@ -312,8 +319,8 @@ namespace BioSeqDB
             // If the output path is on the server, we need to copy it to the local Temp folder to display the results.
             // If the output path is on the local machine, we need to copy from the user folder on the server to the local destination.
 
-            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Search"), new string[] { AppConfigHelper.SearchOutputSampleName() + ".txt" });
-
+            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Search"), 
+                                                      new string[] { AppConfigHelper.SearchOutputSampleName() + ".txt" });
             Process.Start(DirectoryHelper.CleanPath(destination) + AppConfigHelper.SearchOutputSampleName() + ".txt");
           }
           break;
@@ -388,9 +395,8 @@ namespace BioSeqDB
           Cursor.Current = Cursors.Default;
           if (task.LastExitCode == 0)
           {
-            NextstrainProfile nextstrainProfile = AppConfigHelper.GetNextstrainProfile(); // for current database.
-            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Nextstrain completed successfully. Result is in " + 
-                                                                 nextstrainProfile.OuputPath, "Success", MessageBoxButtons.OK);
+            //NextstrainProfile nextstrainProfile = AppConfigHelper.GetNextstrainProfile(); // for current database.
+            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Nextstrain completed successfully.", "Success", MessageBoxButtons.OK);
             if (IsServiceClass.IsService)
             {
               //string browser = string.Empty;
@@ -418,7 +424,14 @@ namespace BioSeqDB
               //}
 
               // Open the browser.
-              Process proc = Process.Start("http://localhost:4000/ncov/global");
+              // See documentation for this approach:
+              // https://docs.nextstrain.org/en/latest/guides/share/community-builds.html
+              // The GitHub repository file structure must be:
+              // nextstrain/auspice/nextstrain.json
+
+              // The BioSeqDB service will have already pushed the updated files to Github.
+
+              Process proc = Process.Start("https://nextstrain.org/community/ArnieBerg/nextstrain@main");
 
               //if (nextstrainProfile.OuputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
               //{

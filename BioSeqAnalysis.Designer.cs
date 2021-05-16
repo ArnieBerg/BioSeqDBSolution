@@ -170,7 +170,6 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.panel1.Controls.Add(this.pnlSearch);
       this.panel1.Controls.Add(this.radSample);
       this.panel1.Controls.Add(this.radContig);
       this.panel1.Controls.Add(this.btnFindInputPath);
@@ -305,10 +304,10 @@
       this.pnlSearch.Controls.Add(this.label6);
       this.pnlSearch.Controls.Add(this.txtCutoff);
       this.pnlSearch.Controls.Add(this.label5);
-      this.pnlSearch.Location = new System.Drawing.Point(459, 160);
+      this.pnlSearch.Location = new System.Drawing.Point(30, 401);
       this.pnlSearch.Name = "pnlSearch";
       this.pnlSearch.Size = new System.Drawing.Size(606, 76);
-      this.pnlSearch.TabIndex = 61;
+      this.pnlSearch.TabIndex = 62;
       // 
       // txtOutputSampleName
       // 
@@ -316,6 +315,7 @@
       this.txtOutputSampleName.Name = "txtOutputSampleName";
       this.txtOutputSampleName.Size = new System.Drawing.Size(172, 20);
       this.txtOutputSampleName.TabIndex = 34;
+      this.txtOutputSampleName.TextChanged += new System.EventHandler(this.txtSampleID_TextChanged);
       // 
       // label3
       // 
@@ -335,6 +335,7 @@
       this.txtThreads.TabIndex = 31;
       this.txtThreads.Text = "1";
       this.txtThreads.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+      this.txtThreads.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtThreads_KeyPress);
       // 
       // label6
       // 
@@ -354,6 +355,7 @@
       this.txtCutoff.TabIndex = 30;
       this.txtCutoff.Text = "1";
       this.txtCutoff.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+      this.txtCutoff.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtCutoff_KeyPress);
       // 
       // label5
       // 
@@ -372,6 +374,7 @@
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.CancelButton = this.btnCancel;
       this.ClientSize = new System.Drawing.Size(653, 567);
+      this.Controls.Add(this.pnlSearch);
       this.Controls.Add(this.txtMemo);
       this.Controls.Add(this.label2);
       this.Controls.Add(this.btnGeneXref);

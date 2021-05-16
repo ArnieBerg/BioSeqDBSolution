@@ -79,8 +79,7 @@
       this.label4.Size = new System.Drawing.Size(659, 61);
       this.label4.TabIndex = 13;
       this.label4.Text = "Create a phylogenetic tree from the current database using Neststrain. The result" +
-    "ing Json file can be submitted to auspice.us for visualization.   **** THIS FUNC" +
-    "TION IS NOT YET OPERATIONAL ****";
+    "ing Json file is automatically submitted to auspice.us for visualization.";
       // 
       // btnOK
       // 
@@ -318,7 +317,6 @@
       this.txtRootNode.Name = "txtRootNode";
       this.txtRootNode.Size = new System.Drawing.Size(204, 20);
       this.txtRootNode.TabIndex = 70;
-      this.txtRootNode.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
       this.txtRootNode.TextChanged += new System.EventHandler(this.txtRootNode_TextChanged);
       // 
       // label14
@@ -337,7 +335,6 @@
       this.txtMaskSites.Name = "txtMaskSites";
       this.txtMaskSites.Size = new System.Drawing.Size(432, 20);
       this.txtMaskSites.TabIndex = 68;
-      this.txtMaskSites.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
       this.txtMaskSites.TextChanged += new System.EventHandler(this.txtMaskSites_TextChanged);
       // 
       // label13

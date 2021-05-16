@@ -139,8 +139,8 @@ namespace BioSeqDB
 
     public static string LinuxHomeDirectory
     {
-      get { return seqdbConfigGlobal.LinuxHomeDirectory ?? "/home/arnie"; }
-      set { seqdbConfigGlobal.LinuxHomeDirectory = value ?? "/home/arnie"; SaveConfigGlobal(); }
+      get { return seqdbConfigGlobal.LinuxHomeDirectory ?? "/~"; }
+      set { seqdbConfigGlobal.LinuxHomeDirectory = value ?? "/~"; SaveConfigGlobal(); }
     }
 
     public static string TaskFilter
@@ -430,10 +430,11 @@ namespace BioSeqDB
       return seqdbConfig.AssembleBBMap;
     }
 
-    public static string CopyResultFromServer(string outputPath, string[] filenames)
+    public static string CopyResultFromServer(string outputPath, string[] names, bool isFiles = true)
     {
       // If the output path is on the server, we need to copy it to the local Temp folder to display the results.
       // If the output path is on the local machine, we need to copy from the user folder on the server to the local destination.
+      // If filenames is empty, outpuPath is a folder to copy.
       string destination = @"[L]C:\Temp\"; // Copy from UserFolder() on server to C:\Temp.
       string source = outputPath + "\\";
       if (outputPath.StartsWith("[L]"))  // Copy from user folder on server to OutputPath.
@@ -442,10 +443,21 @@ namespace BioSeqDB
         source = "[S]" + UserFolder();
       }
 
-      foreach (string filename in filenames)
+      if (!isFiles) // Copy folders.
       {
-        Logger.Log.Debug("Copy " + filename + " from " + source + " to " + destination);
-        DirectoryHelper.FileCopy(source + filename, destination, true);
+        foreach (string foldername in names)
+        {
+          Logger.Log.Debug("Copy " + foldername + " from " + source + " to " + destination);
+          DirectoryHelper.FolderCopy(source + foldername, destination);
+        }
+      }
+      else
+      {
+        foreach (string filename in names)
+        {
+          Logger.Log.Debug("Copy " + filename + " from " + source + " to " + destination);
+          DirectoryHelper.FileCopy(source + filename, destination, true);
+        }
       }
       return destination;
     }
@@ -1706,6 +1718,7 @@ namespace BioSeqDB
     {
       task.TaskStatus = "Ready";
       task.TaskComplete = DateTime.Now;
+      SaveConfig();
     }
 
     public static string RestoreOutputPath()
