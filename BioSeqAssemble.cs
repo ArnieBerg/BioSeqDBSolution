@@ -140,6 +140,7 @@ namespace BioSeqDB
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folders containing .fastq contig file(s)",
                                  DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path) + "\\",
                                  "Fastq files (*.fastq)|*.fastq|All files (*.*)|*.*", genomeList, AppConfigHelper.UbuntuPrefix());
+        Explorer.frmExplorer.ServerOnly = true;
         DialogResult result = Explorer.frmExplorer.ShowDialog();
         if (result != DialogResult.Cancel)
         {

@@ -28,7 +28,7 @@
     <ProductName>BioSeqDB</ProductName>
     <PublisherName>Prairie Diagnostic Services</PublisherName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>60</ApplicationRevision>
+    <ApplicationRevision>62</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -120,6 +120,12 @@
     </Compile>
     <Compile Include="BioSeqAnalysis.Designer.cs">
       <DependentUpon>BioSeqAnalysis.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqCentrifuge.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqCentrifuge.Designer.cs">
+      <DependentUpon>BioSeqCentrifuge.cs</DependentUpon>
     </Compile>
     <Compile Include="BioSeqNextstrain.cs">
       <SubType>Form</SubType>
@@ -254,6 +260,10 @@
       <DependentUpon>BioSeqAnalysis.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqCentrifuge.resx">
+      <DependentUpon>BioSeqCentrifuge.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="BioSeqNextstrain.resx">
       <DependentUpon>BioSeqNextstrain.cs</DependentUpon>
     </EmbeddedResource>
@@ -268,6 +278,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="BioSeqInfluenzaA.resx">
       <DependentUpon>BioSeqInfluenzaA.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="BioSeqRestore.resx">
       <DependentUpon>BioSeqRestore.cs</DependentUpon>

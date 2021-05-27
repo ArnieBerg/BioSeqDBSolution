@@ -451,7 +451,7 @@ namespace BioSeqDB
           DirectoryHelper.FolderCopy(source + foldername, destination);
         }
       }
-      else
+      else // Copy files.
       {
         foreach (string filename in names)
         {
@@ -604,10 +604,21 @@ namespace BioSeqDB
       return db.BBMapFastqPath ?? string.Empty;
     }
 
+    internal static void CentrifugeParms(string CentrifugeReferencePath, string OutputPath, string InputPath, string Memo, string Threads, string MaxAssignments)
+    {
+      seqdbConfig.CentrifugeReferencePath = CentrifugeReferencePath; // Path to database
+      seqdbConfig.TaskMemo = Memo;
+      seqdbConfig.CentrifugeOutputPath = OutputPath;
+      seqdbConfig.CentrifugeFastqPath = InputPath;
+      seqdbConfig.CentrifugeThreads = int.Parse(Threads);
+      seqdbConfig.CentrifugeMaxAssignments = int.Parse(MaxAssignments);
+      SaveConfig();
+    }
+
     public static void InfluenzaAParms(string CentrifugePath, string OutputPath, string Memo, bool Trim, string Threads, 
                                                                                     string SegmentsToAssemble, string model)
     {
-      seqdbConfig.InfluenzaACentrifugePath = CentrifugePath;
+      seqdbConfig.CentrifugeReferencePath = CentrifugePath; // The reference genome is a Centrifuge database.
       seqdbConfig.InfluenzaAChooseTrim = Trim;
       seqdbConfig.TaskMemo = Memo;
       seqdbConfig.InfluenzaAOutputPath = OutputPath;
@@ -1282,6 +1293,15 @@ namespace BioSeqDB
       SaveConfig();
     }
 
+    internal static void SaveCentrifugeUIForm(Point location, Size size)
+    {
+      seqdbConfig.CentrifugeX = location.X;
+      seqdbConfig.CentrifugeY = location.Y;
+      seqdbConfig.CentrifugeW = size.Width;
+      seqdbConfig.CentrifugeH = size.Height;
+      SaveConfig();
+    }
+
     public static Point UILocation()
     {
       return new Point(seqdbConfig.X, seqdbConfig.Y);
@@ -1310,6 +1330,16 @@ namespace BioSeqDB
     public static Size InfluenzaASize()
     {
       return new Size(seqdbConfig.InfluenzaAW, seqdbConfig.InfluenzaAH);
+    }
+
+    internal static Size CentrifugeSize()
+    {
+      return new Size(seqdbConfig.CentrifugeW, seqdbConfig.CentrifugeH);
+    }
+
+    internal static Point CentrifugeLocation()
+    {
+      return new Point(seqdbConfig.CentrifugeX, seqdbConfig.CentrifugeY);
     }
 
     public static string VFabricateGeneXref
@@ -1567,6 +1597,58 @@ namespace BioSeqDB
       }
     }
 
+    public static string CentrifugeOutputPath
+    {
+      get
+      {
+        return seqdbConfig.CentrifugeOutputPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.CentrifugeOutputPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static string CentrifugeFastqPath
+    {
+      get
+      {
+        return seqdbConfig.CentrifugeFastqPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.CentrifugeFastqPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static string CentrifugeThreads
+    {
+      get
+      {
+        return seqdbConfig.CentrifugeThreads == 0 ? string.Empty : seqdbConfig.CentrifugeThreads.ToString();
+      }
+      set
+      {
+        seqdbConfig.CentrifugeThreads = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static string CentrifugeMaxAssignments
+    {
+      get
+      {
+        return seqdbConfig.CentrifugeMaxAssignments == 0 ? string.Empty : seqdbConfig.CentrifugeMaxAssignments.ToString();
+      }
+      set
+      {
+        seqdbConfig.CentrifugeMaxAssignments = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
     public static string InfluenzaAOutputPath
     {
       get
@@ -1592,6 +1674,20 @@ namespace BioSeqDB
         SaveConfig();
       }
     }
+
+    public static string CentrifugeReferencePath
+    {
+      get
+      {
+        return seqdbConfig.CentrifugeReferencePath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.CentrifugeReferencePath = value;
+        SaveConfig();
+      }
+    }
+
     public static string InfluenzaACentrifugePath
     {
       get
@@ -1631,6 +1727,32 @@ namespace BioSeqDB
       }
     }
 
+    public static string Kraken2FastqPath
+    {
+      get
+      {
+        return seqdbConfig.Kraken2FastqPath == null ? string.Empty : seqdbConfig.Kraken2FastqPath;
+      }
+      set
+      {
+        seqdbConfig.Kraken2FastqPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static bool Kraken2UseFastq
+    {
+      get
+      {
+        return seqdbConfig.Kraken2UseFastq;
+      }
+      set
+      {
+        seqdbConfig.Kraken2UseFastq = value;
+        SaveConfig();
+      }
+    }
+
     public static string LastExplorerServerPath
     {
       get
@@ -1656,10 +1778,6 @@ namespace BioSeqDB
         SaveConfig();
       }
     }
-
-    //public static string NextstrainReference { get; internal set; }
-    //public static string NextstrainOutputPath { get; internal set; }
-    //public static string NextstrainThreads { get; internal set; }
 
     public static string BuildTreeOutputPath()
     {

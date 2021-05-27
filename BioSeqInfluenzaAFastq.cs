@@ -13,11 +13,12 @@ namespace BioSeqDB
     public Dictionary<string, string> items; // Folders selected in this run.
     public Dictionary<string, string> alreadySelected; // This is a list of those that have already been selected.
     private bool IsSalmonella;
+    private bool IsInfluenzaA;
     private string currentSampleSelection = null;
 
     // Prompt for a Influenza A fastq sample for pipeline to analyze. Or Salmonella.
 
-    public BioSeqInfluenzaAFastq(Dictionary<string, string> itemsSelected, string functionUsage)  // functionUsage is "Salmonella" or "Influenza A".
+    public BioSeqInfluenzaAFastq(Dictionary<string, string> itemsSelected, string functionUsage)  // functionUsage is "Salmonella" or "Influenza A". Or "Centrifuge".
     {
       InitializeComponent();
 
@@ -31,6 +32,7 @@ namespace BioSeqDB
 
       btnOK.Enabled = false;
       IsSalmonella = functionUsage == "Salmonella";
+      IsInfluenzaA = functionUsage == "Influenza A";
       Text = Text.Replace("<analysis>", functionUsage);
       label4.Text = label4.Text.Replace("<analysis>", functionUsage);
       label2.Text = label2.Text.Replace("<analysis>", functionUsage);
@@ -215,7 +217,7 @@ namespace BioSeqDB
         {
           AppConfigHelper.SalmonellaSamplesPath = samplePath;
         }
-        else
+        else if (IsInfluenzaA)
         {
           AppConfigHelper.InfluenzaASamplesPath = samplePath;
         }

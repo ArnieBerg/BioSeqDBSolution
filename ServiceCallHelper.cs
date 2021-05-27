@@ -208,14 +208,20 @@ namespace BioSeqDB
     {
       if (IsServiceClass.IsService)
       {
-        //if (AppConfigHelper.SalmonellaSamplesPath.StartsWith("[L]"))
-        //{
-        //  DirectoryHelper.FileCopy(AppConfigHelper.SalmonellaSamplesPath, "[S]" + AppConfigHelper.UserFolder(), true);
-        //}
         return BioSeqDBModel.Instance.Salmonella(loggedOnUser, config);
       }
 
       return SeqDBHelper.InfluenzaA();
+    }
+
+    internal static WSLProxyResponse Centrifuge(string loggedOnUser, string config)
+    {
+      if (IsServiceClass.IsService)
+      {
+        return BioSeqDBModel.Instance.Centrifuge(loggedOnUser, config);
+      }
+
+      return SeqDBHelper.Centrifuge();
     }
 
     internal static WSLProxyResponse InfluenzaA(string loggedOnUser, string config)

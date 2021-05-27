@@ -38,6 +38,9 @@
       this.txtFastqPath = new System.Windows.Forms.TextBox();
       this.lblFastqPath = new System.Windows.Forms.Label();
       this.panel1 = new System.Windows.Forms.Panel();
+      this.pnlKraken = new System.Windows.Forms.Panel();
+      this.radUseFastq = new System.Windows.Forms.RadioButton();
+      this.radUseFasta = new System.Windows.Forms.RadioButton();
       this.radSample = new System.Windows.Forms.RadioButton();
       this.radContig = new System.Windows.Forms.RadioButton();
       this.btnFindInputPath = new System.Windows.Forms.Button();
@@ -56,6 +59,7 @@
       this.txtCutoff = new System.Windows.Forms.TextBox();
       this.label5 = new System.Windows.Forms.Label();
       this.panel1.SuspendLayout();
+      this.pnlKraken.SuspendLayout();
       this.pnlSearch.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -170,6 +174,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.panel1.Controls.Add(this.pnlKraken);
       this.panel1.Controls.Add(this.radSample);
       this.panel1.Controls.Add(this.radContig);
       this.panel1.Controls.Add(this.btnFindInputPath);
@@ -181,6 +186,38 @@
       this.panel1.Name = "panel1";
       this.panel1.Size = new System.Drawing.Size(629, 340);
       this.panel1.TabIndex = 42;
+      // 
+      // pnlKraken
+      // 
+      this.pnlKraken.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.pnlKraken.Controls.Add(this.radUseFastq);
+      this.pnlKraken.Controls.Add(this.radUseFasta);
+      this.pnlKraken.Location = new System.Drawing.Point(473, 60);
+      this.pnlKraken.Name = "pnlKraken";
+      this.pnlKraken.Size = new System.Drawing.Size(149, 66);
+      this.pnlKraken.TabIndex = 41;
+      // 
+      // radUseFastq
+      // 
+      this.radUseFastq.AutoSize = true;
+      this.radUseFastq.Location = new System.Drawing.Point(14, 34);
+      this.radUseFastq.Name = "radUseFastq";
+      this.radUseFastq.Size = new System.Drawing.Size(125, 17);
+      this.radUseFastq.TabIndex = 2;
+      this.radUseFastq.Text = "Use fastq folder input";
+      this.radUseFastq.UseVisualStyleBackColor = true;
+      this.radUseFastq.CheckedChanged += new System.EventHandler(this.radUseFastq_CheckedChanged);
+      // 
+      // radUseFasta
+      // 
+      this.radUseFasta.AutoSize = true;
+      this.radUseFasta.Location = new System.Drawing.Point(14, 11);
+      this.radUseFasta.Name = "radUseFasta";
+      this.radUseFasta.Size = new System.Drawing.Size(112, 17);
+      this.radUseFasta.TabIndex = 1;
+      this.radUseFasta.Text = "Use fasta file input";
+      this.radUseFasta.UseVisualStyleBackColor = true;
+      this.radUseFasta.CheckedChanged += new System.EventHandler(this.radUseFasta_CheckedChanged);
       // 
       // radSample
       // 
@@ -232,6 +269,7 @@
       this.lblSampleFasta.Size = new System.Drawing.Size(171, 13);
       this.lblSampleFasta.TabIndex = 40;
       this.lblSampleFasta.Text = "Sample .fasta file to analyze:";
+      this.lblSampleFasta.Click += new System.EventHandler(this.lblSampleFasta_Click);
       // 
       // lstSampleIDs
       // 
@@ -394,6 +432,8 @@
       this.Shown += new System.EventHandler(this.BioSeqAnalysis_Shown);
       this.panel1.ResumeLayout(false);
       this.panel1.PerformLayout();
+      this.pnlKraken.ResumeLayout(false);
+      this.pnlKraken.PerformLayout();
       this.pnlSearch.ResumeLayout(false);
       this.pnlSearch.PerformLayout();
       this.ResumeLayout(false);
@@ -430,5 +470,8 @@
     private System.Windows.Forms.Label label6;
     private System.Windows.Forms.TextBox txtCutoff;
     private System.Windows.Forms.Label label5;
+    private System.Windows.Forms.Panel pnlKraken;
+    private System.Windows.Forms.RadioButton radUseFastq;
+    private System.Windows.Forms.RadioButton radUseFasta;
   }
 }

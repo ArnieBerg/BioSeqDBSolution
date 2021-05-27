@@ -52,6 +52,16 @@ namespace BioSeqDB
       switch (analysis)
       {
         case "Kraken2":
+          // Hide the fastq folder path controls.
+          lblFastqPath.Visible = txtFastqPath.Visible = btnFastqPath.Visible = false;
+          if (AppConfigHelper.Kraken2UseFastq)
+          {
+            txtInputPath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.Kraken2FastqPath);
+          }
+          pnlKraken.Visible = true;
+          radUseFastq.Checked = AppConfigHelper.Kraken2UseFastq;
+          radUseFasta.Checked = !radUseFastq.Checked;
+          break;
         case "Quast":
           // Hide the fastq folder path controls.
           lblFastqPath.Visible = txtFastqPath.Visible = btnFastqPath.Visible = false;
@@ -83,6 +93,15 @@ namespace BioSeqDB
       AppConfigHelper.OutputPath(analysis, txtOutputPath.Text.Trim());
       AppConfigHelper.SampleChecked(analysis, radSample.Checked);
       AppConfigHelper.TaskMemo = txtMemo.Text.Trim();
+
+      if (analysis == "Kraken2")
+      {
+        AppConfigHelper.Kraken2UseFastq = radUseFastq.Checked;
+        if (radUseFastq.Checked)
+        {
+          AppConfigHelper.Kraken2FastqPath = txtInputPath.Text.Trim();
+        }
+      }
 
       if (analysis == "BBMap")
       {
@@ -178,7 +197,7 @@ namespace BioSeqDB
 
     private void radContig_CheckedChanged(object sender, EventArgs e)
     {
-      lblSampleFasta.Enabled = txtInputPath.Enabled = btnFindInputPath.Enabled = radContig.Checked;
+      lblSampleFasta.Enabled = txtInputPath.Enabled = btnFindInputPath.Enabled = pnlKraken.Enabled = radContig.Checked;
       lblSampleID.Enabled = lstSampleIDs.Enabled = !radContig.Checked;
       AppConfigHelper.SampleChecked(analysis, false);
       EnableOK();
@@ -187,7 +206,7 @@ namespace BioSeqDB
     private void radSample_CheckedChanged(object sender, EventArgs e)
     {
       lblSampleID.Enabled = lstSampleIDs.Enabled = radSample.Checked;
-      lblSampleFasta.Enabled = txtInputPath.Enabled = btnFindInputPath.Enabled = !radSample.Checked;
+      lblSampleFasta.Enabled = txtInputPath.Enabled = btnFindInputPath.Enabled = pnlKraken.Enabled = !radSample.Checked;
       AppConfigHelper.SampleChecked(analysis, true);
       EnableOK();
     }
@@ -201,9 +220,21 @@ namespace BioSeqDB
           txtInputPath.Text = txtInputPath.Text.Substring(0, txtInputPath.Text.LastIndexOf("\\"));
         }
         string path = AppConfigHelper.NormalizePathToWindows(txtInputPath.Text); // We want an actual file, so don't append "\\".
-        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folder with .fasta contig file",
-                                            DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                                            "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+
+        if (analysis == "Kraken2" && radUseFastq.Checked)
+        {
+          path = AppConfigHelper.NormalizePathToWindows(path + "\\");
+          Cursor.Current = Cursors.WaitCursor;
+          Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folder with .fastq files",
+                                              DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
+                                              string.Empty, null, AppConfigHelper.UbuntuPrefix());
+        }
+        else
+        {
+          Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folder with .fasta contig file",
+                                              DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
+                                              "Fasta files (*.fasta)|*.fasta;*.fna;*.fa|All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+        }
         Explorer.frmExplorer.ShowDialog();
         if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
         {
@@ -444,6 +475,23 @@ namespace BioSeqDB
     private void BioSeqAnalysis_Shown(object sender, EventArgs e)
     {
       pnlSearch.Visible = analysis == "Search";
+    }
+
+    private void radUseFasta_CheckedChanged(object sender, EventArgs e)
+    {
+      txtInputPath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.InputPath(analysis));
+      lblSampleFasta.Text = "Sample .fasta file to analyze:";
+    }
+
+    private void radUseFastq_CheckedChanged(object sender, EventArgs e)
+    {
+      lblSampleFasta.Text = "Sample .fastq folder to analyze:";
+      txtInputPath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.Kraken2FastqPath);
+    }
+
+    private void lblSampleFasta_Click(object sender, EventArgs e)
+    {
+
     }
   }
 }

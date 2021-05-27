@@ -240,7 +240,7 @@
       this.btnLIMSEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.btnLIMSEdit.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.btnLIMSEdit.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-      this.btnLIMSEdit.Location = new System.Drawing.Point(521, 439);
+      this.btnLIMSEdit.Location = new System.Drawing.Point(521, 437);
       this.btnLIMSEdit.Margin = new System.Windows.Forms.Padding(2);
       this.btnLIMSEdit.Name = "btnLIMSEdit";
       this.btnLIMSEdit.Size = new System.Drawing.Size(344, 22);
@@ -293,7 +293,7 @@
       this.chkDetailSamples.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.chkDetailSamples.AutoSize = true;
       this.chkDetailSamples.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.chkDetailSamples.Location = new System.Drawing.Point(785, 127);
+      this.chkDetailSamples.Location = new System.Drawing.Point(786, 127);
       this.chkDetailSamples.Margin = new System.Windows.Forms.Padding(2);
       this.chkDetailSamples.Name = "chkDetailSamples";
       this.chkDetailSamples.Size = new System.Drawing.Size(73, 17);
@@ -334,7 +334,7 @@
       this.lstSampleIDs.Location = new System.Drawing.Point(521, 145);
       this.lstSampleIDs.Margin = new System.Windows.Forms.Padding(2);
       this.lstSampleIDs.Name = "lstSampleIDs";
-      this.lstSampleIDs.Size = new System.Drawing.Size(344, 290);
+      this.lstSampleIDs.Size = new System.Drawing.Size(344, 264);
       this.lstSampleIDs.Sorted = true;
       this.lstSampleIDs.TabIndex = 28;
       this.lstSampleIDs.SelectedIndexChanged += new System.EventHandler(this.lstSampleIDs_SelectedIndexChanged);
@@ -508,6 +508,7 @@
             "-- Select analysis --",
             "BBMap...",
             "Build tree...",
+            "Centrifuge...",
             "InfluenzaA...",
             "Kraken2...",
             "Nextstrain...",

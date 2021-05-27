@@ -591,6 +591,10 @@ namespace BioSeqDB
       WSLProxyResponse WSLResponse = null;
       switch (task.TaskType)
       {
+        case "Centrifuge":
+          WSLResponse = ServiceCallHelper.Centrifuge(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+          break;
+
         case "Salmonella":
           WSLResponse = ServiceCallHelper.Salmonella(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
@@ -783,9 +787,25 @@ namespace BioSeqDB
     {
       switch (cmbAnalysis.Text)
       {
+        case "Centrifuge...":
+          BioSeqCentrifuge frmCentrifuge = new BioSeqCentrifuge();
+          DialogResult rc = frmCentrifuge.ShowDialog();
+          if (rc == DialogResult.OK) // then the config has the specs 
+          {
+            Cursor.Current = Cursors.WaitCursor;
+            SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
+
+            CreateNewTask("Centrifuge", AppConfigHelper.TaskMemo, string.Empty);
+            UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
+
+            backgroundWorker.RunWorkerAsync();
+            Cursor.Current = Cursors.Default;
+          }
+          break;
+
         case "Nextstrain...":
           BioSeqNextstrain frmNextstrain = new BioSeqNextstrain();
-          DialogResult rc = frmNextstrain.ShowDialog();
+          rc = frmNextstrain.ShowDialog();
           if (rc == DialogResult.OK) // then the config has the specs 
           {
             Cursor.Current = Cursors.WaitCursor;

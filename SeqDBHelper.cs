@@ -235,7 +235,12 @@ namespace BioSeqDB
       return filename.Substring(0, filename.LastIndexOf("."));
     }
 
-    internal static WSLProxyResponse InfluenzaA()
+    internal static WSLProxyResponse InfluenzaA() // This assumes InfluenzaA will run locally.
+    {
+      throw new NotImplementedException();
+    }
+
+    internal static WSLProxyResponse Centrifuge() // This assumes Centrifuge will run locally.
     {
       throw new NotImplementedException();
     }

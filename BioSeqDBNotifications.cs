@@ -163,6 +163,7 @@ namespace BioSeqDB
         {
           if (IsServiceClass.IsService)
           {
+            // If the task has completed, this brings back the task details and deletes the task file on the server.
             string taskCompleted = BioSeqDBModel.Instance.TaskComplete(AppConfigHelper.LoggedOnUser, task.TaskID);
             if (!string.IsNullOrEmpty(taskCompleted))
             {
@@ -171,6 +172,7 @@ namespace BioSeqDB
               task.LastExitCode = taskFromService.LastExitCode;
               task.StandardOutput = taskFromService.StandardOutput;
               task.TaskComplete = taskFromService.TaskComplete;
+              task.TaskCommand = taskFromService.TaskCommand;
               AppConfigHelper.BackgroundTaskComplete(task); // Mark task Ready and save config.
             }
           }
@@ -200,11 +202,6 @@ namespace BioSeqDB
     private void btnPushTask_Click(object sender, EventArgs e)
     {
       Cursor.Current = Cursors.WaitCursor;
-      if (IsServiceClass.IsService)
-      {
-        //ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // Get any changes made by the service.
-        AppConfigHelper.LastCommand = (string)BioSeqDBModel.Instance.UserConfigAttributeValue("LastCommand", AppConfigHelper.LoggedOnUser);
-      }
 
       BioSeqTask task = AppConfigHelper.TaskOfIndex(lstTasks.SelectedIndex);
       Cursor.Current = Cursors.Default;
@@ -215,6 +212,7 @@ namespace BioSeqDB
         return;
       }
 
+      AppConfigHelper.LastCommand = task.TaskCommand;
       switch (task.TaskType)
       {
         case "VFabricate":
@@ -266,21 +264,37 @@ namespace BioSeqDB
           Cursor.Current = Cursors.Default;
           if (task.LastExitCode == 0)
           {
-            // /usr/local/kraken2/kraken2 --db /data/referenceDB/minikraken2_v1_8GB/ --threads 64 --report kraken.aggregates.txt --use-names --output kraken.txt $contig
-            // conda run -n refseq_masher-0.1.1 refseq_masher matches --output-type tab -o RefseqIdent.txt $contig
-            //string sampleName = string.Empty;
-            //if (AppConfigHelper.SampleChecked("Kraken2"))
-            //{
-            //  sampleName = AppConfigHelper.SampleID("Kraken2");
-            //}
-            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Kraken2"), new string[] { "kraken.aggregates.txt" });
-
-            //destination = DirectoryHelper.CleanPath(destination);
             MessageBox.Show(task.StandardOutput + Environment.NewLine + "Kraken2 completed successfully. Result is in " +
-                                                                             destination + ".", "Success", MessageBoxButtons.OK);
-            if (File.Exists(destination + "kraken.aggregates.txt"))
+                                                         AppConfigHelper.OutputPath("Kraken2") + ".", "Success", MessageBoxButtons.OK);
+            if (AppConfigHelper.OutputPath("Kraken2").StartsWith("[L]"))
             {
-              Process.Start(destination + "kraken.aggregates.txt");
+              string destination = DirectoryHelper.CleanPath(AppConfigHelper.OutputPath("Kraken2")) + "\\";
+              if (File.Exists(destination + "kraken.aggregates.txt"))
+              {
+                File.Delete(destination + "kraken.aggregates.txt");
+              }
+              if (File.Exists(destination + "kraken.txt"))
+              {
+                File.Delete(destination + "kraken.txt");
+              }
+              if (File.Exists(destination + "RefseqIdent.txt"))
+              {
+                File.Delete(destination + "RefseqIdent.txt");
+              }
+              AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Kraken2"),
+                                                            new string[] { "kraken.aggregates.txt", "kraken.txt", "RefseqIdent.txt" });
+              if (File.Exists(destination + "kraken.aggregates.txt"))
+              {
+                Process.Start(destination + "kraken.aggregates.txt");
+              }
+              if (File.Exists(destination + "kraken.txt"))
+              {
+                Process.Start(destination + "kraken.txt");
+              }
+              if (File.Exists(destination + "RefseqIdent.txt"))
+              {
+                Process.Start(destination + "RefseqIdent.txt");
+              }
             }
           }
           break;
@@ -290,7 +304,7 @@ namespace BioSeqDB
 
           if (task.LastExitCode == 0)
           {
-            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("BBMap"), 
+            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("BBMap"),
                                           new string[] { "covhist.txt", "covstats.txt", "bincov.txt", "basecov.txt", "RefseqIdent.txt" });
 
             destination = DirectoryHelper.CleanPath(destination);
@@ -319,7 +333,7 @@ namespace BioSeqDB
             // If the output path is on the server, we need to copy it to the local Temp folder to display the results.
             // If the output path is on the local machine, we need to copy from the user folder on the server to the local destination.
 
-            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Search"), 
+            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Search"),
                                                       new string[] { AppConfigHelper.SearchOutputSampleName() + ".txt" });
             Process.Start(DirectoryHelper.CleanPath(destination) + AppConfigHelper.SearchOutputSampleName() + ".txt");
           }
@@ -354,9 +368,44 @@ namespace BioSeqDB
                   }
                 }
               }
-              MessageBox.Show(task.StandardOutput + Environment.NewLine + "Influenza A pipeline completed successfully. Results copied to " + 
-                              AppConfigHelper.InfluenzaAOutputPath + "\\, including consensus fasta files in sample name subfolder[s].", 
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "Influenza A pipeline completed successfully. Results copied to " +
+                              AppConfigHelper.InfluenzaAOutputPath + "\\, including consensus fasta files in sample name subfolder[s].",
                                                                                               "Files copied", MessageBoxButtons.OK);
+            }
+          }
+          break;
+
+        case "Centrifuge":
+          TaskCompletion(task, "Centrifuge", "Centrifuge completed.");
+
+          Cursor.Current = Cursors.Default;
+          if (task.LastExitCode == 0)
+          {
+            if (IsServiceClass.IsService)
+            {
+              if (AppConfigHelper.CentrifugeOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+              {
+                if (AppConfigHelper.CentrifugeOutputPath.StartsWith("[L]"))
+                {
+                  string destination = DirectoryHelper.CleanPath(AppConfigHelper.CentrifugeOutputPath) + "\\";
+                  if (File.Exists(destination + "centrifuge_res.tsv"))
+                  {
+                    File.Delete(destination + "centrifuge_res.tsv");
+                  }
+                  if (File.Exists(destination + "centrifuge_report.tsv"))
+                  {
+                    File.Delete(destination + "centrifuge_report.tsv");
+                  }
+                  AppConfigHelper.CopyResultFromServer(AppConfigHelper.CentrifugeOutputPath, new string[] { "centrifuge_res.tsv", "centrifuge_report.tsv" });
+
+                  if (File.Exists(destination + "centrifuge_report.tsv"))
+                  {
+                    Process.Start(destination + "centrifuge_report.tsv");
+                  }
+                }
+              }
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "Centrifuge pipeline completed successfully. Results copied to " +
+                                                      AppConfigHelper.CentrifugeOutputPath + ".", "Files copied", MessageBoxButtons.OK);
             }
           }
           break;
@@ -522,7 +571,7 @@ namespace BioSeqDB
             }
             catch (Exception ex)
             {
-              MessageBox.Show("Dendroscope needs to be installed to view the result. Check path " + AppConfigHelper.PathToDendroscope() + 
+              MessageBox.Show("Dendroscope needs to be installed to view the result. Check path " + AppConfigHelper.PathToDendroscope() +
                                   Environment.NewLine + Environment.NewLine + ex.ToString(), "INSTALL DENDROSCOPE", MessageBoxButtons.OK);
             }
           }
@@ -540,7 +589,7 @@ namespace BioSeqDB
 
       string db = string.IsNullOrEmpty(task.TaskDB) ? string.Empty : "Sequence database: " + task.TaskDB;
       string memo = string.IsNullOrEmpty(task.TaskMemo) ? string.Empty : "Memo: " + task.TaskMemo;
-      string subject = "Task completed: " + taskName + " at " + task.TaskComplete.ToString("MMM d, yyyy HH:mm") + " after " + 
+      string subject = "Task completed: " + taskName + " at " + task.TaskComplete.ToString("MMM d, yyyy HH:mm") + " after " +
                         duration.TotalMinutes.ToString("#.0") + " minutes." + Environment.NewLine + (db + " " + Environment.NewLine + memo).Trim();
       string message = subject + Environment.NewLine + AppConfigHelper.LastCommand + Environment.NewLine;
       subject = subject.Replace(Environment.NewLine, "  ");
