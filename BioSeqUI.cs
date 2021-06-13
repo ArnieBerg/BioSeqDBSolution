@@ -14,7 +14,7 @@ namespace BioSeqDB
   public partial class BioSeqUI : Form
   {
     public bool NotificationsIsOpen { get; private set; }
-    public BioSeqDBNotifications frm;
+    public BioSeqDBNotifications frmNotifications;
     //private PleaseWaitDialog pleaseWaitDialog;
     private bool SampleIDsBusyFlag = false;
     private bool VersionsBusyFlag = false;
@@ -86,6 +86,7 @@ namespace BioSeqDB
         txtDB.Text = AppConfigHelper.CurrentDBName();
         txtStandardReference.Text = AppConfigHelper.BuildTreeDomesticReference;
         txtPath.Text = AppConfigHelper.CurrentDBPath();
+        backgroundWorker_CleanUserFolder.RunWorkerAsync();
       }
       catch (Exception ex)
       {
@@ -181,13 +182,18 @@ namespace BioSeqDB
 
       txtStandardReference.Text = AppConfigHelper.BuildTreeDomesticReference; // This may have been updated by the Build tree function.
 
+      OpenNotifications();
+    }
+
+    private void OpenNotifications()
+    {
       if (btnNotifications.Enabled && !NotificationsIsOpen)
       {
         //btnNotifications_Click(null, null); // Automatically open the notifications dialog if it is not open.
-        frm = new BioSeqDBNotifications();
-        frm.FormClosedEvent += NotificationsClosed;
-        frm.StatusChangeEvent += ModelessDialogEvent;
-        frm.Show(this);
+        frmNotifications = new BioSeqDBNotifications();
+        frmNotifications.FormClosedEvent += NotificationsClosed;
+        frmNotifications.StatusChangeEvent += ModelessDialogEvent;
+        frmNotifications.Show(this);
         NotificationsIsOpen = true;
       }
     }
@@ -591,12 +597,28 @@ namespace BioSeqDB
       WSLProxyResponse WSLResponse = null;
       switch (task.TaskType)
       {
+        case "FastQC":
+          WSLResponse = ServiceCallHelper.FastQC(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+          break;
+
+        case "MultiQC":
+          WSLResponse = ServiceCallHelper.MultiQC(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+          break;
+
         case "Centrifuge":
           WSLResponse = ServiceCallHelper.Centrifuge(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
 
+        case "CANS":
+          WSLResponse = ServiceCallHelper.CANS(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+          break;
+
         case "Salmonella":
           WSLResponse = ServiceCallHelper.Salmonella(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+          break;
+
+        case "MetaMaps":
+          WSLResponse = ServiceCallHelper.MetaMaps(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
           break;
 
         case "VFabricate":
@@ -652,13 +674,33 @@ namespace BioSeqDB
         int ret = (int)arguments[0];
         BioSeqTask task = (BioSeqTask)arguments[1];
 
+        if (ret != 0)  // Background task never got off the ground. Activate event in Notifications to report and remove task.
+        {
+          task.LastExitCode = ret;
+          OpenNotifications();
+          frmNotifications.TaskCompletion(task, task.TaskType, task.TaskType + " failed to complete");
+          return;
+        }
+
         switch (task.TaskType)
         {
-          case "Search":
-          case "Kraken2":
+          case "Search": // These analyses all use the option to extract a sample from the current sequence database,
+          case "Kraken2": // and so need to report when that extraction fails.
           case "Quast":
+          case "MetaMaps":
           case "VFabricate":
             ReportExtractError(ret, task.TaskType);
+            break;
+
+          case "FastQC":
+            if (AppConfigHelper.FastQCMultiQC) // Schedule, but don't start this until we know that the background task is done.
+            {
+              if (frmNotifications == null)
+              {
+                frmNotifications = new BioSeqDBNotifications();
+              }
+              frmNotifications.ScheduleMultiQCEvent += ScheduleMultiQC;
+            }
             break;
 
           case "BBMap":
@@ -733,7 +775,7 @@ namespace BioSeqDB
     {
       if (NotificationsIsOpen)
       {
-        frm.Focus();
+        frmNotifications.Focus();
         return;
       }
 
@@ -743,6 +785,23 @@ namespace BioSeqDB
       //frm.StatusChangeEvent += ModelessDialogEvent; 
       //frm.Show(this);
       UpdateNotificationStatus();
+    }
+
+    private void ScheduleMultiQC(object sender, EventArgs e)
+    {
+      Cursor.Current = Cursors.WaitCursor;
+      if (frmNotifications != null)
+      {
+        frmNotifications.ScheduleMultiQCEvent -= ScheduleMultiQC; // Deactivate scheduling mechanism.
+      }
+
+      SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
+
+      CreateNewTask("MultiQC", AppConfigHelper.TaskMemo, string.Empty);
+      UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
+
+      backgroundWorker.RunWorkerAsync();
+      Cursor.Current = Cursors.Default;
     }
 
     private void ModelessDialogEvent(object sender, EventArgs e)
@@ -796,6 +855,70 @@ namespace BioSeqDB
             SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
 
             CreateNewTask("Centrifuge", AppConfigHelper.TaskMemo, string.Empty);
+            UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
+
+            backgroundWorker.RunWorkerAsync();
+            Cursor.Current = Cursors.Default;
+          }
+          break;
+
+        case "CANS...":
+          BioSeqCANS frmCANS = new BioSeqCANS();
+          rc = frmCANS.ShowDialog();
+          if (rc == DialogResult.OK) // then the config has the specs 
+          {
+            Cursor.Current = Cursors.WaitCursor;
+            SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
+
+            CreateNewTask("CANS", AppConfigHelper.TaskMemo, string.Empty);
+            UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
+
+            backgroundWorker.RunWorkerAsync();
+            Cursor.Current = Cursors.Default;
+          }
+          break;
+
+        case "FastQC...":
+          BioSeqFastQC frmBioSeqFastQC = new BioSeqFastQC();
+          rc = frmBioSeqFastQC.ShowDialog();
+          if (rc == DialogResult.OK) // then the config has the specs 
+          {
+            Cursor.Current = Cursors.WaitCursor;
+            SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
+
+            CreateNewTask("FastQC", AppConfigHelper.TaskMemo, string.Empty);
+            UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
+
+            backgroundWorker.RunWorkerAsync();
+            Cursor.Current = Cursors.Default;
+          }
+          break;
+
+        case "MetaMaps...":
+          BioSeqMetaMaps frmBioSeqMetaMaps = new BioSeqMetaMaps();
+          rc = frmBioSeqMetaMaps.ShowDialog();
+          if (rc == DialogResult.OK) // then the config has the specs 
+          {
+            Cursor.Current = Cursors.WaitCursor;
+            SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
+
+            CreateNewTask("MetaMaps", AppConfigHelper.TaskMemo, string.Empty);
+            UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
+
+            backgroundWorker.RunWorkerAsync();
+            Cursor.Current = Cursors.Default;
+          }
+          break;
+
+        case "MultiQC...":
+          BioSeqMultiQC frmBioSeqMultiQC = new BioSeqMultiQC();
+          rc = frmBioSeqMultiQC.ShowDialog();
+          if (rc == DialogResult.OK) // then the config has the specs 
+          {
+            Cursor.Current = Cursors.WaitCursor;
+            SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete); // Schedule a clean up task.
+
+            CreateNewTask("MultiQC", AppConfigHelper.TaskMemo, string.Empty);
             UpdateNotificationStatus();  // Completion will arrive in the Notifications dialog.
 
             backgroundWorker.RunWorkerAsync();
@@ -967,6 +1090,11 @@ namespace BioSeqDB
       }
 
       return list;
+    }
+
+    private void backgroundWorker_CleanUserFolder_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+    {
+      e.Result = ServiceCallHelper.CleanUserFolder(AppConfigHelper.LoggedOnUser);
     }
 
     private void backgroundWorker_Versions_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)

@@ -214,6 +214,27 @@ namespace BioSeqDB
       return SeqDBHelper.InfluenzaA();
     }
 
+    internal static WSLProxyResponse MetaMaps(string loggedOnUser, string config)
+    {
+      if (IsServiceClass.IsService)
+      {
+        return BioSeqDBModel.Instance.MetaMaps(loggedOnUser, config);
+      }
+
+      return SeqDBHelper.MetaMaps();
+    }
+
+    internal static WSLProxyResponse FastQC(string loggedOnUser, string config)
+    {
+
+      return BioSeqDBModel.Instance.FastQC(loggedOnUser, config);
+    }
+
+    internal static WSLProxyResponse MultiQC(string loggedOnUser, string config)
+    {
+      return BioSeqDBModel.Instance.MultiQC(loggedOnUser, config);
+    }
+
     internal static WSLProxyResponse Centrifuge(string loggedOnUser, string config)
     {
       if (IsServiceClass.IsService)
@@ -450,6 +471,16 @@ namespace BioSeqDB
       }
 
       AppConfigHelper.WriteLIMSData(LIMSList);
+    }
+
+    internal static WSLProxyResponse CANS(string loggedOnUser, string config)
+    {
+      return BioSeqDBModel.Instance.CANS(loggedOnUser, config);
+    }
+
+    internal static object CleanUserFolder(string loggedOnUser)
+    {
+      return BioSeqDBModel.Instance.CleanUserFolder(loggedOnUser);
     }
   }
 }

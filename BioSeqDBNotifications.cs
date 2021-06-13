@@ -16,6 +16,7 @@ namespace BioSeqDB
     public delegate void infoevent(object sender, EventArgs e);
     public event infoevent StatusChangeEvent;
     public event infoevent FormClosedEvent;
+    public event infoevent ScheduleMultiQCEvent;
     private Timer timer1;
 
     private string TaskFilter;
@@ -114,7 +115,7 @@ namespace BioSeqDB
     {
       timer1 = new Timer();
       timer1.Tick += new EventHandler(timer1_Tick);
-      timer1.Interval = 20000; // in milliseconds
+      timer1.Interval = 5000; // in milliseconds
       timer1.Start();
     }
 
@@ -349,17 +350,15 @@ namespace BioSeqDB
           Cursor.Current = Cursors.Default;
           if (task.LastExitCode == 0)
           {
-            //MessageBox.Show(task.StandardOutput + Environment.NewLine + "InfluenzaA completed successfully. Result is in the " +
-            //                AppConfigHelper.InfluenzaAOutputPath + " folder.", "Success", MessageBoxButtons.OK);
             if (IsServiceClass.IsService)
             {
               if (AppConfigHelper.InfluenzaAOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
               {
                 // For each sample that was processed, there is a subfolder in the UserFolder on the server named after the sample name. 
                 // That subfolder needs to be copied to the local output folder. Note that we only copy the <sample>\consensus contents.
-                foreach (string sampleName in AppConfigHelper.InfluenzaASamplesList.Keys)
+                foreach (string sampleName in AppConfigHelper.InfluenzaASampleList.Keys)
                 {
-                  if (AppConfigHelper.InfluenzaASamplesList[sampleName].Substring(0, 1) == "1")
+                  if (AppConfigHelper.InfluenzaASampleList[sampleName].Substring(0, 1) == "1")
                   {
                     string sourceFolderName = "[S]" + AppConfigHelper.UserFolder() + sampleName + "\\consensus\\";
                     Directory.CreateDirectory(DirectoryHelper.CleanPath(AppConfigHelper.InfluenzaAOutputPath) + "\\" + sampleName + "\\");
@@ -375,6 +374,122 @@ namespace BioSeqDB
           }
           break;
 
+        case "CANS":
+          TaskCompletion(task, "CANS", "CANS completed.");
+
+          Cursor.Current = Cursors.Default;
+          if (task.LastExitCode == 0)
+          {
+            if (IsServiceClass.IsService)
+            {
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "CANS pipeline completed successfully. Results copied to " +
+                              AppConfigHelper.CANSOutputPath + ".  The report_summary.html file consolidates statistics from all samples processed.",
+                                                                                                            "Files copied", MessageBoxButtons.OK);
+              if (AppConfigHelper.CANSOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+              {
+                // For each sample that was processed, there is a subfolder in the UserFolder on the server named after the sample name. 
+                // That subfolder needs to be copied to the local output folder. 
+                foreach (string sampleName in AppConfigHelper.CANSSampleList.Keys)
+                {
+                  if (AppConfigHelper.CANSSampleList[sampleName].Substring(0, 1) == "1")
+                  {
+                    DirectoryHelper.FolderCopy("[S]" + AppConfigHelper.UserFolder() + sampleName, AppConfigHelper.CANSOutputPath + "\\" + sampleName + "\\");
+                  }
+                }
+                DirectoryHelper.FileCopy("[S]" + AppConfigHelper.UserFolder() + "report_summary.html", AppConfigHelper.CANSOutputPath + "\\", true);
+                Process.Start(DirectoryHelper.CleanPath(AppConfigHelper.CANSOutputPath + "\\report_summary.html"));
+              }
+            }
+          }
+          break;
+
+        case "FastQC":
+          TaskCompletion(task, "FastQC", "FastQC completed.");
+
+          Cursor.Current = Cursors.Default;
+          int fileCt = 0;
+          if (task.LastExitCode == 0)
+          {
+            if (IsServiceClass.IsService)
+            {
+              if (AppConfigHelper.FastQCMultiQC) // Follow up with MultiQC of the same output folder as input.
+              {
+                AppConfigHelper.MultiQCInputPath = AppConfigHelper.UserFolder() + "FastQC\\"; // Pick up the output from FastQC as input to MultiQC.
+                ScheduleMultiQCEvent?.Invoke(this, null); // Notify parent to submit MultiQC.
+              }
+
+              if (AppConfigHelper.FastQCOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+              {
+                string destination = AppConfigHelper.FastQCOutputPath + "\\";
+                DirInfo dirInfo = BioSeqDBModel.Instance.GetFolderContents(AppConfigHelper.UserFolder() + "FastQC", null);
+                List<string> fileList = new List<string>();
+
+                foreach (DirData dirData in dirInfo.files)
+                {
+                  if (dirData.Name.ToUpper().EndsWith("HTML"))
+                  {
+                    string filename = Path.GetFileName(dirData.Name);
+                    fileList.Add(filename);
+                    string copyTo = DirectoryHelper.CleanPath(destination) + filename;
+                    if (File.Exists(copyTo))
+                    {
+                      File.Delete(copyTo);
+                    }
+                  }
+                }
+
+                //MessageBox.Show("dirInfo of " + AppConfigHelper.UserFolder() + "FastQC contains " + dirInfo.files.Count.ToString() + " files, " +
+                //                        fileList.Count.ToString() + " to be copied to " + destination + ", first one being " + fileList[0] + ".");
+
+                AppConfigHelper.CopyResultFromServer(destination, fileList.ToArray(), true, "FastQC\\");
+
+                foreach (DirData dirData in dirInfo.files)
+                {
+                  string filename = Path.GetFileName(dirData.Name);
+                  string copyTo = DirectoryHelper.CleanPath(destination) + filename;
+                  if (dirData.Name.ToUpper().EndsWith("HTML") && File.Exists(copyTo))
+                  {
+                    Process.Start(copyTo);
+                  }
+                }
+
+                fileCt = fileList.Count;
+              }
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "FastQC analysis completed successfully. Results copied to " +
+                                                      AppConfigHelper.FastQCOutputPath + ". " + fileCt.ToString() + " file" + (fileCt != 1 ? "s" : string.Empty) +
+                                                                                                            " copied.", "FastQC completed", MessageBoxButtons.OK);
+            }
+          }
+          break;
+
+        case "MultiQC":
+          TaskCompletion(task, "MultiQC", "MultiQC completed.");
+
+          Cursor.Current = Cursors.Default;
+          if (task.LastExitCode == 0)
+          {
+            if (IsServiceClass.IsService)
+            {
+              if (AppConfigHelper.MultiQCOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+              {
+                string destination = DirectoryHelper.CleanPath(AppConfigHelper.MultiQCOutputPath) + "\\";
+                if (File.Exists(destination + "multiqc_report.html"))
+                {
+                  File.Delete(destination + "multiqc_report.html");
+                }
+                AppConfigHelper.CopyResultFromServer(AppConfigHelper.MultiQCOutputPath, new string[] { "multiqc_report.html" }, true, "MultiQC\\");
+
+                if (File.Exists(destination + "multiqc_report.html"))
+                {
+                  Process.Start(destination + "multiqc_report.html");
+                }
+              }
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "MultiQC analysis completed successfully. Results copied to " +
+                                                      AppConfigHelper.MultiQCOutputPath + ".", "MultiQC completed", MessageBoxButtons.OK);
+            }
+          }
+          break;
+
         case "Centrifuge":
           TaskCompletion(task, "Centrifuge", "Centrifuge completed.");
 
@@ -385,27 +500,56 @@ namespace BioSeqDB
             {
               if (AppConfigHelper.CentrifugeOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
               {
-                if (AppConfigHelper.CentrifugeOutputPath.StartsWith("[L]"))
+                string destination = DirectoryHelper.CleanPath(AppConfigHelper.CentrifugeOutputPath) + "\\";
+                if (File.Exists(destination + "centrifuge_res.tsv"))
                 {
-                  string destination = DirectoryHelper.CleanPath(AppConfigHelper.CentrifugeOutputPath) + "\\";
-                  if (File.Exists(destination + "centrifuge_res.tsv"))
-                  {
-                    File.Delete(destination + "centrifuge_res.tsv");
-                  }
-                  if (File.Exists(destination + "centrifuge_report.tsv"))
-                  {
-                    File.Delete(destination + "centrifuge_report.tsv");
-                  }
-                  AppConfigHelper.CopyResultFromServer(AppConfigHelper.CentrifugeOutputPath, new string[] { "centrifuge_res.tsv", "centrifuge_report.tsv" });
+                  File.Delete(destination + "centrifuge_res.tsv");
+                }
+                if (File.Exists(destination + "centrifuge_report.tsv"))
+                {
+                  File.Delete(destination + "centrifuge_report.tsv");
+                }
+                AppConfigHelper.CopyResultFromServer(AppConfigHelper.CentrifugeOutputPath, new string[] { "centrifuge_res.tsv", "centrifuge_report.tsv" });
 
-                  if (File.Exists(destination + "centrifuge_report.tsv"))
-                  {
-                    Process.Start(destination + "centrifuge_report.tsv");
-                  }
+                if (File.Exists(destination + "centrifuge_report.tsv"))
+                {
+                  Process.Start(destination + "centrifuge_report.tsv");
                 }
               }
               MessageBox.Show(task.StandardOutput + Environment.NewLine + "Centrifuge pipeline completed successfully. Results copied to " +
                                                       AppConfigHelper.CentrifugeOutputPath + ".", "Files copied", MessageBoxButtons.OK);
+            }
+          }
+          break;
+
+        case "MetaMaps":
+          TaskCompletion(task, "MetaMaps", "MetaMaps completed.");
+
+          Cursor.Current = Cursors.Default;
+          if (task.LastExitCode == 0)
+          {
+            if (IsServiceClass.IsService)
+            {
+              if (AppConfigHelper.MetaMapsOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+              {
+                if (AppConfigHelper.MetaMapsOutputPath.StartsWith("[L]"))
+                {
+                  string destination = DirectoryHelper.CleanPath(AppConfigHelper.MetaMapsOutputPath) + "\\";
+                  if (File.Exists(destination + "MetaMaps_Index.EM.WIMP"))
+                  {
+                    File.Delete(destination + "MetaMaps_Index.EM.WIMP");
+                  }
+                  AppConfigHelper.CopyResultFromServer(AppConfigHelper.MetaMapsOutputPath, new string[] { "MetaMaps_Index.EM.WIMP" });
+
+                  if (File.Exists(destination + "MetaMaps_Index.EM.WIMP"))
+                  {
+                    File.Move(destination + "MetaMaps_Index.EM.WIMP", destination + "MetaMaps_Index.EM.WIMP.tsv");
+                    Process.Start(destination + "MetaMaps_Index.EM.WIMP.tsv");
+                  }
+                }
+              }
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "MetaMaps pipeline completed successfully. Results copied to " +
+                                                      AppConfigHelper.MetaMapsOutputPath + ".", "Files copied", MessageBoxButtons.OK);
             }
           }
           break;
@@ -580,10 +724,11 @@ namespace BioSeqDB
       UIThreadRefresh(sender, e);
     }
 
-    private void TaskCompletion(BioSeqTask task, string taskName, string successMsg)
+    public void TaskCompletion(BioSeqTask task, string taskName, string successMsg)
     {
       // Called by the user from the Push button when task status is Ready.
       Cursor.Current = Cursors.WaitCursor;
+      UIThreadRefresh(null, null);
 
       TimeSpan duration = task.TaskComplete - task.TaskTime;
 
@@ -604,7 +749,7 @@ namespace BioSeqDB
       {
         linuxCapture = BioSeqDBModel.Instance.ReadAllText(filename, AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // We know it is on the server.
         int residual = 6000;
-        if (linuxCapture.Length > residual)
+        if (linuxCapture != null && linuxCapture.Length > residual)
         {
           // Write the whole thing to a log file that can be opened separately.
           string tasklog = "C:\\Temp\\TaskLog.txt";
@@ -618,7 +763,7 @@ namespace BioSeqDB
 
       SuccessDialog.MainInstruction = successMsg;
       SuccessDialog.Content = output;
-      if (linuxCapture.Length > 0 && output.IndexOf(linuxCapture) == -1)
+      if (linuxCapture != null && linuxCapture.Length > 0 && output.IndexOf(linuxCapture) == -1)
       {
         SuccessDialog.Content += (output.Length > 0 ? Environment.NewLine : string.Empty) + linuxCapture;
       }
@@ -631,10 +776,15 @@ namespace BioSeqDB
       }
       SuccessDialog.ShowDialog(this);
 
+      Cursor.Current = Cursors.WaitCursor;
+
       RemoveTask(false); // Do this as soon as possible to reflect the user's closing of the dialog.
       StatusChangeEvent?.Invoke(this, null); // Notify parent we have a potential status change.
 
-      message += linuxCapture;
+      if (linuxCapture != null)
+      {
+        message += linuxCapture;
+      }
       User user = AppConfigHelper.seqdbConfigGlobal.Users[AppConfigHelper.LoggedOnUser];
       if (user.EmailNotifications)
       {

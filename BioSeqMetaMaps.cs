@@ -7,32 +7,34 @@ using System.Windows.Forms;
 
 namespace BioSeqDB
 {
-  public partial class BioSeqCentrifuge : Form
+  public partial class BioSeqMetaMaps : Form
   {
-    // Perform Influenza A analysis from Nanopore data using Centrifuge database.
+    // Perform MetaMaps analysis from Nanopore data using MetaMaps database.
 
-    public BioSeqCentrifuge()
+    public BioSeqMetaMaps()
     {
       InitializeComponent();
       btnOK.Enabled = false;
 
-      txtCentrifugePath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.CentrifugeReferencePath);
-      lblCentrifugeDBName.Text = GetCentrifugeDBName();
-      txtOutputPath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.CentrifugeOutputPath);
-      txtInputPath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.CentrifugeFastqPath);
-      txtThreads.Text = string.IsNullOrEmpty(AppConfigHelper.CentrifugeThreads) ? "4" : AppConfigHelper.CentrifugeThreads.ToString();
-      txtMaxAssignments.Text = string.IsNullOrEmpty(AppConfigHelper.CentrifugeMaxAssignments) ? "50" : AppConfigHelper.CentrifugeMaxAssignments.ToString();
+      txtReferencePath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.MetaMapsReferencePath);
+      txtOutputPath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.MetaMapsOutputPath);
+      txtInputPath.Text = DirectoryHelper.UnCleanPath(AppConfigHelper.MetaMapsInputFile);
+      txtThreads.Text = string.IsNullOrEmpty(AppConfigHelper.MetaMapsThreads) ? "4" : AppConfigHelper.MetaMapsThreads.ToString();
+      txtMinReadLength.Text = string.IsNullOrEmpty(AppConfigHelper.MetaMapsMinReadLength) ? "2000" : AppConfigHelper.MetaMapsMinReadLength.ToString();
+      txtMaxMemory.Text = string.IsNullOrEmpty(AppConfigHelper.MetaMapsMaxMemory) ? "40" : AppConfigHelper.MetaMapsMaxMemory.ToString();
+      txtMaxReads.Text = string.IsNullOrEmpty(AppConfigHelper.MetaMapsMaxReads) ? "40" : AppConfigHelper.MetaMapsMaxReads.ToString();
+      chkOnlyBestMappings.Checked = AppConfigHelper.MetaMapsOnlyBestMappings;
 
       EnableOK();
 
       if (Size.Width != 0)
       {
-        Location = AppConfigHelper.CentrifugeLocation();
+        Location = AppConfigHelper.MetaMapsLocation();
         if (Location.X <= 0)
         {
           Location = new Point(100, 100);
         }
-        Size = AppConfigHelper.CentrifugeSize();
+        Size = AppConfigHelper.MetaMapsSize();
         if (Size.Height <= 0 || Size.Width <= 0)
         {
           Size = new Size(1000, 1000);
@@ -42,15 +44,23 @@ namespace BioSeqDB
 
     private void EnableOK()
     {
-      btnOK.Enabled = txtCentrifugePath.Text.Trim().Length > 0 && txtOutputPath.Text.Trim().Length > 0 && txtInputPath.Text.Trim().Length > 0 && txtThreads.Text.Trim().Length > 0;
+      btnOK.Enabled = txtReferencePath.Text.Trim().Length > 0 && txtOutputPath.Text.Trim().Length > 0 && txtInputPath.Text.Trim().Length > 0 && txtThreads.Text.Trim().Length > 0;
     }
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-      if (!DirectoryHelper.DirectoryExists(AppConfigHelper.NormalizePathToWindows(txtCentrifugePath.Text)))
+      if (!DirectoryHelper.FileExists(AppConfigHelper.NormalizePathToWindows(txtReferencePath.Text)))
       {
-        MessageBox.Show(txtCentrifugePath.Text + " does not exist. Choose a valid Centrifuge database path.", "Invalid Centrifuge database path", MessageBoxButtons.OK);
-        txtCentrifugePath.Focus();
+        MessageBox.Show(txtReferencePath.Text + " does not exist. Choose a valid MetaMaps database file.", "Invalid MetaMaps database file", MessageBoxButtons.OK);
+        txtReferencePath.Focus();
+        DialogResult = DialogResult.None;
+        return;
+      }
+
+      if (!DirectoryHelper.FileExists(AppConfigHelper.NormalizePathToWindows(txtInputPath.Text.Trim())))
+      {
+        MessageBox.Show(txtInputPath.Text.Trim() + " does not exist. Choose a valid fastq read file.", "Invalid fastq read file", MessageBoxButtons.OK);
+        txtInputPath.Focus();
         DialogResult = DialogResult.None;
         return;
       }
@@ -63,64 +73,44 @@ namespace BioSeqDB
         return;
       }
 
-      AppConfigHelper.CentrifugeParms(txtCentrifugePath.Text.Trim(), txtOutputPath.Text.Trim(), txtInputPath.Text.Trim(),
-                                              txtMemo.Text.Trim(), txtThreads.Text, txtMaxAssignments.Text.Trim());
+      AppConfigHelper.MetaMapsParms(txtReferencePath.Text.Trim(), txtOutputPath.Text.Trim(), txtInputPath.Text.Trim(),
+                                              txtMemo.Text.Trim(), txtThreads.Text.Trim(), txtMinReadLength.Text.Trim(),
+                                              txtMaxMemory.Text.Trim(), txtMaxReads.Text.Trim(), chkOnlyBestMappings.Checked);
     }
 
-    private void btnCentrifugePath_Click(object sender, EventArgs e)
+    private void btnReferencePath_Click(object sender, EventArgs e)
     {
       if (IsServiceClass.IsService)
       {
-        string path = AppConfigHelper.NormalizePathToWindows(txtCentrifugePath.Text + "\\");
+        string path = AppConfigHelper.NormalizePathToWindows(txtReferencePath.Text);
         Cursor.Current = Cursors.WaitCursor;
-        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Path to Centrifuge reference database",
-                                            DirectoryHelper.IsServerPath(txtCentrifugePath.Text), DirectoryHelper.CleanPath(path),
+        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Path to MetaMaps reference database",
+                                            DirectoryHelper.IsServerPath(txtReferencePath.Text), DirectoryHelper.CleanPath(path),
                                             string.Empty, null, AppConfigHelper.UbuntuPrefix());
         Explorer.frmExplorer.ServerOnly = true;
         Cursor.Current = Cursors.Default;
         Explorer.frmExplorer.ShowDialog();
         if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
         {
-          txtCentrifugePath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
+          txtReferencePath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
         }
         Explorer.frmExplorer = null;
       }
       else
       {
         VistaFolderBrowserDialog ofn = new VistaFolderBrowserDialog();
-        ofn.Description = "Path to Centrifuge reference database";
+        ofn.Description = "Path to MetaMaps reference database";
         ofn.SelectedPath = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text);
         ofn.ShowNewFolderButton = true;
         ofn.UseDescriptionForTitle = true;
 
         if (ofn.ShowDialog() != DialogResult.Cancel)
         {
-          txtCentrifugePath.Text = ofn.SelectedPath.Trim();
+          txtReferencePath.Text = ofn.SelectedPath.Trim();
         }
       }
-
-      lblCentrifugeDBName.Text = GetCentrifugeDBName();
 
       EnableOK();
-    }
-
-    private string GetCentrifugeDBName()
-    {
-      string lblCentrifugeDBName = "Centrifuge database name: ";
-
-      if (!string.IsNullOrEmpty(txtCentrifugePath.Text.Trim()))
-      {
-        string centrifugeDBName = ServiceCallHelper.CentrifugeDatabaseName(txtCentrifugePath.Text);
-        if (!string.IsNullOrEmpty(centrifugeDBName))
-        {
-          lblCentrifugeDBName += centrifugeDBName;
-        }
-        else
-        {
-          lblCentrifugeDBName = txtCentrifugePath.Text + " is not a valid Centrifuge database path.";
-        }
-      }
-      return lblCentrifugeDBName;
     }
 
     private void btnOutputPath_Click(object sender, EventArgs e)
@@ -157,13 +147,13 @@ namespace BioSeqDB
       EnableOK();
     }
 
-    private void txtThreads_KeyPress(object sender, KeyPressEventArgs e)
+    private void txt_KeyPress(object sender, KeyPressEventArgs e)
     {
       e.Handled = (!Char.IsNumber(e.KeyChar) && e.KeyChar != (Char)Keys.Back &&
                       e.KeyChar != (Char)Keys.Delete) || e.KeyChar == '.';  // Numerics only  isNumeric
     }
 
-    private void txtThreads_TextChanged(object sender, EventArgs e)
+    private void txt_TextChanged(object sender, EventArgs e)
     {
       EnableOK();
     }
@@ -178,32 +168,21 @@ namespace BioSeqDB
       EnableOK();
     }
 
-    private void txtCentrifugePath_TextChanged(object sender, EventArgs e)
+    private void txtReferencePath_TextChanged(object sender, EventArgs e)
     {
       EnableOK();
     }
 
-    private void BioSeqCentrifuge_FormClosing(object sender, FormClosingEventArgs e)
+    private void BioSeqMetaMaps_FormClosing(object sender, FormClosingEventArgs e)
     {
-      AppConfigHelper.SaveCentrifugeUIForm(Location, Size);
-    }
-
-    private void txtMaxAssignments_KeyPress(object sender, KeyPressEventArgs e)
-    {
-      e.Handled = (!Char.IsNumber(e.KeyChar) && e.KeyChar != (Char)Keys.Back &&
-                e.KeyChar != (Char)Keys.Delete) || e.KeyChar == '.';  // Numerics only  isNumeric
-    }
-
-    private void txtMaxAssignments_TextChanged(object sender, EventArgs e)
-    {
-      EnableOK();
+      AppConfigHelper.SaveMetaMapsUIForm(Location, Size);
     }
 
     private void btnFindInputPath_Click(object sender, EventArgs e)
     {
-      string path = AppConfigHelper.NormalizePathToWindows(txtInputPath.Text + "\\"); // We want a folder.
+      string path = AppConfigHelper.NormalizePathToWindows(txtInputPath.Text); // We want a file.
       Cursor.Current = Cursors.WaitCursor;
-      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folder with .fastq files",
+      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to .fastq file with reads",
                                           DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
                                           string.Empty, null, AppConfigHelper.UbuntuPrefix());
       Explorer.frmExplorer.ShowDialog();

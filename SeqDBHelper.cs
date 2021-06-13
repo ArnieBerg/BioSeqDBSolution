@@ -221,6 +221,11 @@ namespace BioSeqDB
       return WSLResponse;
     }
 
+    internal static WSLProxyResponse MetaMaps()
+    {
+      throw new NotImplementedException();
+    }
+
     internal static string CentrifugeDatabaseName(string centrifugeDBPath)
     {
       DirectoryInfo directoryInfo = new DirectoryInfo(centrifugeDBPath.Trim());

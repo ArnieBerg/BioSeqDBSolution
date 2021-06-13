@@ -21,20 +21,6 @@ namespace BioSeqDB
 
     public static NextstrainProfile GetNextstrainProfile()
     {
-      //public string MetadataPath { get; set; }
-      //public string ReferencePath { get; set; }
-      //public string OuputPath { get; set; }
-      //public int SNPCutoff { get; set; }
-      //public int ClusterCutoff { get; set; }
-      //public int MinGenomeLength { get; set; }
-      //public int MaskFromBeginning { get; set; }
-      //public int MaskFromEnd { get; set; }
-      //public int NumberOfThreads { get; set; }
-      //public string MaskSites { get; set; }
-      //public string RootNode { get; set; }
-      //public DateTime MinDateFilter { get; set; }
-      //public DateTime MinDate { get; set; }
-
       SeqDB db = seqdbConfig.Current();
       NextstrainProfile nextstrainProfile = db.NextstrainProfile == null ? new NextstrainProfile() : db.NextstrainProfile;
       nextstrainProfile.SNPCutoff = nextstrainProfile.SNPCutoff == 0 ? 25 : nextstrainProfile.SNPCutoff;
@@ -44,6 +30,25 @@ namespace BioSeqDB
       nextstrainProfile.NumberOfThreads = nextstrainProfile.NumberOfThreads == 0 ? 2 : nextstrainProfile.NumberOfThreads;
 
       return nextstrainProfile;
+    }
+
+    internal static void MultiQCParms(string Output, string Input, string Memo)
+    {
+      seqdbConfig.MultiQCOutputPath = Output;
+      seqdbConfig.MultiQCInputPath = Input;
+      seqdbConfig.TaskMemo = Memo;
+      SaveConfig();
+    }
+
+    internal static void FastQCParms(string Output, string Input, string Memo, string Threads, bool Consolidate, bool MultiQC)
+    {
+      seqdbConfig.FastQCOutputPath = Output;
+      seqdbConfig.FastQCInputPath = Input;
+      seqdbConfig.FastQCThreads = int.Parse(Threads);
+      seqdbConfig.FastQCConsolidate = Consolidate;
+      seqdbConfig.FastQCMultiQC = MultiQC;
+      seqdbConfig.TaskMemo = Memo;
+      SaveConfig();
     }
 
     public static string LoggedOnUser
@@ -95,6 +100,21 @@ namespace BioSeqDB
     {
       seqdbConfigGlobal.Users[LoggedOnUser].LogoutTime = DateTime.Now; // This information will eventually get to the service for permanent recording.
       SaveConfigGlobal();
+    }
+
+    internal static void CANSParms(string ReferencePath, string OutputPath, string Memo, bool Trim, string Threads, string ExpectedLength, 
+                                                                      string ReadLengthDeviation, string TargetCoverage, string Model)
+    {
+      seqdbConfig.CANSReferencePath = ReferencePath; 
+      seqdbConfig.CANSChooseTrim = Trim;
+      seqdbConfig.TaskMemo = Memo;
+      seqdbConfig.CANSOutputPath = OutputPath;
+      seqdbConfig.CANSThreads = int.Parse(Threads);
+      seqdbConfig.CANSModel = Model;
+      seqdbConfig.CANSExpectedLength = string.IsNullOrEmpty(ExpectedLength) ? 0 : int.Parse(ExpectedLength);
+      seqdbConfig.CANSReadLengthDeviation = string.IsNullOrEmpty(ReadLengthDeviation) ? 0 : int.Parse(ReadLengthDeviation);
+      seqdbConfig.CANSTargetCoverage = string.IsNullOrEmpty(TargetCoverage) ? 0 : int.Parse(TargetCoverage);
+      SaveConfig();
     }
 
     //public static void StartTimer()
@@ -182,18 +202,25 @@ namespace BioSeqDB
       {
         QuerySamples = seqdbConfig.AssembleQueryListTrinity;
       }
-
-      foreach (string query in QuerySamples)
+      if (AssembleTracy())
       {
-        if (query.StartsWith("1"))
+        QuerySamples = seqdbConfig.AssembleQueryListTracy;
+      }
+
+      if (QuerySamples != null)
+      {
+        foreach (string query in QuerySamples)
         {
-          // The last subfolder becomes the sample name.
-          string q = query;
-          if (q.EndsWith("\\"))
+          if (query.StartsWith("1"))
           {
-            q = q.Substring(0, q.Length - 1);
+            // The last subfolder becomes the sample name.
+            string q = query;
+            if (q.EndsWith("\\"))
+            {
+              q = q.Substring(0, q.Length - 1);
+            }
+            config += q.Substring(q.LastIndexOf("\\") + 1) + "," + NormalizePathToLinux(DirectoryHelper.CleanPath(q.Substring(1))) + Environment.NewLine;
           }
-          config += q.Substring(q.LastIndexOf("\\") + 1) + "," + NormalizePathToLinux(DirectoryHelper.CleanPath(q.Substring(1))) + Environment.NewLine;
         }
       }
       return config;
@@ -341,6 +368,19 @@ namespace BioSeqDB
       }
     }
 
+    public static string AssembleLastQueryFolderTracy
+    {
+      get
+      {
+        return seqdbConfig.AssembleLastQueryFolderTracy ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.AssembleLastQueryFolderTracy = value;
+        SaveConfig();
+      }
+    }
+
     public static string AssembleVFGeneXRef
     {
       get
@@ -350,6 +390,19 @@ namespace BioSeqDB
       set
       {
         seqdbConfig.AssembleVFGeneXRef = value;
+        SaveConfig();
+      }
+    }
+
+    public static string AssembleTracyReference
+    {
+      get
+      {
+        return seqdbConfig.AssembleTracyReference ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.AssembleTracyReference = value;
         SaveConfig();
       }
     }
@@ -430,7 +483,7 @@ namespace BioSeqDB
       return seqdbConfig.AssembleBBMap;
     }
 
-    public static string CopyResultFromServer(string outputPath, string[] names, bool isFiles = true)
+    public static string CopyResultFromServer(string outputPath, string[] names, bool isFiles = true, string userSubFolder = "")
     {
       // If the output path is on the server, we need to copy it to the local Temp folder to display the results.
       // If the output path is on the local machine, we need to copy from the user folder on the server to the local destination.
@@ -440,7 +493,7 @@ namespace BioSeqDB
       if (outputPath.StartsWith("[L]"))  // Copy from user folder on server to OutputPath.
       {
         destination = source;
-        source = "[S]" + UserFolder();
+        source = "[S]" + UserFolder() + userSubFolder;
       }
 
       if (!isFiles) // Copy folders.
@@ -536,6 +589,11 @@ namespace BioSeqDB
       return seqdbConfig.AssembleTrinity;
     }
 
+    public static bool AssembleTracy()
+    {
+      return seqdbConfig.AssembleTracy;
+    }
+
     public static bool BuildTreeFastTree()
     {
       SeqDB db = seqdbConfig.Current();
@@ -604,6 +662,21 @@ namespace BioSeqDB
       return db.BBMapFastqPath ?? string.Empty;
     }
 
+    internal static void MetaMapsParms(string ReferencePath, string OutputPath, string InputPath, string Memo, string Threads, 
+                                                    string MinReadLength, string MaxMemory, string MaxReads, bool OnlyBestMappings)
+    {
+      seqdbConfig.TaskMemo = Memo;
+      seqdbConfig.MetaMapsInputFile = InputPath;
+      seqdbConfig.MetaMapsMaxMemory = string.IsNullOrEmpty(MaxMemory) ? 0 : int.Parse(MaxMemory);
+      seqdbConfig.MetaMapsMaxReads = string.IsNullOrEmpty(MaxReads) ? 0 : int.Parse(MaxReads);
+      seqdbConfig.MetaMapsMinReadLength = string.IsNullOrEmpty(MinReadLength) ? 0 : int.Parse(MinReadLength);
+      seqdbConfig.MetaMapsOnlyBestMappings = OnlyBestMappings;
+      seqdbConfig.MetaMapsOutputPath = OutputPath;
+      seqdbConfig.MetaMapsReferencePath = ReferencePath;
+      seqdbConfig.MetaMapsThreads = string.IsNullOrEmpty(Threads) ? 0 : int.Parse(Threads);
+      SaveConfig();
+    }
+
     internal static void CentrifugeParms(string CentrifugeReferencePath, string OutputPath, string InputPath, string Memo, string Threads, string MaxAssignments)
     {
       seqdbConfig.CentrifugeReferencePath = CentrifugeReferencePath; // Path to database
@@ -615,8 +688,7 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    public static void InfluenzaAParms(string CentrifugePath, string OutputPath, string Memo, bool Trim, string Threads, 
-                                                                                    string SegmentsToAssemble, string model)
+    public static void InfluenzaAParms(string CentrifugePath, string OutputPath, string Memo, bool Trim, string Threads, string SegmentsToAssemble, string model)
     {
       seqdbConfig.CentrifugeReferencePath = CentrifugePath; // The reference genome is a Centrifuge database.
       seqdbConfig.InfluenzaAChooseTrim = Trim;
@@ -1249,6 +1321,11 @@ namespace BioSeqDB
       return seqdbConfig.AssembleQueryListRAFlye ?? null;
     }
 
+    internal static List<string> AssembleQueryListTracy()
+    {
+      return seqdbConfig.AssembleQueryListTracy ?? null;
+    }
+
     public static List<string> AssembleQueryListTrinity()
     {
       return seqdbConfig.AssembleQueryListTrinity ?? null;
@@ -1284,6 +1361,15 @@ namespace BioSeqDB
       SaveConfig();
     }
 
+    internal static void SaveCANSUIForm(Point location, Size size)
+    {
+      seqdbConfig.CANSX = location.X;
+      seqdbConfig.CANSY = location.Y;
+      seqdbConfig.CANSW = size.Width;
+      seqdbConfig.CANSH = size.Height;
+      SaveConfig();
+    }
+
     public static void SaveInfluenzaAUIForm(Point location, Size size)
     {
       seqdbConfig.InfluenzaAX = location.X;
@@ -1293,12 +1379,39 @@ namespace BioSeqDB
       SaveConfig();
     }
 
+    internal static void SaveMultiQCUIForm(Point location, Size size)
+    {
+      seqdbConfig.MultiQCX = location.X;
+      seqdbConfig.MultiQCY = location.Y;
+      seqdbConfig.MultiQCW = size.Width;
+      seqdbConfig.MultiQCH = size.Height;
+      SaveConfig();
+    }
+
+    internal static void SaveFastQCUIForm(Point location, Size size)
+    {
+      seqdbConfig.FastQCX = location.X;
+      seqdbConfig.FastQCY = location.Y;
+      seqdbConfig.FastQCW = size.Width;
+      seqdbConfig.FastQCH = size.Height;
+      SaveConfig();
+    }
+
     internal static void SaveCentrifugeUIForm(Point location, Size size)
     {
       seqdbConfig.CentrifugeX = location.X;
       seqdbConfig.CentrifugeY = location.Y;
       seqdbConfig.CentrifugeW = size.Width;
       seqdbConfig.CentrifugeH = size.Height;
+      SaveConfig();
+    }
+
+    internal static void SaveMetaMapsUIForm(Point location, Size size)
+    {
+      seqdbConfig.MetaMapsX = location.X;
+      seqdbConfig.MetaMapsY = location.Y;
+      seqdbConfig.MetaMapsW = size.Width;
+      seqdbConfig.MetaMapsH = size.Height;
       SaveConfig();
     }
 
@@ -1322,6 +1435,16 @@ namespace BioSeqDB
       return new Size(seqdbConfig.NotificationW, seqdbConfig.NotificationH);
     }
 
+    internal static Size CANSSize()
+    {
+      return new Size(seqdbConfig.CANSW, seqdbConfig.CANSH);
+    }
+
+    internal static Point CANSLocation()
+    {
+      return new Point(seqdbConfig.CANSX, seqdbConfig.CANSY);
+    }
+
     public static Point InfluenzaALocation()
     {
       return new Point(seqdbConfig.InfluenzaAX, seqdbConfig.InfluenzaAY);
@@ -1340,6 +1463,36 @@ namespace BioSeqDB
     internal static Point CentrifugeLocation()
     {
       return new Point(seqdbConfig.CentrifugeX, seqdbConfig.CentrifugeY);
+    }
+
+    internal static Size FastQCSize()
+    {
+      return new Size(seqdbConfig.FastQCW, seqdbConfig.FastQCH);
+    }
+
+    internal static Point FastQCLocation()
+    {
+      return new Point(seqdbConfig.FastQCX, seqdbConfig.FastQCY);
+    }
+
+    internal static Size MultiQCSize()
+    {
+      return new Size(seqdbConfig.MultiQCW, seqdbConfig.MultiQCH);
+    }
+
+    internal static Point MultiQCLocation()
+    {
+      return new Point(seqdbConfig.MultiQCX, seqdbConfig.MultiQCY);
+    }
+
+    internal static Size MetaMapsSize()
+    {
+      return new Size(seqdbConfig.MetaMapsW, seqdbConfig.MetaMapsH);
+    }
+
+    internal static Point MetaMapsLocation()
+    {
+      return new Point(seqdbConfig.MetaMapsX, seqdbConfig.MetaMapsY);
     }
 
     public static string VFabricateGeneXref
@@ -1558,6 +1711,19 @@ namespace BioSeqDB
       }
     }
 
+    public static bool CANSChooseTrim
+    {
+      get
+      {
+        return seqdbConfig.CANSChooseTrim;
+      }
+      set
+      {
+        seqdbConfig.CANSChooseTrim = value;
+        SaveConfig();
+      }
+    }
+
     public static bool InfluenzaAChooseTrim
     {
       get
@@ -1567,6 +1733,19 @@ namespace BioSeqDB
       set
       {
         seqdbConfig.InfluenzaAChooseTrim = value;
+        SaveConfig();
+      }
+    }
+
+    public static string CANSModel
+    {
+      get
+      {
+        return seqdbConfig.CANSModel ?? "r9";
+      }
+      set
+      {
+        seqdbConfig.CANSModel = value;
         SaveConfig();
       }
     }
@@ -1584,6 +1763,58 @@ namespace BioSeqDB
       }
     }
 
+    public static string CANSReadLengthDeviation
+    {
+      get
+      {
+        return seqdbConfig.CANSReadLengthDeviation == 0 ? string.Empty : seqdbConfig.CANSReadLengthDeviation.ToString();
+      }
+      set
+      {
+        seqdbConfig.CANSReadLengthDeviation = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static string CANSExpectedLength
+    {
+      get
+      {
+        return seqdbConfig.CANSExpectedLength == 0 ? string.Empty : seqdbConfig.CANSExpectedLength.ToString();
+      }
+      set
+      {
+        seqdbConfig.CANSExpectedLength = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static string CANSTargetCoverage
+    {
+      get
+      {
+        return seqdbConfig.CANSTargetCoverage == 0 ? string.Empty : seqdbConfig.CANSTargetCoverage.ToString();
+      }
+      set
+      {
+        seqdbConfig.CANSTargetCoverage = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static string CANSThreads
+    {
+      get
+      {
+        return seqdbConfig.CANSThreads == 0 ? string.Empty : seqdbConfig.CANSThreads.ToString();
+      }
+      set
+      {
+        seqdbConfig.CANSThreads = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
     public static string InfluenzaAThreads
     {
       get
@@ -1593,6 +1824,44 @@ namespace BioSeqDB
       set
       {
         seqdbConfig.InfluenzaAThreads = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static string MultiQCOutputPath
+    {
+      get
+      {
+        return seqdbConfig.MultiQCOutputPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.MultiQCOutputPath = value;
+        SaveConfig();
+      }
+    }
+    public static string MultiQCInputPath
+    {
+      get
+      {
+        return seqdbConfig.MultiQCInputPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.MultiQCInputPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static string FastQCOutputPath
+    {
+      get
+      {
+        return seqdbConfig.FastQCOutputPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.FastQCOutputPath = value;
         SaveConfig();
       }
     }
@@ -1610,6 +1879,19 @@ namespace BioSeqDB
       }
     }
 
+    public static string FastQCInputPath
+    {
+      get
+      {
+        return seqdbConfig.FastQCInputPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.FastQCInputPath = value;
+        SaveConfig();
+      }
+    }
+
     public static string CentrifugeFastqPath
     {
       get
@@ -1619,6 +1901,19 @@ namespace BioSeqDB
       set
       {
         seqdbConfig.CentrifugeFastqPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static string FastQCThreads
+    {
+      get
+      {
+        return seqdbConfig.FastQCThreads == 0 ? string.Empty : seqdbConfig.FastQCThreads.ToString();
+      }
+      set
+      {
+        seqdbConfig.FastQCThreads = int.Parse(value);
         SaveConfig();
       }
     }
@@ -1645,6 +1940,84 @@ namespace BioSeqDB
       set
       {
         seqdbConfig.CentrifugeMaxAssignments = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static string MetaMapsThreads
+    {
+      get
+      {
+        return seqdbConfig.MetaMapsThreads == 0 ? string.Empty : seqdbConfig.MetaMapsThreads.ToString();
+      }
+      set
+      {
+        seqdbConfig.MetaMapsThreads = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static string MetaMapsMinReadLength
+    {
+      get
+      {
+        return seqdbConfig.MetaMapsMinReadLength == 0 ? string.Empty : seqdbConfig.MetaMapsMinReadLength.ToString();
+      }
+      set
+      {
+        seqdbConfig.MetaMapsMinReadLength = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static string MetaMapsMaxMemory
+    {
+      get
+      {
+        return seqdbConfig.MetaMapsMaxMemory == 0 ? string.Empty : seqdbConfig.MetaMapsMaxMemory.ToString();
+      }
+      set
+      {
+        seqdbConfig.MetaMapsMaxMemory = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static string MetaMapsMaxReads
+    {
+      get
+      {
+        return seqdbConfig.MetaMapsMaxReads == 0 ? string.Empty : seqdbConfig.MetaMapsMaxReads.ToString();
+      }
+      set
+      {
+        seqdbConfig.MetaMapsMaxReads = int.Parse(value);
+        SaveConfig();
+      }
+    }
+
+    public static bool MetaMapsOnlyBestMappings
+    {
+      get
+      {
+        return seqdbConfig.MetaMapsOnlyBestMappings;
+      }
+      set
+      {
+        seqdbConfig.MetaMapsOnlyBestMappings = value;
+        SaveConfig();
+      }
+    }
+
+    public static string CANSOutputPath
+    {
+      get
+      {
+        return seqdbConfig.CANSOutputPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.CANSOutputPath = value;
         SaveConfig();
       }
     }
@@ -1688,6 +2061,58 @@ namespace BioSeqDB
       }
     }
 
+    public static string MetaMapsReferencePath
+    {
+      get
+      {
+        return seqdbConfig.MetaMapsReferencePath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.MetaMapsReferencePath = value;
+        SaveConfig();
+      }
+    }
+
+    public static string MetaMapsOutputPath
+    {
+      get
+      {
+        return seqdbConfig.MetaMapsOutputPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.MetaMapsOutputPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static string MetaMapsInputFile
+    {
+      get
+      {
+        return seqdbConfig.MetaMapsInputFile ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.MetaMapsInputFile = value;
+        SaveConfig();
+      }
+    }
+
+    public static string CANSReferencePath
+    {
+      get
+      {
+        return seqdbConfig.CANSReferencePath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.CANSReferencePath = value;
+        SaveConfig();
+      }
+    }
+
     public static string InfluenzaACentrifugePath
     {
       get
@@ -1701,7 +2126,20 @@ namespace BioSeqDB
       }
     }
 
-    public static Dictionary<string, string> InfluenzaASamplesList
+    public static Dictionary<string, string> CANSSampleList
+    {
+      get
+      {
+        return seqdbConfig.CANSSampleList;
+      }
+      set
+      {
+        seqdbConfig.CANSSampleList = value;
+        SaveConfig();
+      }
+    }
+
+    public static Dictionary<string, string> InfluenzaASampleList
     {
       get
       {
@@ -1777,6 +2215,18 @@ namespace BioSeqDB
         seqdbConfig.LastExplorerLocalPath = value;
         SaveConfig();
       }
+    }
+
+    public static bool FastQCConsolidate
+    {
+      get { return seqdbConfig.FastQCConsolidate; }
+      set { seqdbConfig.FastQCConsolidate = value; SaveConfig(); }
+    }
+
+    public static bool FastQCMultiQC
+    {
+      get { return seqdbConfig.FastQCMultiQC; }
+      set { seqdbConfig.FastQCMultiQC = value; SaveConfig(); }
     }
 
     public static string BuildTreeOutputPath()
@@ -1874,22 +2324,38 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    public static void AssembleSample(List<string> QuerySamples, bool FastPolish, bool RA, bool Flye, bool Trinity,
+    public static void AssembleSample(List<string> QuerySamples, bool FastPolish, bool RA, bool Flye, int tabSelected,
                                                   bool Kraken2, bool BBmap, bool Quast, bool VFabricate, string GeneXRef, 
                                                                                            string memo, string maxFastq)
     {
-      if (RA || Flye)
+      if (tabSelected == 0 && (RA || Flye))
       {
         seqdbConfig.AssembleQueryListRAFlye = QuerySamples;
       }
-      if (Trinity)
+      if (tabSelected == 1)
       {
         seqdbConfig.AssembleQueryListTrinity = QuerySamples;
       }
+      if (tabSelected == 2)
+      {
+        seqdbConfig.AssembleQueryListTracy = QuerySamples;
+      }
       seqdbConfig.AssembleFastPolish = FastPolish;
-      seqdbConfig.AssembleRA = RA;
-      seqdbConfig.AssembleFlye = Flye;
-      seqdbConfig.AssembleTrinity = Trinity;
+      seqdbConfig.AssembleRA = seqdbConfig.AssembleFlye = seqdbConfig.AssembleTrinity = seqdbConfig.AssembleTracy = false;
+      if (tabSelected == 1)
+      {
+        seqdbConfig.AssembleTrinity = true;
+      }
+      else if (tabSelected == 2)
+      {
+        seqdbConfig.AssembleTracy = true;
+      }
+      else
+      {
+        seqdbConfig.AssembleRA = RA;
+        seqdbConfig.AssembleFlye = Flye;
+      }
+
       seqdbConfig.AssembleKraken2 = Kraken2;
       seqdbConfig.AssembleBBMap = BBmap;
       seqdbConfig.AssembleQuast = Quast;

@@ -53,13 +53,13 @@ namespace BioSeqDB
     private void ReloadSampleList()
     {
       lvSamples.Items.Clear();
-      if (AppConfigHelper.InfluenzaASamplesList != null)
+      if (AppConfigHelper.InfluenzaASampleList != null)
       {
-        foreach (string item in AppConfigHelper.InfluenzaASamplesList.Keys)
+        foreach (string item in AppConfigHelper.InfluenzaASampleList.Keys)
         {
           ListViewItem lvItem = new ListViewItem(item);
-          lvItem.SubItems.Add(AppConfigHelper.InfluenzaASamplesList[item].Substring(1));
-          lvItem.Checked = AppConfigHelper.InfluenzaASamplesList[item].StartsWith("1");
+          lvItem.SubItems.Add(AppConfigHelper.InfluenzaASampleList[item].Substring(1));
+          lvItem.Checked = AppConfigHelper.InfluenzaASampleList[item].StartsWith("1");
 
           lvSamples.Items.Insert(lvSamples.Items.Count, lvItem);
         }
@@ -106,11 +106,11 @@ namespace BioSeqDB
       // Update config to reflect selection.
       foreach (ListViewItem item in lvSamples.Items)
       {
-        foreach (string key in AppConfigHelper.InfluenzaASamplesList.Keys)
+        foreach (string key in AppConfigHelper.InfluenzaASampleList.Keys)
         {
           if (key == item.Text)
           {
-            AppConfigHelper.InfluenzaASamplesList[key] = (item.Checked ? "1" : "0") + AppConfigHelper.InfluenzaASamplesList[key].Substring(1);
+            AppConfigHelper.InfluenzaASampleList[key] = (item.Checked ? "1" : "0") + AppConfigHelper.InfluenzaASampleList[key].Substring(1);
             break;
           }
         }
@@ -231,10 +231,10 @@ namespace BioSeqDB
 
     private void btnFastqPicker_Click(object sender, EventArgs e)
     {
-      BioSeqInfluenzaAFastq frm = new BioSeqInfluenzaAFastq(AppConfigHelper.InfluenzaASamplesList, "Influenza A");
+      BioSeqInfluenzaAFastq frm = new BioSeqInfluenzaAFastq(AppConfigHelper.InfluenzaASampleList, "Influenza A");
       if (frm.ShowDialog() == DialogResult.OK)
       {
-        AppConfigHelper.InfluenzaASamplesList = frm.alreadySelected;
+        AppConfigHelper.InfluenzaASampleList = frm.alreadySelected;
         ReloadSampleList();
       }
     }
@@ -245,7 +245,7 @@ namespace BioSeqDB
       {
         if (!item.Checked)
         {
-          AppConfigHelper.InfluenzaASamplesList.Remove(item.Text);
+          AppConfigHelper.InfluenzaASampleList.Remove(item.Text);
         }
       }
 

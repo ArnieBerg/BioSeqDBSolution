@@ -54,8 +54,8 @@
       this.lblAbout.Name = "lblAbout";
       this.lblAbout.Size = new System.Drawing.Size(565, 93);
       this.lblAbout.TabIndex = 13;
-      this.lblAbout.Tag = "When there is a fasta file is in the same format as the sequence database, simply" +
-    " select the input fasta file.";
+      this.lblAbout.Tag = "When there is a fasta file in the same format as the sequence database, simply se" +
+    "lect the input fasta file.";
       this.lblAbout.Text = resources.GetString("lblAbout.Text");
       // 
       // label1

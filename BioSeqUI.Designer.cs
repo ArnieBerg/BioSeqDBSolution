@@ -70,6 +70,7 @@
       this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
       this.backgroundWorker_Versions = new System.ComponentModel.BackgroundWorker();
       this.backgroundWorker_SampleIDs = new System.ComponentModel.BackgroundWorker();
+      this.backgroundWorker_CleanUserFolder = new System.ComponentModel.BackgroundWorker();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
@@ -508,9 +509,13 @@
             "-- Select analysis --",
             "BBMap...",
             "Build tree...",
+            "CANS...",
             "Centrifuge...",
+            "FastQC...",
             "InfluenzaA...",
             "Kraken2...",
+            "MetaMaps...",
+            "MultiQC...",
             "Nextstrain...",
             "Quast...",
             "Salmonella Serotyping...",
@@ -552,6 +557,10 @@
       // 
       this.backgroundWorker_SampleIDs.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker_SampleIDs_DoWork);
       this.backgroundWorker_SampleIDs.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker_SampleIDs_RunWorkerCompleted);
+      // 
+      // backgroundWorker_CleanUserFolder
+      // 
+      this.backgroundWorker_CleanUserFolder.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker_CleanUserFolder_DoWork);
       // 
       // BioSeqUI
       // 
@@ -621,5 +630,6 @@
     private System.ComponentModel.BackgroundWorker backgroundWorker_SampleIDs;
     private System.Windows.Forms.Panel panel1;
     private System.Windows.Forms.ToolStripComboBox cmbAnalysis;
+    private System.ComponentModel.BackgroundWorker backgroundWorker_CleanUserFolder;
   }
 }
