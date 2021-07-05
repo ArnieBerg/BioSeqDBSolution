@@ -776,13 +776,13 @@ namespace BioSeqDB
       return StandardCallToWSL();
     }
 
-    public static WSLProxyResponse RemoveSample()
-    {
-      // eg. ~/seqdb/seqdb remove -q 1616822_Hp -d /data/amrDB/hpsuis/hpsuis_db.fasta
-      AppConfigHelper.LastCommand = AppConfigHelper.PathToSeqDB() + " remove -q " + AppConfigHelper.RemoveSampleID() + 
-                                                                           " -d " + AppConfigHelper.NormalizePathToLinux(AppConfigHelper.CurrentDBPath());
-      return StandardCallToWSL();
-    }
+    //public static WSLProxyResponse RemoveSample()
+    //{
+    //  // eg. ~/seqdb/seqdb remove -q 1616822_Hp -d /data/amrDB/hpsuis/hpsuis_db.fasta
+    //  AppConfigHelper.LastCommand = AppConfigHelper.PathToSeqDB() + " remove -q " + AppConfigHelper.RemoveSampleIDs() + 
+    //                                                                       " -d " + AppConfigHelper.NormalizePathToLinux(AppConfigHelper.CurrentDBPath());
+    //  return StandardCallToWSL();
+    //}
 
     public static WSLProxyResponse InsertSample()
     {

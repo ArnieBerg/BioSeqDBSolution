@@ -80,7 +80,7 @@ namespace BioSeqDB
       ServiceCallHelper.LoadConfig(string.Empty); // Loads the global appsettings.json.
 
       //// Start by copying the local copy of <loggedOnUser>_appsettings.json to the server.
-      //DirectoryHelper.FileCopy("[L]" + AppConfigHelper.executablePath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json",
+      //TransferHelper.FileCopy("[L]" + AppConfigHelper.executablePath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json",
       //                                                                      "[S]" + AppConfigHelper.PathToServerAppsettings, true);
       if (!IsServiceClass.IsService)
       {
@@ -183,7 +183,7 @@ namespace BioSeqDB
       AppConfigHelper.SaveConfigGlobal();
 
       //// Start by copying the local copy of <loggedOnUser>_appsettings.json to the server.      
-      //DirectoryHelper.FileCopy("[L]" + AppConfigHelper.executablePath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json",
+      //TransferHelper.FileCopy("[L]" + AppConfigHelper.executablePath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json",
       //                                                                      "[S]" + AppConfigHelper.PathToServerAppsettings, true);
       AppConfigHelper.LoggedOnUser = AppConfigHelper.LastUser; 
     }

@@ -36,7 +36,6 @@
       this.label3 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
-      this.lblLastSeqDBCall = new System.Windows.Forms.Label();
       this.panel1 = new System.Windows.Forms.Panel();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
       this.btnChangeLog = new System.Windows.Forms.Button();
@@ -56,6 +55,7 @@
       this.colLogout = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.label7 = new System.Windows.Forms.Label();
       this.lblServer = new System.Windows.Forms.Label();
+      this.txtCommandHistory = new System.Windows.Forms.TextBox();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
       this.SuspendLayout();
       // 
@@ -120,17 +120,6 @@
       this.label5.Size = new System.Drawing.Size(264, 13);
       this.label5.TabIndex = 25;
       this.label5.Text = "Last Windows Subsystem for Linux command:";
-      // 
-      // lblLastSeqDBCall
-      // 
-      this.lblLastSeqDBCall.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.lblLastSeqDBCall.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.lblLastSeqDBCall.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblLastSeqDBCall.Location = new System.Drawing.Point(27, 140);
-      this.lblLastSeqDBCall.Name = "lblLastSeqDBCall";
-      this.lblLastSeqDBCall.Size = new System.Drawing.Size(455, 62);
-      this.lblLastSeqDBCall.TabIndex = 26;
       // 
       // panel1
       // 
@@ -287,11 +276,23 @@
       this.lblServer.TabIndex = 73;
       this.lblServer.Text = "server IP address";
       // 
+      // txtCommandHistory
+      // 
+      this.txtCommandHistory.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.txtCommandHistory.Location = new System.Drawing.Point(33, 141);
+      this.txtCommandHistory.Multiline = true;
+      this.txtCommandHistory.Name = "txtCommandHistory";
+      this.txtCommandHistory.ReadOnly = true;
+      this.txtCommandHistory.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+      this.txtCommandHistory.Size = new System.Drawing.Size(449, 66);
+      this.txtCommandHistory.TabIndex = 74;
+      // 
       // BioSeqDBAbout
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(519, 680);
+      this.Controls.Add(this.txtCommandHistory);
       this.Controls.Add(this.lblServer);
       this.Controls.Add(this.btnChangeLog);
       this.Controls.Add(this.label7);
@@ -300,7 +301,6 @@
       this.Controls.Add(this.label6);
       this.Controls.Add(this.labelVersion);
       this.Controls.Add(this.panel1);
-      this.Controls.Add(this.lblLastSeqDBCall);
       this.Controls.Add(this.label5);
       this.Controls.Add(this.label4);
       this.Controls.Add(this.label3);
@@ -327,7 +327,6 @@
     private System.Windows.Forms.Label label3;
     private System.Windows.Forms.Label label4;
     private System.Windows.Forms.Label label5;
-    private System.Windows.Forms.Label lblLastSeqDBCall;
     private System.Windows.Forms.Panel panel1;
     private System.Windows.Forms.ToolTip toolTip1;
     private System.Windows.Forms.Label labelVersion;
@@ -347,5 +346,6 @@
     private System.Windows.Forms.Label label7;
     private System.Windows.Forms.Button btnChangeLog;
     private System.Windows.Forms.Label lblServer;
+    private System.Windows.Forms.TextBox txtCommandHistory;
   }
 }

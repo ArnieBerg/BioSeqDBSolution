@@ -23,18 +23,11 @@ namespace BioSeqDB
       chkMultiQC.Checked = AppConfigHelper.FastQCMultiQC;
       EnableOK();
 
-      if (Size.Width != 0)
+      Location = AppConfigHelper.FastQCLocation();
+      if (Location.X == 0 && Location.Y == 0)
       {
-        Location = AppConfigHelper.FastQCLocation();
-        if (Location.X <= 0)
-        {
-          Location = new Point(100, 100);
-        }
-        Size = AppConfigHelper.FastQCSize();
-        if (Size.Height <= 0 || Size.Width <= 0)
-        {
-          Size = new Size(1000, 1000);
-        }
+        Location = new Point(100, 100);
+        Size = new Size(1000, 600);
       }
     }
 

@@ -1,5 +1,6 @@
 ﻿using BioSeqDB.ModelClient;
 using BioSeqDBConfigModel;
+using BioSeqDBTransferData;
 using FSExplorer;
 using Ookii.Dialogs.WinForms;
 using System;
@@ -15,7 +16,6 @@ namespace BioSeqDB
   {
     public bool NotificationsIsOpen { get; private set; }
     public BioSeqDBNotifications frmNotifications;
-    //private PleaseWaitDialog pleaseWaitDialog;
     private bool SampleIDsBusyFlag = false;
     private bool VersionsBusyFlag = false;
 
@@ -52,18 +52,12 @@ namespace BioSeqDB
       Visible = true;
       //AppConfigHelper.StartTimer();
       Cursor.Current = Cursors.Default;
-      if (Size.Width != 0)
+
+      Location = AppConfigHelper.UILocation();
+      if (Location.X <= 0 || Location.Y <= 0)
       {
-        Location = AppConfigHelper.UILocation();
-        if (Location.X <= 0)
-        {
-          Location = new Point(100, 100);
-        }
-        Size = AppConfigHelper.UISize();
-        if (Size.Height <= 0 || Size.Width <= 0)
-        {
-          Size = new Size(3000, 1500);
-        }
+        Location = new Point(100, 100);
+        Size = new Size(3000, 1500);
       }
       cmbUser.SelectedIndexChanged += cmbUser_SelectedIndexChanged;
     }
@@ -84,15 +78,23 @@ namespace BioSeqDB
 
         cmbUser.Text = AppConfigHelper.LastUser;
         txtDB.Text = AppConfigHelper.CurrentDBName();
-        txtStandardReference.Text = AppConfigHelper.BuildTreeDomesticReference;
+        txtStandardReference.Text = AppConfigHelper.StandardReference;
         txtPath.Text = AppConfigHelper.CurrentDBPath();
         backgroundWorker_CleanUserFolder.RunWorkerAsync();
+
+        priorityDataBackupToolStripMenuItem.Visible = AppConfigHelper.BackupManager == AppConfigHelper.LoggedOnUser;
+
+        if (AppConfigHelper.seqdbConfig.TaskToDelete != null)        // Remove any previous delete request at startup so as not to confuse WSLProxy2.
+        {
+          AppConfigHelper.seqdbConfig.TaskToDelete = null;
+          AppConfigHelper.SaveConfig();
+        }
       }
       catch (Exception ex)
       {
         Splasher.Close();
         MessageBox.Show(ex.ToString(), "ERROR", MessageBoxButtons.OK);
-        throw ex;
+        throw; // Rethrow original exception
       }
     }
 
@@ -180,7 +182,7 @@ namespace BioSeqDB
         }
       }
 
-      txtStandardReference.Text = AppConfigHelper.BuildTreeDomesticReference; // This may have been updated by the Build tree function.
+      txtStandardReference.Text = AppConfigHelper.StandardReference; // This may have been updated by the Build tree function.
 
       OpenNotifications();
     }
@@ -259,7 +261,7 @@ namespace BioSeqDB
           string fastaPath = AppConfigHelper.Build_DBInput();
           if (IsServiceClass.IsService && !string.IsNullOrEmpty(fastaPath))
           {
-            if (fastaPath.StartsWith("[L]") || !fastaPath.StartsWith("[")) 
+            if (fastaPath.StartsWith("[L]") || !fastaPath.StartsWith("["))
             {
               ServiceCallHelper.ResetFastaFolder(AppConfigHelper.LoggedOnUser);
               string[] folders = Directory.GetDirectories(DirectoryHelper.CleanPath(fastaPath));
@@ -268,17 +270,17 @@ namespace BioSeqDB
                 string[] files = Directory.GetFiles(folder, "*.fasta", SearchOption.TopDirectoryOnly);
                 foreach (string file in files)
                 {
-                  DirectoryHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastaFiles", true);
+                  TransferHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastaFiles", true);
                 }
                 files = Directory.GetFiles(folder, "*.fna", SearchOption.TopDirectoryOnly);
                 foreach (string file in files)
                 {
-                  DirectoryHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastaFiles", true);
+                  TransferHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastaFiles", true);
                 }
                 files = Directory.GetFiles(folder, "*.fa", SearchOption.TopDirectoryOnly);
                 foreach (string file in files)
                 {
-                  DirectoryHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastaFiles", true);
+                  TransferHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastaFiles", true);
                 }
               }
             }
@@ -287,7 +289,7 @@ namespace BioSeqDB
           if (!string.IsNullOrEmpty(AppConfigHelper.BuildTreeWildReference())) // This is the standard genome for the new database.
           {
             // Wherever it is, store it temporarily in the UserFolder.
-            DirectoryHelper.FileCopy(AppConfigHelper.BuildTreeWildReference(), "[S]" + AppConfigHelper.UserFolder(), true);
+            TransferHelper.FileCopy(AppConfigHelper.BuildTreeWildReference(), "[S]" + AppConfigHelper.UserFolder(), true);
           }
 
           /////////// Call Build_DB in SeqDB.
@@ -309,11 +311,17 @@ namespace BioSeqDB
             return;
           }
 
-          if (string.IsNullOrEmpty(AppConfigHelper.BuildTreeDomesticReference))
-          {
-            AppConfigHelper.BuildTreeDomesticReference = AppConfigHelper.BuildTreeWildReference();
-            AppConfigHelper.SaveConfig();
-          }
+          //if (string.IsNullOrEmpty(AppConfigHelper.StandardReference))
+          //{
+          //  AppConfigHelper.StandardReference = AppConfigHelper.BuildTreeDomesticReference;
+          //  AppConfigHelper.SaveConfig();
+          //}
+          //if (string.IsNullOrEmpty(AppConfigHelper.StandardReference))
+          //{
+          //  AppConfigHelper.StandardReference = AppConfigHelper.BuildTreeWildReference();
+          //  AppConfigHelper.SaveConfig();
+          //}
+
           ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser);
           PopulateDBDropdownAndSelect();
           Cursor.Current = Cursors.Default;
@@ -335,6 +343,8 @@ namespace BioSeqDB
         SeqDB db = AppConfigHelper.seqdbConfig.seqDBs[AppConfigHelper.seqdbConfig.LastDBSelected];
         txtDB.Text = db.DBName;
         txtPath.Text = db.DBPath;
+
+        txtStandardReference.Text = AppConfigHelper.StandardReference;
         AppConfigHelper.LastError = string.Empty;
 
         if (SampleIDsBusyFlag || VersionsBusyFlag)
@@ -384,7 +394,7 @@ namespace BioSeqDB
         // If the InsertInputPath is local, copy it to UserFolder on the server.
         if (AppConfigHelper.InsertInputPath().StartsWith("[L]"))
         {
-          DirectoryHelper.FileCopy(AppConfigHelper.InsertInputPath(), "[S]" + AppConfigHelper.UserFolder(), true);
+          TransferHelper.FileCopy(AppConfigHelper.InsertInputPath(), "[S]" + AppConfigHelper.UserFolder(), true);
         }
 
         WSLProxyResponse WSLResponse;
@@ -438,6 +448,14 @@ namespace BioSeqDB
 
     private void mnuRemove_Click(object sender, EventArgs e)
     {
+      // Collect all the samples selected.
+      List<string> sampleIDs = new List<string>();
+      foreach (string sample in lstSampleIDs.SelectedItems)
+      {
+        sampleIDs.Add(sample);
+      }
+      AppConfigHelper.RemoveSampleIDs = sampleIDs;
+
       BioSeqRemove frm = new BioSeqRemove();
       DialogResult rc = frm.ShowDialog();
       if (rc == DialogResult.OK) // then the config has the specs 
@@ -449,9 +467,8 @@ namespace BioSeqDB
         Cursor.Current = Cursors.Default;
         if (WSLResponse.ExitCode == 0)
         {
-          MessageBox.Show(AppConfigHelper.RemoveSampleID() + " successfully removed.", "Success", MessageBoxButtons.OK);
-          AppConfigHelper.RemoveSample(string.Empty); // So we don't prompt for it again.
-          ReloadSampleIDs(); // Reload list without sample ID.
+          MessageBox.Show(AppConfigHelper.RemoveSampleIDs.Count.ToString() + " sample(s) successfully removed.", "Success", MessageBoxButtons.OK);
+          ReloadSampleIDs(); // Reload list with sample IDs removed.
         }
         else
         {
@@ -543,7 +560,7 @@ namespace BioSeqDB
       if (Size.Width != 0)
       {
         Location = AppConfigHelper.UILocation();
-        if (Location.X <= 0)
+        if (Location.X <= 0 || Location.Y <= 0)
         {
           Location = new Point(100, 100);
         }
@@ -595,72 +612,84 @@ namespace BioSeqDB
     {
       BioSeqTask task = AppConfigHelper.TaskOfID(AppConfigHelper.LastTaskID);
       WSLProxyResponse WSLResponse = null;
-      switch (task.TaskType)
+
+      try
       {
-        case "FastQC":
-          WSLResponse = ServiceCallHelper.FastQC(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+        switch (task.TaskType)
+        {
+          case "BackupOffsite":
+            WSLResponse = BioSeqDBModel.Instance.BackupDatabaseOffsite(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "MultiQC":
-          WSLResponse = ServiceCallHelper.MultiQC(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "FastQC":
+            WSLResponse = ServiceCallHelper.FastQC(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "Centrifuge":
-          WSLResponse = ServiceCallHelper.Centrifuge(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "MultiQC":
+            WSLResponse = ServiceCallHelper.MultiQC(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "CANS":
-          WSLResponse = ServiceCallHelper.CANS(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "Centrifuge":
+            WSLResponse = ServiceCallHelper.Centrifuge(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "Salmonella":
-          WSLResponse = ServiceCallHelper.Salmonella(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "CANS":
+            WSLResponse = ServiceCallHelper.CANS(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "MetaMaps":
-          WSLResponse = ServiceCallHelper.MetaMaps(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "Salmonella":
+            WSLResponse = ServiceCallHelper.Salmonella(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "VFabricate":
-          WSLResponse = ServiceCallHelper.VFabricate(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "MetaMaps":
+            WSLResponse = ServiceCallHelper.MetaMaps(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "Search":
-          WSLResponse = ServiceCallHelper.SearchSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "VFabricate":
+            WSLResponse = ServiceCallHelper.VFabricate(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "Kraken2":
-          WSLResponse = ServiceCallHelper.Kraken2(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "Search":
+            WSLResponse = ServiceCallHelper.SearchSample(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "Quast":
-          WSLResponse = ServiceCallHelper.Quast(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "Kraken2":
+            WSLResponse = ServiceCallHelper.Kraken2(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "BBMap":
-          WSLResponse = ServiceCallHelper.BBMap(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "Quast":
+            WSLResponse = ServiceCallHelper.Quast(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "BuildTree":
-          WSLResponse = ServiceCallHelper.BuildTree(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "BBMap":
+            WSLResponse = ServiceCallHelper.BBMap(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "Assemble":
-          WSLResponse = ServiceCallHelper.Assemble(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), AppConfigHelper.QuerySampleConfig());
-          break;
+          case "BuildTree":
+            WSLResponse = ServiceCallHelper.BuildTree(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
 
-        case "InfluenzaA":
-          WSLResponse = ServiceCallHelper.InfluenzaA(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "Assemble":
+            WSLResponse = ServiceCallHelper.Assemble(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), AppConfigHelper.QuerySampleConfig());
+            break;
 
-        case "Nextstrain":
-          WSLResponse = ServiceCallHelper.Nextstrain(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
-          break;
+          case "InfluenzaA":
+            WSLResponse = ServiceCallHelper.InfluenzaA(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
+
+          case "Nextstrain":
+            WSLResponse = ServiceCallHelper.Nextstrain(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+            break;
+        }
+
+        task.LastError = WSLResponse.StandardError;
+        task.StandardOutput = WSLResponse.StandardOutput;
+        e.Result = new List<object>() { WSLResponse.ExitCode, task };
       }
-
-      task.LastError = WSLResponse.StandardError;
-      task.StandardOutput = WSLResponse.StandardOutput;
-      e.Result = new List<object>() { WSLResponse.ExitCode, task };
+      catch (Exception ex)
+      {
+        e.Result = new List<object>() { ex, 0 };
+      }
     }
 
     private void backgroundWorker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
@@ -671,6 +700,14 @@ namespace BioSeqDB
         //AppConfigHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // Reload user's config (gets at least the LastCommand)
 
         List<object> arguments = (List<object>)e.Result;
+
+        if (arguments[0] is Exception)
+        {
+          Exception ex = (Exception)arguments[0];
+          MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK);
+          return;
+        }
+
         int ret = (int)arguments[0];
         BioSeqTask task = (BioSeqTask)arguments[1];
 
@@ -733,6 +770,7 @@ namespace BioSeqDB
       }
       catch (Exception ex)
       {
+        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK);
       }
     }
 
@@ -758,6 +796,7 @@ namespace BioSeqDB
         TaskComplete = DateTime.MinValue,
         TaskType = taskType,
         TaskUser = AppConfigHelper.LoggedOnUser,
+        TaskTimeout = 0,
         StandardOutput = string.Empty,
         LastError = string.Empty,
         LastExitCode = -999
@@ -779,11 +818,6 @@ namespace BioSeqDB
         return;
       }
 
-      //NotificationsIsOpen = true;
-      //frm = new BioSeqDBNotifications();
-      //frm.FormClosedEvent += NotificationsClosed;
-      //frm.StatusChangeEvent += ModelessDialogEvent; 
-      //frm.Show(this);
       UpdateNotificationStatus();
     }
 
@@ -844,6 +878,23 @@ namespace BioSeqDB
 
     private void cmbAnalysis_SelectedIndexChanged(object sender, EventArgs e)
     {
+      cmbAnalysis.SelectedIndexChanged -= cmbAnalysis_SelectedIndexChanged; // Prevent double-entry when using keystroke.
+      switch (cmbAnalysis.Text)
+      {
+        case "Search...":
+        case "Kraken2...":
+        case "Quast...":
+        case "BBMap...":
+        case "VFabricate...":
+          if (lstSampleIDs.Items.Count == 0)
+          {
+            MessageBox.Show("Try again when sample IDs are loaded.", "Sample IDs not loaded", MessageBoxButtons.OK);
+            cmbAnalysis.SelectedIndexChanged += cmbAnalysis_SelectedIndexChanged; // Reestablish hook.
+            return;
+          }
+          break;
+      }
+
       switch (cmbAnalysis.Text)
       {
         case "Centrifuge...":
@@ -859,6 +910,60 @@ namespace BioSeqDB
 
             backgroundWorker.RunWorkerAsync();
             Cursor.Current = Cursors.Default;
+          }
+          break;
+
+        case "Artemis...":
+          BioSeqArtemis frmArtemis = new BioSeqArtemis();
+          rc = frmArtemis.ShowDialog();
+          if (rc == DialogResult.OK) // then the config has the specs 
+          {
+            Cursor.Current = Cursors.WaitCursor;
+            // If the file is on the server, copy to local machine first.
+            string path = DirectoryHelper.CleanPath(AppConfigHelper.ArtemisInputPath);
+            try
+            {
+              if (AppConfigHelper.ArtemisInputPath.StartsWith("[S"))
+              {
+                path = @"C:\Temp\";
+                TransferHelper.FileCopy(AppConfigHelper.ArtemisInputPath, "[L]" + path, true);
+                path = path + Path.GetFileName(DirectoryHelper.CleanPath(AppConfigHelper.ArtemisInputPath));
+              }
+              InvokeArtemis(path);
+              Cursor.Current = Cursors.Default;
+            }
+            catch (Exception ex)
+            {
+              Cursor.Current = Cursors.Default;
+              MessageBox.Show("Failed to read " + AppConfigHelper.ArtemisInputPath + ".\n\nException: " + ex.Message, "Error", MessageBoxButtons.OK);
+            }
+          }
+          break;
+
+        case "Bandage...":
+          BioSeqBandage frmBandage = new BioSeqBandage();
+          rc = frmBandage.ShowDialog();
+          if (rc == DialogResult.OK) // then the config has the specs 
+          {
+            Cursor.Current = Cursors.WaitCursor;
+            // If the file is on the server, copy to local machine first.
+            string path = DirectoryHelper.CleanPath(AppConfigHelper.BandageInputPath);
+            try
+            {
+              if (AppConfigHelper.BandageInputPath.StartsWith("[S"))
+              {
+                path = @"C:\Temp\";
+                TransferHelper.FileCopy(AppConfigHelper.BandageInputPath, "[L]" + path, true);
+                path = path + Path.GetFileName(DirectoryHelper.CleanPath(AppConfigHelper.BandageInputPath));
+              }
+              InvokeBandage(path);
+              Cursor.Current = Cursors.Default;
+            }
+            catch (Exception ex)
+            {
+              Cursor.Current = Cursors.Default;
+              MessageBox.Show("Failed to read " + AppConfigHelper.ArtemisInputPath + ".\n\nException: " + ex.Message, "Error", MessageBoxButtons.OK);
+            }
           }
           break;
 
@@ -1079,6 +1184,124 @@ namespace BioSeqDB
           break;
       }
       cmbAnalysis.SelectedIndex = 0; // Position back to -- Select analysis --.
+      cmbAnalysis.SelectedIndexChanged += cmbAnalysis_SelectedIndexChanged; // Reestablish hook.
+    }
+
+    private void InvokeBandage(string dataPath)
+    {
+      string pathToBandage = AppConfigHelper.BandageInvocation();
+      if (DownloadSoftware("Bandage", pathToBandage))
+      {
+        Process.Start(AppConfigHelper.BandageInvocation(), "load " + dataPath + " --draw");
+      }
+    }
+
+    private void InvokeArtemis(string dataPath)
+    {
+      string pathToBandage = AppConfigHelper.ArtemisInvocation();
+      if (DownloadSoftware("Artemis", pathToBandage))
+      {
+        Process.Start(AppConfigHelper.ArtemisInvocation(), dataPath);
+      }
+    }
+
+    private static bool DownloadSoftware(string software, string pathToSoftware)
+    {
+      DirData dirData;
+      string localPath, serverPath;
+      List<DirData> fileNames, fileList, zeroLengthFileList;
+
+      if (!File.Exists(pathToSoftware)) // then put it in place.
+      {
+        if (!Directory.Exists("C:\\Programs")) // Then this is not a managed computer and we need to create this folder.
+        {
+          Directory.CreateDirectory("C:\\Programs");
+        }
+
+        // Now if we can create a file in C:\Programs, this is unmanaged. Otherwise managed.
+        try
+        {
+          if (!File.Exists(@"C:\Programs\unmanaged.txt"))
+          {
+            File.Create(@"C:\Programs\unmanaged.txt");
+          }
+        }
+        catch (Exception ex) // Then this is a managed computer and will need support.
+        {
+          MessageBox.Show("This is a managed computer and will need help to install " + software + ". You will be contacted by Support.",
+                                                                              software + " did not get installed.", MessageBoxButtons.OK);
+          string s1 = Emailer.SendEmail("agb465@mail.usask.ca", "BioSeqDB User: Attempt to install " + software + ".",
+                                                            "Assist " + AppConfigHelper.LoggedOnUser + " to install " + software + ".", null, null);
+          if (!string.IsNullOrEmpty(s1))
+          {
+            Logger.Log.Debug("Email error: " + s1);
+            //MessageBox.Show(s1, "ERROR", MessageBoxButtons.OK);
+          }
+          return false;
+        }
+
+        string fileName = "OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.11_9.msi";
+        localPath = "C:\\Temp\\"; // Target the C:\Temp folder.
+        serverPath = "C:\\PDSFiles\\"; // This is where the <software> folder is stored on the server.
+
+        if (software == "Artemis" && !File.Exists(localPath + fileName)) // Need to install Java runtime as well.
+        {
+          DialogResult rc = MessageBox.Show("In order to run Artemis on this computer, the Java runtime is required. Please respond to the prompts to install Java runtime.",
+                                                                                "Click OK to install Java runtime, else Cancel", MessageBoxButtons.OKCancel);
+          if (rc == DialogResult.Cancel)
+          {
+            return false;
+          }
+
+          fileNames = new List<DirData>();
+          dirData = new DirData();
+          dirData.Name = serverPath + fileName; // Copy this file from C:\PDSFiles\ on the server.
+          dirData.FileType = "msi";
+          dirData.Size = 155676672;
+          fileNames.Add(dirData);
+
+          zeroLengthFileList = new List<DirData>();
+
+          TransferHelper.OpenModal = true;
+          TransferHelper.AutoClose = true;
+          TransferHelper.TCPCopy(serverPath, localPath, fileNames, zeroLengthFileList, false, software + " needs to be downloaded; please be patient."); // Download <software>
+          if (!File.Exists(localPath + fileName)) // then put it in place.
+          {
+            MessageBox.Show("Cannot start " + software + " from " + pathToSoftware + ".", "Java runtime did not get downloaded.", MessageBoxButtons.OK);
+            return false;
+          }
+          Process P = Process.Start(localPath + fileName);
+          P.WaitForExit();
+        }
+
+        Cursor.Current = Cursors.WaitCursor;
+        fileNames = new List<DirData>();
+        dirData = new DirData();
+        dirData.Name = software + "\\"; // Copy this folder from C:\PDSFiles\<software> on the server.
+        dirData.FileType = "Folder";
+        fileNames.Add(dirData);
+
+        localPath = Path.GetDirectoryName(pathToSoftware); // Target the C:\Temp folder.
+        localPath = Path.GetDirectoryName(localPath) + "\\"; // Knock off '<software>'
+        // For managed computers, we cannot copy directly to c:\Programs, but we can run from there. For unmanaged, we are fine.
+        serverPath = "C:\\PDSFiles\\"; // This is where the <software> folder is stored on the server.
+
+        // Handle multi-select here (FileNames) and pass all selected items to fileList.
+        fileList = BioSeqDBModel.Instance.FileList(serverPath, fileNames, false); // For download we look to the server for a list of files. 
+        zeroLengthFileList = BioSeqDBModel.Instance.FileList(serverPath, fileNames, true); // For download we look to the server for a list of files. 
+
+        TransferHelper.OpenModal = true;
+        TransferHelper.AutoClose = true;
+        TransferHelper.TCPCopy(serverPath, localPath, fileList, zeroLengthFileList, false, software + " needs to be downloaded; please be patient."); // Download <software>
+      }
+
+      Cursor.Current = Cursors.Default;
+      if (!File.Exists(pathToSoftware)) // then put it in place.
+      {
+        MessageBox.Show("Cannot start " + software + " from " + pathToSoftware + ".", software + " did not get installed.", MessageBoxButtons.OK);
+        return false;
+      }
+      return true;
     }
 
     private List<string> SampleList()
@@ -1114,7 +1337,12 @@ namespace BioSeqDB
       if (txtVersions.Text.Trim().Length > 0)
       {
         SeqDB db = AppConfigHelper.seqdbConfigGlobal.seqDBs[AppConfigHelper.seqdbConfig.LastDBSelected];
-        lblKipper.Text = "This backup is stored at " + db.KipperPath + db.KipperFilenamePrefix + ".";
+        lblKipper.Text = "This backup is stored at " + AppConfigHelper.NormalizePathToWindows(db.KipperPath);
+        if (!lblKipper.Text.EndsWith("\\"))
+        {
+          lblKipper.Text += "\\";
+        }
+        lblKipper.Text += db.KipperFilenamePrefix + ".";
         lblKipper.Visible = true;
       }
       btnRestore.Enabled = txtVersions.Text.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries).Length > 2; // Must have at least two backups before restore is meaningful.
@@ -1148,12 +1376,13 @@ namespace BioSeqDB
 
     private void panel1_Click(object sender, EventArgs e)
     {
-      // Test DirectoryHelper
       string path = AppConfigHelper.LastExplorerServerPath;
-      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Server File Explorer...", 
-                                          DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path), "All files (*.*)|*.*", 
+      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Server File Explorer...",
+                                          DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path), "All files (*.*)|*.*",
                                                                                           null, AppConfigHelper.UbuntuPrefix());
       Explorer.frmExplorer.lastPath = LastPathCallback;
+      //Explorer.frmExplorer.ReadOnly = true;  // Testing
+      Explorer.frmExplorer.ReadOnly = AppConfigHelper.seqdbConfigGlobal.Users[AppConfigHelper.LoggedOnUser].ReadOnly;
       Explorer.frmExplorer.Show(); // Show modeless
     }
 
@@ -1161,6 +1390,80 @@ namespace BioSeqDB
     {
       AppConfigHelper.LastExplorerServerPath = serverPath;
       AppConfigHelper.LastExplorerLocalPath = localPath;
+    }
+
+    private void btnReferenceGenome_Click(object sender, EventArgs e)
+    {
+      string path = AppConfigHelper.NormalizePathToWindows(AppConfigHelper.StandardReference); // We want an actual file, so don't append "\\".
+      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Path to genome reference file",
+                               DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
+                               "All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());
+      Explorer.frmExplorer.ShowDialog();
+      if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
+      {
+        AppConfigHelper.StandardReference = txtStandardReference.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
+      }
+    }
+
+    private void priorityDataBackupToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      BioSeqBackupOffsite frm = new BioSeqBackupOffsite();
+      DialogResult rc = frm.ShowDialog();
+      if (rc == DialogResult.OK)
+      {
+        int ct = 0;
+        long bytes = 0;
+        btnNotifications.Focus();
+        Cursor.Current = Cursors.Default;
+        Cursor.Current = Cursors.WaitCursor;
+        BackupOffsiteParms backupOffsiteParms = BioSeqDBModel.Instance.PriorityBackupFileCount(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
+        Cursor.Current = Cursors.WaitCursor;
+        foreach (List<DirData> pathData in backupOffsiteParms.FilesToBackup.Values)
+        {
+          ct += pathData.Count;
+          foreach (DirData dd in pathData)
+          {
+            bytes += dd.Size;
+          }
+        }
+
+        int removeCt = backupOffsiteParms.FilesToRemoveFromBackup.Count;
+        string removeMsg = ", ";
+        if (removeCt > 0)
+        {
+          removeMsg += removeCt.ToString() + " files to remove from backup";
+        }
+
+        if (ct == 0 && removeCt == 0)
+        {
+          MessageBox.Show("Backup is up-to-date.", "No Backup Needed", MessageBoxButtons.OK);
+        }
+        else if (ct == 0)
+        {
+          if (MessageBox.Show("No files to back up" + removeMsg + ". Continue anyway?", "No Backup Needed", MessageBoxButtons.YesNo) == DialogResult.Yes)
+          {
+            Cursor.Current = Cursors.WaitCursor;
+
+            SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete);
+
+            CreateNewTask("BackupOffsite", AppConfigHelper.TaskMemo, string.Empty);
+            UpdateNotificationStatus();
+            backgroundWorker.RunWorkerAsync();
+          }
+        }
+        else if (MessageBox.Show(ct.ToString() + " files to back up in " + backupOffsiteParms.FilesToBackup.Count + " folders (" + (bytes / 1024 / 1024).ToString() +
+                                                              "Mb)" + removeMsg + ". Ok to continue?", "Ready to backup", MessageBoxButtons.YesNo) == DialogResult.Yes)
+        {
+          Cursor.Current = Cursors.WaitCursor;
+
+          SeqDBHelper.backgroundTaskComplete += new SeqDBHelper.taskCompleteEvent(backupgroundTaskComplete);
+
+          CreateNewTask("BackupOffsite", AppConfigHelper.TaskMemo, string.Empty);
+          UpdateNotificationStatus();
+          backgroundWorker.RunWorkerAsync();
+        }
+      }
+      Cursor.Current = Cursors.Default;
     }
   }
 }

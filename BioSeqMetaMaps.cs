@@ -27,18 +27,11 @@ namespace BioSeqDB
 
       EnableOK();
 
-      if (Size.Width != 0)
+      Location = AppConfigHelper.MetaMapsLocation();
+      if (Location.X == 0 && Location.Y == 0)
       {
-        Location = AppConfigHelper.MetaMapsLocation();
-        if (Location.X <= 0)
-        {
-          Location = new Point(100, 100);
-        }
-        Size = AppConfigHelper.MetaMapsSize();
-        if (Size.Height <= 0 || Size.Width <= 0)
-        {
-          Size = new Size(1000, 1000);
-        }
+        Location = new Point(100, 100);
+        Size = new Size(1000, 600);
       }
     }
 

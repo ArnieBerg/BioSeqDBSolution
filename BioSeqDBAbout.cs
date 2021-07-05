@@ -16,21 +16,19 @@ namespace BioSeqDB
     public BioSeqDBAbout()
     {
       InitializeComponent();
-      lblLastSeqDBCall.Text = AppConfigHelper.LastCommand;
+      txtCommandHistory.Text = BioSeqDBModel.Instance.GetCommandHistory(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig());
       threadStats = new Dictionary<int, ThreadStat>();
       userStats = new Dictionary<string, UserStat>();
     }
 
     private void panel1_Click(object sender, System.EventArgs e)
     {
-      Clipboard.SetText(lblLastSeqDBCall.Text);
-      MessageBox.Show("Last command text copied.", "Copy", MessageBoxButtons.OK);
+      Clipboard.SetText(txtCommandHistory.Text);
+      MessageBox.Show("Last command history text copied.", "Copy", MessageBoxButtons.OK);
     }
 
     private void BioSeqDBAbout_Shown(object sender, System.EventArgs e)
     {
-      //labelVersion.Text = string.Format("Version {0} ", Assembly.GetExecutingAssembly().GetName().Version.ToString());
-
       string currentVersion = string.Empty;
       if (ApplicationDeployment.IsNetworkDeployed)
       {
@@ -89,7 +87,20 @@ namespace BioSeqDB
     {
       try
       {
-        Process.Start(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\ChangeLog.txt");
+        string changelog = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\ChangeLog.txt";
+        if (!File.Exists(changelog))
+        {
+          changelog = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\bin\debug\ChangeLog.txt";
+        }
+
+        if (File.Exists(changelog))
+        {
+          Process.Start(changelog);
+        }
+        else
+        {
+          MessageBox.Show(changelog + " change log file does not exist on this computer.", "Missing change log file", MessageBoxButtons.OK);
+        }
       }
       finally { }
     }

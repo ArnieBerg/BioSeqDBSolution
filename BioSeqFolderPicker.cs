@@ -1,4 +1,5 @@
 ﻿using BioSeqDB.ModelClient;
+using BioSeqDBConfigModel;
 using FSExplorer;
 using Ookii.Dialogs.WinForms;
 using System;
@@ -8,17 +9,19 @@ using System.Windows.Forms;
 
 namespace BioSeqDB
 {
-  public partial class BioSeqInfluenzaAFastq : Form
+  public partial class BioSeqFolderPicker : Form
   {
     public Dictionary<string, string> items; // Folders selected in this run.
     public Dictionary<string, string> alreadySelected; // This is a list of those that have already been selected.
     private bool IsSalmonella;
     private bool IsInfluenzaA;
+    private bool IsBackup;
+    private bool IsCANS;
     private string currentSampleSelection = null;
 
     // Prompt for a Influenza A fastq sample for pipeline to analyze. Or Salmonella.
 
-    public BioSeqInfluenzaAFastq(Dictionary<string, string> itemsSelected, string functionUsage)  // functionUsage is "Salmonella" or "Influenza A". Or "Centrifuge".
+    public BioSeqFolderPicker(Dictionary<string, string> itemsSelected, string functionUsage)  // functionUsage is "Salmonella" or "Influenza A". Or "CANS". Or "Priority Backup".
     {
       InitializeComponent();
 
@@ -33,6 +36,8 @@ namespace BioSeqDB
       btnOK.Enabled = false;
       IsSalmonella = functionUsage == "Salmonella";
       IsInfluenzaA = functionUsage == "Influenza A";
+      IsBackup = functionUsage == "Priority Backup";
+      IsCANS = functionUsage == "CANS";
       Text = Text.Replace("<analysis>", functionUsage);
       label4.Text = label4.Text.Replace("<analysis>", functionUsage);
       label2.Text = label2.Text.Replace("<analysis>", functionUsage);
@@ -43,18 +48,18 @@ namespace BioSeqDB
           currentSampleSelection = key; // Choose the last sample in those already selected.
         }
       }
-      ReloadSampleList();
+      ReloadFolderList();
     }
 
-    private void ReloadSampleList()
+    private void ReloadFolderList()
     {
-      lvSamples.Items.Clear();
+      lvFolders.Items.Clear();
       foreach (string item in alreadySelected.Keys)
       {
         ListViewItem lvItem = new ListViewItem(item);
         lvItem.SubItems.Add(alreadySelected[item].Substring(1));
 
-        lvSamples.Items.Insert(lvSamples.Items.Count, lvItem);
+        lvFolders.Items.Insert(lvFolders.Items.Count, lvItem);
       }
 
       foreach (string item in items.Keys)
@@ -62,17 +67,17 @@ namespace BioSeqDB
         ListViewItem lvItem = new ListViewItem(item);
         lvItem.SubItems.Add(items[item]);
 
-        lvSamples.Items.Insert(lvSamples.Items.Count, lvItem);
+        lvFolders.Items.Insert(lvFolders.Items.Count, lvItem);
       }
-      for (int i = 0; i < lvSamples.Items.Count; i++)
+      for (int i = 0; i < lvFolders.Items.Count; i++)
       {
-        if (lvSamples.Items[i].Text == currentSampleSelection)
+        if (lvFolders.Items[i].Text == currentSampleSelection)
         {
-          lvSamples.Items[i].Focused = true;
-          lvSamples.Items[i].Selected = true;
-          lvSamples.Items[i].EnsureVisible();
+          lvFolders.Items[i].Focused = true;
+          lvFolders.Items[i].Selected = true;
+          lvFolders.Items[i].EnsureVisible();
 
-          lvSamples.Select();
+          lvFolders.Select();
           break;
         }
       }
@@ -83,7 +88,7 @@ namespace BioSeqDB
     {
       btnOK.Enabled = true;
 
-      foreach (ListViewItem item in lvSamples.Items) // Make sure all the samples have IDs.
+      foreach (ListViewItem item in lvFolders.Items) // Make sure all the samples have IDs.
       {
         if (string.IsNullOrEmpty(item.Text))
         {
@@ -93,85 +98,88 @@ namespace BioSeqDB
       }
     }
 
-    private void btnFindInputPath_Click(object sender, EventArgs e)
+    private void btnFindFolder_Click(object sender, EventArgs e)
     {
       DialogResult result;
-      string samplePath = string.Empty;
       List<string> folderList = new List<string>();
       items = new Dictionary<string, string>(); // Start from square one with items in this batch.
 
-      if (IsServiceClass.IsService)
+      string title = "Input path to folder containing sample fastq files";
+      string extensions = "Fastq files (*.fastq)|*.fastq|All files (*.*)|*.*";
+      string folderPath = AppConfigHelper.InfluenzaASamplesPath;
+      if (IsSalmonella)
       {
-        string path = IsSalmonella ? AppConfigHelper.NormalizePathToWindows(AppConfigHelper.SalmonellaSamplesPath) :
-                                     AppConfigHelper.NormalizePathToWindows(AppConfigHelper.InfluenzaASamplesPath);
-
-        // We want an actual file, so don't append "\\".
-        // Jan-8-2021 No, we want a folder with fastq files in it.
-        path += "\\";
-        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to folder containing sample fastq files",
-                            DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
-                            "Fastq files (*.fastq)|*.fastq|All files (*.*)|*.*", folderList, AppConfigHelper.UbuntuPrefix());
-        Explorer.frmExplorer.ServerOnly = true;
-        result = Explorer.frmExplorer.ShowDialog();
-        if (result != DialogResult.Cancel)
-        {
-          folderList = Explorer.FileNames;
-          samplePath = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
-        }
+        folderPath = AppConfigHelper.SalmonellaSamplesPath;
       }
-      else
+      if (IsCANS)
       {
-        VistaOpenFileDialog ofn = new VistaOpenFileDialog();
-        if (IsSalmonella ? Directory.Exists(AppConfigHelper.SalmonellaSamplesPath) : Directory.Exists(AppConfigHelper.InfluenzaASamplesPath))
-        {
-          ofn.InitialDirectory = ofn.FileName = IsSalmonella ? AppConfigHelper.FileExists(AppConfigHelper.SalmonellaSamplesPath) :
-                                                               AppConfigHelper.FileExists(AppConfigHelper.InfluenzaASamplesPath);
-        }
-        ofn.Title = "Input path to folder containing sample fastq files";
-        ofn.CheckFileExists = true;
-        ofn.Multiselect = false;
-        ofn.Filter = "Fastq files (*.fastq)|*.fastq|All files (*.*)|*.*";
+        folderPath = AppConfigHelper.CANSSamplesPath;
+      }
+      if (IsBackup)
+      {
+        folderPath = AppConfigHelper.BackupFoldersPath;
+        title = "Input path to folder containing files to backup";
+        extensions = "All files (*.*)|*.*";
+      }
+      folderPath = AppConfigHelper.NormalizePathToWindows(folderPath);
 
-        result = ofn.ShowDialog();
-        samplePath = ofn.FileName;
+      // We want an actual file, so don't append "\\".
+      // Jan-8-2021 No, we want a folder with fastq files in it.
+      if (string.IsNullOrEmpty(folderPath))
+      {
+        folderPath = "C:";
+      }
+      if (!folderPath.EndsWith("\\"))
+      {
+        folderPath += "\\";
+      }
+      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), title, DirectoryHelper.IsServerPath(folderPath), 
+                                                     DirectoryHelper.CleanPath(folderPath), extensions, folderList, AppConfigHelper.UbuntuPrefix());
+      Explorer.frmExplorer.ServerOnly = true;
+      result = Explorer.frmExplorer.ShowDialog();
+      if (result != DialogResult.Cancel)
+      {
+        folderList = Explorer.FileNames;
+        folderPath = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
       }
 
       if (result != DialogResult.Cancel)
       {
-        samplePath = samplePath.Substring(0, samplePath.LastIndexOf("\\") + 1);
+        folderPath = folderPath.Substring(0, folderPath.LastIndexOf("\\") + 1);
 
         // If the selection already exists, boot it out.
-        string msg = "Folders already selected or having no .fastq files (will be ignored): " + Environment.NewLine;
+        string fastqClause = IsBackup ? "" : " or having no .fastq files";
+        string msg = "Folders already selected" + fastqClause + " (will be ignored): " + Environment.NewLine;
         bool isSelected = false;
         if (folderList.Count == 0)
         {
           foreach (string key in alreadySelected.Keys)
           {
-            if (alreadySelected[key].Substring(1) == samplePath)
+            if (alreadySelected[key].Substring(1) == folderPath)
             {
               isSelected = true;
-              msg += samplePath + Environment.NewLine;
+              msg += folderPath + Environment.NewLine;
               break;
             }
           }
 
-          if (!isSelected)
+          if (!isSelected && !IsBackup)
           {
-            int fCount = ServiceCallHelper.TraverseTree(DirectoryHelper.CleanPath(samplePath), true, "fastq");
+            int fCount = ServiceCallHelper.TraverseTree(DirectoryHelper.CleanPath(folderPath), true, "fastq");
             if (fCount == 0)
             {
               isSelected = true;
-              msg += samplePath + Environment.NewLine;
+              msg += folderPath + Environment.NewLine;
             }
           }
 
           if (!isSelected)
           {
-            string path = samplePath.Substring(0, samplePath.Length - 1);
+            string path = folderPath.Substring(0, folderPath.Length - 1);
             path = path.Substring(path.LastIndexOf("\\") + 1);
             //samplePath = samplePath.Substring(0, samplePath.Length - 1 - path.Length); // Chop off last folder name.
             currentSampleSelection = path;
-            items.Add(path, samplePath);
+            items.Add(path, folderPath);
           }
         }
         else
@@ -181,28 +189,28 @@ namespace BioSeqDB
             isSelected = false;
             foreach (string key in alreadySelected.Keys)
             {
-              if (Path.GetDirectoryName(alreadySelected[key].Substring(1)) == Path.GetDirectoryName(samplePath + folder + "\\"))
+              if (Path.GetDirectoryName(alreadySelected[key].Substring(1)) == Path.GetDirectoryName(folderPath + folder + "\\"))
               {
                 isSelected = true;
-                msg += samplePath + folder + Environment.NewLine;
+                msg += folderPath + folder + Environment.NewLine;
                 break;
               }
             }
 
-            if (!isSelected)
+            if (!isSelected && !IsBackup)
             {
-              int fCount = ServiceCallHelper.TraverseTree(DirectoryHelper.CleanPath(samplePath + folder), true, "fastq");
+              int fCount = ServiceCallHelper.TraverseTree(DirectoryHelper.CleanPath(folderPath + folder), true, "fastq");
               if (fCount == 0)
               {
                 isSelected = true;
-                msg += samplePath + folder + Environment.NewLine;
+                msg += folderPath + folder + Environment.NewLine;
               }
             }
 
             if (!isSelected)
             {
               currentSampleSelection = folder;
-              items.Add(folder, samplePath + folder);
+              items.Add(folder, folderPath + folder);
             }
           }
         }
@@ -211,27 +219,35 @@ namespace BioSeqDB
         {
           MessageBox.Show(msg, "WARNING", MessageBoxButtons.OK);
         }
-        ReloadSampleList();
+        ReloadFolderList();
 
         if (IsSalmonella)
         {
-          AppConfigHelper.SalmonellaSamplesPath = samplePath;
+          AppConfigHelper.SalmonellaSamplesPath = folderPath;
         }
         else if (IsInfluenzaA)
         {
-          AppConfigHelper.InfluenzaASamplesPath = samplePath;
+          AppConfigHelper.InfluenzaASamplesPath = folderPath;
+        }
+        else if (IsBackup)
+        {
+          AppConfigHelper.BackupFoldersPath = folderPath;
+        }
+        else if (IsCANS)
+        {
+          AppConfigHelper.CANSSamplesPath = folderPath;
         }
       }
     }
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-      // If the sample ID is already exists, prompt to replace.
+      // If the sample ID already exists, prompt to replace.
       foreach (string sample in items.Keys)
       {
         if (alreadySelected.ContainsKey(sample))
         {
-          ReplacePrompt.MainInstruction = "A sample for " + sample + " already exists in the database. Do you want to replace it?";
+          ReplacePrompt.MainInstruction = "A folder for " + sample + " already exists in the database. Do you want to replace it?";
           TaskDialogButton button = ReplacePrompt.ShowDialog(this);
           if (button == btnReplaceCancel)
           {
@@ -248,16 +264,16 @@ namespace BioSeqDB
       }
     }
 
-    private void BioSeqInfluenzaAFastq_Shown(object sender, EventArgs e)
+    private void BioSeqFolderPicker_Shown(object sender, EventArgs e)
     {
-      btnFindInputPath_Click(sender, e); // Immediately go into Explorer to find fastq folder(s).
+      btnFindFolder_Click(sender, e); // Immediately go into Explorer to find fastq folder(s).
     }
 
     private void lvSamples_SelectedIndexChanged(object sender, EventArgs e)
     {
-      if (lvSamples.SelectedItems != null && lvSamples.SelectedItems.Count > 0)
+      if (lvFolders.SelectedItems != null && lvFolders.SelectedItems.Count > 0)
       {
-        ListViewItem item = lvSamples.SelectedItems[0];
+        ListViewItem item = lvFolders.SelectedItems[0];
         btnUpdate.Enabled = btnDelete.Enabled = true;
         if (alreadySelected.ContainsKey(item.Text))
         {
@@ -271,22 +287,22 @@ namespace BioSeqDB
 
     private void btnUpdate_Click(object sender, EventArgs e)
     {
-      if (txtSampleID.Text.Trim().Length > 0 && txtSampleID.Text.Trim() != lvSamples.SelectedItems[0].Text)
+      if (txtSampleID.Text.Trim().Length > 0 && txtSampleID.Text.Trim() != lvFolders.SelectedItems[0].Text)
       {
-        items.Remove(lvSamples.SelectedItems[0].Text);
+        items.Remove(lvFolders.SelectedItems[0].Text);
         currentSampleSelection = txtSampleID.Text;
         items.Add(currentSampleSelection, lblPath.Text);
-        ReloadSampleList();
+        ReloadFolderList();
       }
     }
 
     private void btnDelete_Click(object sender, EventArgs e)
     {
-      if (txtSampleID.Text.Trim().Length > 0 && txtSampleID.Text.Trim() == lvSamples.SelectedItems[0].Text)
+      if (txtSampleID.Text.Trim().Length > 0 && txtSampleID.Text.Trim() == lvFolders.SelectedItems[0].Text)
       {
-        items.Remove(lvSamples.SelectedItems[0].Text);
+        items.Remove(lvFolders.SelectedItems[0].Text);
         txtSampleID.Text = lblPath.Text = currentSampleSelection = string.Empty;
-        ReloadSampleList();
+        ReloadFolderList();
       }
     }
   }

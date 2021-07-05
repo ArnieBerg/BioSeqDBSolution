@@ -164,7 +164,7 @@
       this.btnDelete.Name = "btnDelete";
       this.btnDelete.Size = new System.Drawing.Size(122, 23);
       this.btnDelete.TabIndex = 28;
-      this.btnDelete.Text = "Delete unchecked";
+      this.btnDelete.Text = "Remove unchecked";
       this.btnDelete.UseVisualStyleBackColor = true;
       this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
       // 

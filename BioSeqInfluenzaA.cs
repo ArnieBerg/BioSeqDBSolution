@@ -35,18 +35,11 @@ namespace BioSeqDB
       ReloadSampleList();
       EnableOK();
 
-      if (Size.Width != 0)
+      Location = AppConfigHelper.InfluenzaALocation();
+      if (Location.X == 0 && Location.Y == 0)
       {
-        Location = AppConfigHelper.InfluenzaALocation();
-        if (Location.X <= 0)
-        {
-          Location = new Point(100, 100);
-        }
-        Size = AppConfigHelper.InfluenzaASize();
-        if (Size.Height <= 0 || Size.Width <= 0)
-        {
-          Size = new Size(1000, 1000);
-        }
+        Location = new Point(100, 100);
+        Size = new Size(1000, 600);
       }
     }
 
@@ -231,7 +224,7 @@ namespace BioSeqDB
 
     private void btnFastqPicker_Click(object sender, EventArgs e)
     {
-      BioSeqInfluenzaAFastq frm = new BioSeqInfluenzaAFastq(AppConfigHelper.InfluenzaASampleList, "Influenza A");
+      BioSeqFolderPicker frm = new BioSeqFolderPicker(AppConfigHelper.InfluenzaASampleList, "Influenza A");
       if (frm.ShowDialog() == DialogResult.OK)
       {
         AppConfigHelper.InfluenzaASampleList = frm.alreadySelected;

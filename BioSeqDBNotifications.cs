@@ -1,5 +1,6 @@
 ﻿using BioSeqDB.ModelClient;
 using BioSeqDBConfigModel;
+using BioSeqDBTransferData;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -30,18 +31,11 @@ namespace BioSeqDB
       InitTimer();
       cmbTaskStatusFilter.SelectedIndex = 0;
 
-      if (Size.Width != 0)
+      Location = AppConfigHelper.NotificationLocation();
+      if (Location.X <= 0 || Location.Y <= 0)
       {
-        Location = AppConfigHelper.NotificationLocation();
-        if (Location.X <= 0)
-        {
-          Location = new Point(100, 100);
-        }
-        Size = AppConfigHelper.NotificationSize();
-        if (Size.Height <= 0 || Size.Width <= 0)
-        {
-          Size = new Size(1000, 1000);
-        }
+        Location = new Point(100, 100);
+        Size = new Size(1000, 600);
       }
     }
 
@@ -213,144 +207,146 @@ namespace BioSeqDB
         return;
       }
 
-      AppConfigHelper.LastCommand = task.TaskCommand;
-      switch (task.TaskType)
+      try
       {
-        case "VFabricate":
-          TaskCompletion(task, "VFabricate", "VFabricate completed.");
+        AppConfigHelper.LastCommand = task.TaskCommand;
+        switch (task.TaskType)
+        {
+          case "BackupOffsite":
+            TaskCompletion(task, "BackupOffsite", "Offsite backup completed.");
+            break;
 
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            string sampleName = string.Empty;
-            if (AppConfigHelper.SampleChecked("VFabricate"))
+          case "VFabricate":
+            TaskCompletion(task, "VFabricate", "VFabricate completed.");
+
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
             {
-              sampleName = AppConfigHelper.SampleID("VFabricate");
+              string sampleName = string.Empty;
+              if (AppConfigHelper.SampleChecked("VFabricate"))
+              {
+                sampleName = AppConfigHelper.SampleID("VFabricate");
+              }
+
+              string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("VFabricate"),
+                                                       new string[] { sampleName + ".VFList.tsv" });
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "VFabricate completed successfully. Result is in " +
+                              destination + "\\" + sampleName + ".VFList.tsv", "Success", MessageBoxButtons.OK);
+
+              destination = DirectoryHelper.CleanPath(destination);
+              Process.Start(destination + "\\" + sampleName + ".VFList.tsv");
             }
+            break;
 
-            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("VFabricate"),
-                                                     new string[] { sampleName + ".VFList.tsv" });
-            MessageBox.Show(task.StandardOutput + Environment.NewLine + "VFabricate completed successfully. Result is in " +
-                            destination + "\\" + sampleName + ".VFList.tsv", "Success", MessageBoxButtons.OK);
+          case "Quast":
+            TaskCompletion(task, "Quast", "Quast completed.");
 
-            destination = DirectoryHelper.CleanPath(destination);
-            Process.Start(destination + "\\" + sampleName + ".VFList.tsv");
-          }
-          break;
-
-        case "Quast":
-          TaskCompletion(task, "Quast", "Quast completed.");
-
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            string sampleName = string.Empty;
-            if (AppConfigHelper.SampleChecked("Quast"))
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
             {
-              sampleName = AppConfigHelper.SampleID("Quast");
+              string sampleName = string.Empty;
+              if (AppConfigHelper.SampleChecked("Quast"))
+              {
+                sampleName = AppConfigHelper.SampleID("Quast");
+              }
+
+              string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Quast"), new string[] { "\\Quast" + sampleName }, false); // folder copy
+
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "Quast completed successfully. Result is in the " +
+                                                                                        destination + " folder.", "Success", MessageBoxButtons.OK);
             }
+            break;
 
-            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Quast"), new string[] { "\\Quast" + sampleName }, false); // folder copy
+          case "Kraken2":
+            TaskCompletion(task, "Kraken2", "Kraken2 completed.");
 
-            //destination = DirectoryHelper.CleanPath(destination);
-
-            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Quast completed successfully. Result is in the " +
-                                                                                      destination + " folder.", "Success", MessageBoxButtons.OK);
-          }
-          break;
-
-        case "Kraken2":
-          TaskCompletion(task, "Kraken2", "Kraken2 completed.");
-
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Kraken2 completed successfully. Result is in " +
-                                                         AppConfigHelper.OutputPath("Kraken2") + ".", "Success", MessageBoxButtons.OK);
-            if (AppConfigHelper.OutputPath("Kraken2").StartsWith("[L]"))
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
             {
-              string destination = DirectoryHelper.CleanPath(AppConfigHelper.OutputPath("Kraken2")) + "\\";
-              if (File.Exists(destination + "kraken.aggregates.txt"))
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "Kraken2 completed successfully. Result is in " +
+                                                           AppConfigHelper.OutputPath("Kraken2") + ".", "Success", MessageBoxButtons.OK);
+              if (AppConfigHelper.OutputPath("Kraken2").StartsWith("[L]"))
               {
-                File.Delete(destination + "kraken.aggregates.txt");
-              }
-              if (File.Exists(destination + "kraken.txt"))
-              {
-                File.Delete(destination + "kraken.txt");
-              }
-              if (File.Exists(destination + "RefseqIdent.txt"))
-              {
-                File.Delete(destination + "RefseqIdent.txt");
-              }
-              AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Kraken2"),
-                                                            new string[] { "kraken.aggregates.txt", "kraken.txt", "RefseqIdent.txt" });
-              if (File.Exists(destination + "kraken.aggregates.txt"))
-              {
-                Process.Start(destination + "kraken.aggregates.txt");
-              }
-              if (File.Exists(destination + "kraken.txt"))
-              {
-                Process.Start(destination + "kraken.txt");
-              }
-              if (File.Exists(destination + "RefseqIdent.txt"))
-              {
-                Process.Start(destination + "RefseqIdent.txt");
+                string destination = DirectoryHelper.CleanPath(AppConfigHelper.OutputPath("Kraken2")) + "\\";
+                if (File.Exists(destination + "kraken.aggregates.txt"))
+                {
+                  File.Delete(destination + "kraken.aggregates.txt");
+                }
+                if (File.Exists(destination + "kraken.txt"))
+                {
+                  File.Delete(destination + "kraken.txt");
+                }
+                if (File.Exists(destination + "RefseqIdent.txt"))
+                {
+                  File.Delete(destination + "RefseqIdent.txt");
+                }
+                AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Kraken2"),
+                                                              new string[] { "kraken.aggregates.txt", "kraken.txt", "RefseqIdent.txt" });
+                if (File.Exists(destination + "kraken.aggregates.txt"))
+                {
+                  Process.Start(destination + "kraken.aggregates.txt");
+                }
+                if (File.Exists(destination + "kraken.txt"))
+                {
+                  Process.Start(destination + "kraken.txt");
+                }
+                if (File.Exists(destination + "RefseqIdent.txt"))
+                {
+                  Process.Start(destination + "RefseqIdent.txt");
+                }
               }
             }
-          }
-          break;
+            break;
 
-        case "BBMap":
-          TaskCompletion(task, "BBMap", "BBMap completed.");
+          case "BBMap":
+            TaskCompletion(task, "BBMap", "BBMap completed.");
 
-          if (task.LastExitCode == 0)
-          {
-            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("BBMap"),
-                                          new string[] { "covhist.txt", "covstats.txt", "bincov.txt", "basecov.txt", "RefseqIdent.txt" });
+            if (task.LastExitCode == 0)
+            {
+              string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("BBMap"),
+                                            new string[] { "covhist.txt", "covstats.txt", "bincov.txt", "basecov.txt", "RefseqIdent.txt" });
 
-            destination = DirectoryHelper.CleanPath(destination);
-            MessageBox.Show(task.StandardOutput + Environment.NewLine + "BBMap completed successfully. Result is in " +
-                                                                             destination + ".", "Success", MessageBoxButtons.OK);
-            if (File.Exists(destination + "covhist.txt")) Process.Start(destination + "covhist.txt");
-            if (File.Exists(destination + "covstats.txt")) Process.Start(destination + "covstats.txt");
-            if (File.Exists(destination + "bincov.txt")) Process.Start(destination + "bincov.txt");
-            if (File.Exists(destination + "basecov.txt")) Process.Start(destination + "basecov.txt");
-            if (File.Exists(destination + "RefseqIdent.txt")) Process.Start(destination + "RefseqIdent.txt");
-          }
-          break;
+              destination = DirectoryHelper.CleanPath(destination);
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "BBMap completed successfully. Result is in " +
+                                                                               destination + ".", "Success", MessageBoxButtons.OK);
+              if (File.Exists(destination + "covhist.txt")) Process.Start(destination + "covhist.txt");
+              if (File.Exists(destination + "covstats.txt")) Process.Start(destination + "covstats.txt");
+              if (File.Exists(destination + "bincov.txt")) Process.Start(destination + "bincov.txt");
+              if (File.Exists(destination + "basecov.txt")) Process.Start(destination + "basecov.txt");
+              if (File.Exists(destination + "RefseqIdent.txt")) Process.Start(destination + "RefseqIdent.txt");
+            }
+            break;
 
-        case "Search":
-          TaskCompletion(task, "Search", "Search completed.");
+          case "Search":
+            TaskCompletion(task, "Search", "Search completed.");
 
-          Cursor.Current = Cursors.WaitCursor;
-          ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // To retrieve StandardOutput and LastError.
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            string filename = AppConfigHelper.OutputPath("Search") + "\\" + AppConfigHelper.SearchOutputSampleName() + ".txt";
-            MessageBox.Show(task.StandardOutput + Environment.NewLine +
-                    "Search completed successfully. Close this dialog to open the result file in " + filename + ".", "Success", MessageBoxButtons.OK);
+            Cursor.Current = Cursors.WaitCursor;
+            ServiceCallHelper.LoadConfig(AppConfigHelper.LoggedOnUser); // To retrieve StandardOutput and LastError.
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
+            {
+              string filename = AppConfigHelper.OutputPath("Search") + "\\" + AppConfigHelper.SearchOutputSampleName() + ".txt";
+              MessageBox.Show(task.StandardOutput + Environment.NewLine +
+                      "Search completed successfully. Close this dialog to open the result file in " + filename + ".", "Success", MessageBoxButtons.OK);
 
-            // If the output path is on the server, we need to copy it to the local Temp folder to display the results.
-            // If the output path is on the local machine, we need to copy from the user folder on the server to the local destination.
+              // If the output path is on the server, we need to copy it to the local Temp folder to display the results.
+              // If the output path is on the local machine, we need to copy from the user folder on the server to the local destination.
 
-            string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Search"),
-                                                      new string[] { AppConfigHelper.SearchOutputSampleName() + ".txt" });
-            Process.Start(DirectoryHelper.CleanPath(destination) + AppConfigHelper.SearchOutputSampleName() + ".txt");
-          }
-          break;
+              string destination = AppConfigHelper.CopyResultFromServer(AppConfigHelper.OutputPath("Search"),
+                                                        new string[] { AppConfigHelper.SearchOutputSampleName() + ".txt" });
+              Process.Start(DirectoryHelper.CleanPath(destination) + AppConfigHelper.SearchOutputSampleName() + ".txt");
+            }
+            break;
 
-        case "Assemble":
-          TaskCompletion(task, "Assembly", "Assembly completed. If there are no errors, the results including the contig files are in the E:/data/staging folder on the server.");
-          break;
+          case "Assemble":
+            TaskCompletion(task, "Assembly", "Assembly completed. If there are no errors, the results including the contig files are in the E:/data/staging folder on the server.");
+            break;
 
-        case "InfluenzaA":
-          TaskCompletion(task, "InfluenzaA", "InfluenzaA completed.");
+          case "InfluenzaA":
+            TaskCompletion(task, "InfluenzaA", "InfluenzaA completed.");
 
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            if (IsServiceClass.IsService)
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
             {
               if (AppConfigHelper.InfluenzaAOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
               {
@@ -360,10 +356,10 @@ namespace BioSeqDB
                 {
                   if (AppConfigHelper.InfluenzaASampleList[sampleName].Substring(0, 1) == "1")
                   {
-                    string sourceFolderName = "[S]" + AppConfigHelper.UserFolder() + sampleName + "\\consensus\\";
                     Directory.CreateDirectory(DirectoryHelper.CleanPath(AppConfigHelper.InfluenzaAOutputPath) + "\\" + sampleName + "\\");
                     //Logger.Log.Debug("Copy from " + sourceFolderName + " to " + AppConfigHelper.InfluenzaAOutputPath + "\\");
-                    DirectoryHelper.FolderCopy(sourceFolderName, AppConfigHelper.InfluenzaAOutputPath + "\\" + sampleName + "\\");
+                    //DirectoryHelper.FolderCopy(sourceFolderName, AppConfigHelper.InfluenzaAOutputPath + "\\" + sampleName + "\\");
+                    TransferHelper.FolderCopy("[S]" + AppConfigHelper.UserFolder() + sampleName + "\\consensus\\", AppConfigHelper.InfluenzaAOutputPath + "\\" + sampleName + "\\");
                   }
                 }
               }
@@ -371,292 +367,286 @@ namespace BioSeqDB
                               AppConfigHelper.InfluenzaAOutputPath + "\\, including consensus fasta files in sample name subfolder[s].",
                                                                                               "Files copied", MessageBoxButtons.OK);
             }
-          }
-          break;
+            break;
 
-        case "CANS":
-          TaskCompletion(task, "CANS", "CANS completed.");
+          case "CANS":
+            TaskCompletion(task, "CANS", "CANS completed.");
 
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            if (IsServiceClass.IsService)
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
             {
-              MessageBox.Show(task.StandardOutput + Environment.NewLine + "CANS pipeline completed successfully. Results copied to " +
-                              AppConfigHelper.CANSOutputPath + ".  The report_summary.html file consolidates statistics from all samples processed.",
-                                                                                                            "Files copied", MessageBoxButtons.OK);
-              if (AppConfigHelper.CANSOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+              if (IsServiceClass.IsService)
               {
-                // For each sample that was processed, there is a subfolder in the UserFolder on the server named after the sample name. 
-                // That subfolder needs to be copied to the local output folder. 
-                foreach (string sampleName in AppConfigHelper.CANSSampleList.Keys)
+                MessageBox.Show(task.StandardOutput + Environment.NewLine + "CANS pipeline completed successfully. Results copied to " +
+                                AppConfigHelper.CANSOutputPath + ".  The report_summary.html file consolidates statistics from all samples processed.",
+                                                                                                              "Files copied", MessageBoxButtons.OK);
+                if (AppConfigHelper.CANSOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
                 {
-                  if (AppConfigHelper.CANSSampleList[sampleName].Substring(0, 1) == "1")
+                  // For each sample that was processed, there is a subfolder in the UserFolder on the server named after the sample name. 
+                  // That subfolder needs to be copied to the local output folder. 
+                  foreach (string sampleName in AppConfigHelper.CANSSampleList.Keys)
                   {
-                    DirectoryHelper.FolderCopy("[S]" + AppConfigHelper.UserFolder() + sampleName, AppConfigHelper.CANSOutputPath + "\\" + sampleName + "\\");
+                    if (AppConfigHelper.CANSSampleList[sampleName].Substring(0, 1) == "1")
+                    {
+                      //DirectoryHelper.FolderCopy("[S]" + AppConfigHelper.UserFolder() + sampleName, AppConfigHelper.CANSOutputPath + "\\" + sampleName + "\\");
+                      TransferHelper.FolderCopy("[S]" + AppConfigHelper.UserFolder() + sampleName, AppConfigHelper.CANSOutputPath + "\\" + sampleName + "\\");
+                    }
                   }
+                  TransferHelper.FileCopy("[S]" + AppConfigHelper.UserFolder() + "report_summary.html", AppConfigHelper.CANSOutputPath + "\\", true);
+                  Process.Start(DirectoryHelper.CleanPath(AppConfigHelper.CANSOutputPath + "\\report_summary.html"));
                 }
-                DirectoryHelper.FileCopy("[S]" + AppConfigHelper.UserFolder() + "report_summary.html", AppConfigHelper.CANSOutputPath + "\\", true);
-                Process.Start(DirectoryHelper.CleanPath(AppConfigHelper.CANSOutputPath + "\\report_summary.html"));
               }
             }
-          }
-          break;
+            break;
 
-        case "FastQC":
-          TaskCompletion(task, "FastQC", "FastQC completed.");
+          case "FastQC":
+            TaskCompletion(task, "FastQC", "FastQC completed.");
 
-          Cursor.Current = Cursors.Default;
-          int fileCt = 0;
-          if (task.LastExitCode == 0)
-          {
-            if (IsServiceClass.IsService)
+            Cursor.Current = Cursors.Default;
+            int fileCt = 0;
+            if (task.LastExitCode == 0)
             {
-              if (AppConfigHelper.FastQCMultiQC) // Follow up with MultiQC of the same output folder as input.
+              if (IsServiceClass.IsService)
               {
-                AppConfigHelper.MultiQCInputPath = AppConfigHelper.UserFolder() + "FastQC\\"; // Pick up the output from FastQC as input to MultiQC.
-                ScheduleMultiQCEvent?.Invoke(this, null); // Notify parent to submit MultiQC.
-              }
-
-              if (AppConfigHelper.FastQCOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
-              {
-                string destination = AppConfigHelper.FastQCOutputPath + "\\";
-                DirInfo dirInfo = BioSeqDBModel.Instance.GetFolderContents(AppConfigHelper.UserFolder() + "FastQC", null);
-                List<string> fileList = new List<string>();
-
-                foreach (DirData dirData in dirInfo.files)
+                if (AppConfigHelper.FastQCMultiQC) // Follow up with MultiQC of the same output folder as input.
                 {
-                  if (dirData.Name.ToUpper().EndsWith("HTML"))
+                  AppConfigHelper.MultiQCInputPath = AppConfigHelper.UserFolder() + "FastQC\\"; // Pick up the output from FastQC as input to MultiQC.
+                  ScheduleMultiQCEvent?.Invoke(this, null); // Notify parent to submit MultiQC.
+                }
+
+                if (AppConfigHelper.FastQCOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+                {
+                  string destination = AppConfigHelper.FastQCOutputPath + "\\";
+                  DirInfo dirInfo = BioSeqDBModel.Instance.GetFolderContents(AppConfigHelper.UserFolder() + "FastQC", null);
+                  List<string> fileList = new List<string>();
+
+                  foreach (DirData dirData in dirInfo.files)
+                  {
+                    if (dirData.Name.ToUpper().EndsWith("HTML"))
+                    {
+                      string filename = Path.GetFileName(dirData.Name);
+                      fileList.Add(filename);
+                      string copyTo = DirectoryHelper.CleanPath(destination) + filename;
+                      if (File.Exists(copyTo))
+                      {
+                        File.Delete(copyTo);
+                      }
+                    }
+                  }
+
+                  //MessageBox.Show("dirInfo of " + AppConfigHelper.UserFolder() + "FastQC contains " + dirInfo.files.Count.ToString() + " files, " +
+                  //                        fileList.Count.ToString() + " to be copied to " + destination + ", first one being " + fileList[0] + ".");
+
+                  AppConfigHelper.CopyResultFromServer(destination, fileList.ToArray(), true, "FastQC\\");
+
+                  foreach (DirData dirData in dirInfo.files)
                   {
                     string filename = Path.GetFileName(dirData.Name);
-                    fileList.Add(filename);
                     string copyTo = DirectoryHelper.CleanPath(destination) + filename;
-                    if (File.Exists(copyTo))
+                    if (dirData.Name.ToUpper().EndsWith("HTML") && File.Exists(copyTo))
                     {
-                      File.Delete(copyTo);
+                      Process.Start(copyTo);
+                    }
+                  }
+
+                  fileCt = fileList.Count;
+                }
+                MessageBox.Show(task.StandardOutput + Environment.NewLine + "FastQC analysis completed successfully. Results copied to " +
+                                                        AppConfigHelper.FastQCOutputPath + ". " + fileCt.ToString() + " file" + (fileCt != 1 ? "s" : string.Empty) +
+                                                                                                              " copied.", "FastQC completed", MessageBoxButtons.OK);
+              }
+            }
+            break;
+
+          case "MultiQC":
+            TaskCompletion(task, "MultiQC", "MultiQC completed.");
+
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
+            {
+              if (IsServiceClass.IsService)
+              {
+                if (AppConfigHelper.MultiQCOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+                {
+                  string destination = DirectoryHelper.CleanPath(AppConfigHelper.MultiQCOutputPath) + "\\";
+                  if (File.Exists(destination + "multiqc_report.html"))
+                  {
+                    File.Delete(destination + "multiqc_report.html");
+                  }
+                  AppConfigHelper.CopyResultFromServer(AppConfigHelper.MultiQCOutputPath, new string[] { "multiqc_report.html" }, true, "MultiQC\\");
+
+                  if (File.Exists(destination + "multiqc_report.html"))
+                  {
+                    Process.Start(destination + "multiqc_report.html");
+                  }
+                }
+                MessageBox.Show(task.StandardOutput + Environment.NewLine + "MultiQC analysis completed successfully. Results copied to " +
+                                                        AppConfigHelper.MultiQCOutputPath + ".", "MultiQC completed", MessageBoxButtons.OK);
+              }
+            }
+            break;
+
+          case "Centrifuge":
+            TaskCompletion(task, "Centrifuge", "Centrifuge completed.");
+
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
+            {
+              if (IsServiceClass.IsService)
+              {
+                if (AppConfigHelper.CentrifugeOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+                {
+                  string destination = DirectoryHelper.CleanPath(AppConfigHelper.CentrifugeOutputPath) + "\\";
+                  if (File.Exists(destination + "centrifuge_res.tsv"))
+                  {
+                    File.Delete(destination + "centrifuge_res.tsv");
+                  }
+                  if (File.Exists(destination + "centrifuge_report.tsv"))
+                  {
+                    File.Delete(destination + "centrifuge_report.tsv");
+                  }
+                  AppConfigHelper.CopyResultFromServer(AppConfigHelper.CentrifugeOutputPath, new string[] { "centrifuge_res.tsv", "centrifuge_report.tsv" });
+
+                  if (File.Exists(destination + "centrifuge_report.tsv"))
+                  {
+                    Process.Start(destination + "centrifuge_report.tsv");
+                  }
+                }
+                MessageBox.Show(task.StandardOutput + Environment.NewLine + "Centrifuge pipeline completed successfully. Results copied to " +
+                                                        AppConfigHelper.CentrifugeOutputPath + ".", "Files copied", MessageBoxButtons.OK);
+              }
+            }
+            break;
+
+          case "MetaMaps":
+            TaskCompletion(task, "MetaMaps", "MetaMaps completed.");
+
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
+            {
+              if (IsServiceClass.IsService)
+              {
+                if (AppConfigHelper.MetaMapsOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+                {
+                  if (AppConfigHelper.MetaMapsOutputPath.StartsWith("[L]"))
+                  {
+                    string destination = DirectoryHelper.CleanPath(AppConfigHelper.MetaMapsOutputPath) + "\\";
+                    if (File.Exists(destination + "MetaMaps_Index.EM.WIMP"))
+                    {
+                      File.Delete(destination + "MetaMaps_Index.EM.WIMP");
+                    }
+                    AppConfigHelper.CopyResultFromServer(AppConfigHelper.MetaMapsOutputPath, new string[] { "MetaMaps_Index.EM.WIMP" });
+
+                    if (File.Exists(destination + "MetaMaps_Index.EM.WIMP"))
+                    {
+                      File.Move(destination + "MetaMaps_Index.EM.WIMP", destination + "MetaMaps_Index.EM.WIMP.tsv");
+                      Process.Start(destination + "MetaMaps_Index.EM.WIMP.tsv");
                     }
                   }
                 }
-
-                //MessageBox.Show("dirInfo of " + AppConfigHelper.UserFolder() + "FastQC contains " + dirInfo.files.Count.ToString() + " files, " +
-                //                        fileList.Count.ToString() + " to be copied to " + destination + ", first one being " + fileList[0] + ".");
-
-                AppConfigHelper.CopyResultFromServer(destination, fileList.ToArray(), true, "FastQC\\");
-
-                foreach (DirData dirData in dirInfo.files)
-                {
-                  string filename = Path.GetFileName(dirData.Name);
-                  string copyTo = DirectoryHelper.CleanPath(destination) + filename;
-                  if (dirData.Name.ToUpper().EndsWith("HTML") && File.Exists(copyTo))
-                  {
-                    Process.Start(copyTo);
-                  }
-                }
-
-                fileCt = fileList.Count;
+                MessageBox.Show(task.StandardOutput + Environment.NewLine + "MetaMaps pipeline completed successfully. Results copied to " +
+                                                        AppConfigHelper.MetaMapsOutputPath + ".", "Files copied", MessageBoxButtons.OK);
               }
-              MessageBox.Show(task.StandardOutput + Environment.NewLine + "FastQC analysis completed successfully. Results copied to " +
-                                                      AppConfigHelper.FastQCOutputPath + ". " + fileCt.ToString() + " file" + (fileCt != 1 ? "s" : string.Empty) +
-                                                                                                            " copied.", "FastQC completed", MessageBoxButtons.OK);
             }
-          }
-          break;
+            break;
 
-        case "MultiQC":
-          TaskCompletion(task, "MultiQC", "MultiQC completed.");
+          case "Salmonella":
+            TaskCompletion(task, "Salmonella", "Salmonella serotyping completed.");
 
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            if (IsServiceClass.IsService)
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
             {
-              if (AppConfigHelper.MultiQCOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
-              {
-                string destination = DirectoryHelper.CleanPath(AppConfigHelper.MultiQCOutputPath) + "\\";
-                if (File.Exists(destination + "multiqc_report.html"))
-                {
-                  File.Delete(destination + "multiqc_report.html");
-                }
-                AppConfigHelper.CopyResultFromServer(AppConfigHelper.MultiQCOutputPath, new string[] { "multiqc_report.html" }, true, "MultiQC\\");
-
-                if (File.Exists(destination + "multiqc_report.html"))
-                {
-                  Process.Start(destination + "multiqc_report.html");
-                }
-              }
-              MessageBox.Show(task.StandardOutput + Environment.NewLine + "MultiQC analysis completed successfully. Results copied to " +
-                                                      AppConfigHelper.MultiQCOutputPath + ".", "MultiQC completed", MessageBoxButtons.OK);
-            }
-          }
-          break;
-
-        case "Centrifuge":
-          TaskCompletion(task, "Centrifuge", "Centrifuge completed.");
-
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            if (IsServiceClass.IsService)
-            {
-              if (AppConfigHelper.CentrifugeOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
-              {
-                string destination = DirectoryHelper.CleanPath(AppConfigHelper.CentrifugeOutputPath) + "\\";
-                if (File.Exists(destination + "centrifuge_res.tsv"))
-                {
-                  File.Delete(destination + "centrifuge_res.tsv");
-                }
-                if (File.Exists(destination + "centrifuge_report.tsv"))
-                {
-                  File.Delete(destination + "centrifuge_report.tsv");
-                }
-                AppConfigHelper.CopyResultFromServer(AppConfigHelper.CentrifugeOutputPath, new string[] { "centrifuge_res.tsv", "centrifuge_report.tsv" });
-
-                if (File.Exists(destination + "centrifuge_report.tsv"))
-                {
-                  Process.Start(destination + "centrifuge_report.tsv");
-                }
-              }
-              MessageBox.Show(task.StandardOutput + Environment.NewLine + "Centrifuge pipeline completed successfully. Results copied to " +
-                                                      AppConfigHelper.CentrifugeOutputPath + ".", "Files copied", MessageBoxButtons.OK);
-            }
-          }
-          break;
-
-        case "MetaMaps":
-          TaskCompletion(task, "MetaMaps", "MetaMaps completed.");
-
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            if (IsServiceClass.IsService)
-            {
-              if (AppConfigHelper.MetaMapsOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
-              {
-                if (AppConfigHelper.MetaMapsOutputPath.StartsWith("[L]"))
-                {
-                  string destination = DirectoryHelper.CleanPath(AppConfigHelper.MetaMapsOutputPath) + "\\";
-                  if (File.Exists(destination + "MetaMaps_Index.EM.WIMP"))
-                  {
-                    File.Delete(destination + "MetaMaps_Index.EM.WIMP");
-                  }
-                  AppConfigHelper.CopyResultFromServer(AppConfigHelper.MetaMapsOutputPath, new string[] { "MetaMaps_Index.EM.WIMP" });
-
-                  if (File.Exists(destination + "MetaMaps_Index.EM.WIMP"))
-                  {
-                    File.Move(destination + "MetaMaps_Index.EM.WIMP", destination + "MetaMaps_Index.EM.WIMP.tsv");
-                    Process.Start(destination + "MetaMaps_Index.EM.WIMP.tsv");
-                  }
-                }
-              }
-              MessageBox.Show(task.StandardOutput + Environment.NewLine + "MetaMaps pipeline completed successfully. Results copied to " +
-                                                      AppConfigHelper.MetaMapsOutputPath + ".", "Files copied", MessageBoxButtons.OK);
-            }
-          }
-          break;
-
-        case "Salmonella":
-          TaskCompletion(task, "Salmonella", "Salmonella serotyping completed.");
-
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Salmonella serotyping completed successfully. Result is in " +
-                                                               AppConfigHelper.SalmonellaOutputPath, "Success", MessageBoxButtons.OK);
-            if (IsServiceClass.IsService)
-            {
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "Salmonella serotyping completed successfully. Result is in " +
+                                                                 AppConfigHelper.SalmonellaOutputPath, "Success", MessageBoxButtons.OK);
               if (AppConfigHelper.SalmonellaOutputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
               {
-                string sourceFolderName = "[S]" + AppConfigHelper.UserFolder() + "\\sistr_res_aggregate.csv";
-                string destinationFolderName = AppConfigHelper.SalmonellaOutputPath;
-                DirectoryHelper.FileCopy(sourceFolderName, destinationFolderName, true);
-                File.Move(DirectoryHelper.CleanPath(destinationFolderName) + "\\sistr_res_aggregate.csv",
-                          DirectoryHelper.CleanPath(destinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");  // Rename
-                Process.Start(DirectoryHelper.CleanPath(destinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
+                string salmonellaDestinationFolderName = AppConfigHelper.SalmonellaOutputPath;
+                TransferHelper.FileCopy("[S]" + AppConfigHelper.UserFolder() + "\\sistr_res_aggregate.csv", salmonellaDestinationFolderName, true);
+                File.Move(DirectoryHelper.CleanPath(salmonellaDestinationFolderName) + "\\sistr_res_aggregate.csv",
+                          DirectoryHelper.CleanPath(salmonellaDestinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");  // Rename
+                Process.Start(DirectoryHelper.CleanPath(salmonellaDestinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
               }
               else // Rename on server.
               {
-                DirectoryHelper.FileMove(AppConfigHelper.SalmonellaOutputPath + "\\sistr_res_aggregate.csv",
+                TransferHelper.FileMove(AppConfigHelper.SalmonellaOutputPath + "\\sistr_res_aggregate.csv",
                                          AppConfigHelper.SalmonellaOutputPath + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
               }
             }
-          }
-          break;
+            break;
 
-        case "Nextstrain":
-          TaskCompletion(task, "Nextstrain", "Nextstrain phylogenetic processing completed.");
+          case "Nextstrain":
+            TaskCompletion(task, "Nextstrain", "Nextstrain phylogenetic processing completed.");
 
-          Cursor.Current = Cursors.Default;
-          if (task.LastExitCode == 0)
-          {
-            //NextstrainProfile nextstrainProfile = AppConfigHelper.GetNextstrainProfile(); // for current database.
-            MessageBox.Show(task.StandardOutput + Environment.NewLine + "Nextstrain completed successfully.", "Success", MessageBoxButtons.OK);
-            if (IsServiceClass.IsService)
+            Cursor.Current = Cursors.Default;
+            if (task.LastExitCode == 0)
             {
-              //string browser = string.Empty;
-              //RegistryKey key = null;
-              //try
-              //{
-              //  key = Registry.ClassesRoot.OpenSubKey(@"HTTP\shell\open\command");
-              //  if (key != null)
-              //  {
-              //    // Get default Browser
-              //    browser = key.GetValue(null).ToString().ToLower().Trim(new[] { '"' });
-              //  }
-              //  if (!browser.EndsWith("exe"))
-              //  {
-              //    //Remove all after the ".exe"
-              //    browser = browser.Substring(0, browser.LastIndexOf(".exe", StringComparison.InvariantCultureIgnoreCase) + 4);
-              //  }
-              //}
-              //finally
-              //{
-              //  if (key != null)
-              //  {
-              //    key.Close();
-              //  }
-              //}
+              //NextstrainProfile nextstrainProfile = AppConfigHelper.GetNextstrainProfile(); // for current database.
+              MessageBox.Show(task.StandardOutput + Environment.NewLine + "Nextstrain completed successfully.", "Success", MessageBoxButtons.OK);
+              if (IsServiceClass.IsService)
+              {
+                //string browser = string.Empty;
+                //RegistryKey key = null;
+                //try
+                //{
+                //  key = Registry.ClassesRoot.OpenSubKey(@"HTTP\shell\open\command");
+                //  if (key != null)
+                //  {
+                //    // Get default Browser
+                //    browser = key.GetValue(null).ToString().ToLower().Trim(new[] { '"' });
+                //  }
+                //  if (!browser.EndsWith("exe"))
+                //  {
+                //    //Remove all after the ".exe"
+                //    browser = browser.Substring(0, browser.LastIndexOf(".exe", StringComparison.InvariantCultureIgnoreCase) + 4);
+                //  }
+                //}
+                //finally
+                //{
+                //  if (key != null)
+                //  {
+                //    key.Close();
+                //  }
+                //}
 
-              // Open the browser.
-              // See documentation for this approach:
-              // https://docs.nextstrain.org/en/latest/guides/share/community-builds.html
-              // The GitHub repository file structure must be:
-              // nextstrain/auspice/nextstrain.json
+                // Open the browser.
+                // See documentation for this approach:
+                // https://docs.nextstrain.org/en/latest/guides/share/community-builds.html
+                // The GitHub repository file structure must be:
+                // nextstrain/auspice/nextstrain.json
 
-              // The BioSeqDB service will have already pushed the updated files to Github.
+                // The BioSeqDB service will have already pushed the updated files to Github.
 
-              Process proc = Process.Start("https://nextstrain.org/community/ArnieBerg/nextstrain@main");
+                Process proc = Process.Start("https://nextstrain.org/community/ArnieBerg/nextstrain@main");
 
-              //if (nextstrainProfile.OuputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
-              //{
-              //  string sourceFolderName = "[S]" + AppConfigHelper.UserFolder() + "\\ncov_global.json";
-              //  string destinationFolderName = nextstrainProfile.OuputPath;
-              //  DirectoryHelper.FileCopy(sourceFolderName, destinationFolderName, true);
-              //  File.Move(DirectoryHelper.CleanPath(destinationFolderName) + "\\ncov_global.json",
-              //            DirectoryHelper.CleanPath(destinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");  // Rename
-              //  Process.Start(DirectoryHelper.CleanPath(destinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
-              //}
-              //else // Rename on server.
-              //{
-              //  DirectoryHelper.FileMove(nextstrainProfile.OuputPath + "\\sistr_res_aggregate.csv",
-              //                           nextstrainProfile.OuputPath + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
-              //}
+                //if (nextstrainProfile.OuputPath.StartsWith("[L]")) // Output was created on server, to be stored on client.  [L]
+                //{
+                //  string sourceFolderName = "[S]" + AppConfigHelper.UserFolder() + "\\ncov_global.json";
+                //  string destinationFolderName = nextstrainProfile.OuputPath;
+                //  TransferHelper.FileCopy(sourceFolderName, destinationFolderName, true);
+                //  File.Move(DirectoryHelper.CleanPath(destinationFolderName) + "\\ncov_global.json",
+                //            DirectoryHelper.CleanPath(destinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");  // Rename
+                //  Process.Start(DirectoryHelper.CleanPath(destinationFolderName) + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
+                //}
+                //else // Rename on server.
+                //{
+                //  DirectoryHelper.FileMove(nextstrainProfile.OuputPath + "\\sistr_res_aggregate.csv",
+                //                           nextstrainProfile.OuputPath + "\\sistr_res_aggregate" + DateTime.Now.ToString("yyMMddHHmmss") + ".csv");
+                //}
+              }
             }
-          }
-          break;
+            break;
 
-        case "BuildTree":
-          TaskCompletion(task, "BuildTree", "BuildTree completed. Close this dialog to open the result file.");
+          case "BuildTree":
+            TaskCompletion(task, "BuildTree", "BuildTree completed. Close this dialog to open the result file.");
 
-          //Logger.Log.Debug("ExitCode=" + task.LastExitCode.ToString() + @" Write to c:\temp\commandline.txt: open file='" + 
-          //                                    AppConfigHelper.BuildTreeOutputPath() + "\\tree.nwk';" + Environment.NewLine);
-          if (!Directory.Exists("C:\\Temp"))
-          {
-            Directory.CreateDirectory("C:\\Temp");
-          }
+            //Logger.Log.Debug("ExitCode=" + task.LastExitCode.ToString() + @" Write to c:\temp\commandline.txt: open file='" + 
+            //                                    AppConfigHelper.BuildTreeOutputPath() + "\\tree.nwk';" + Environment.NewLine);
+            if (!Directory.Exists("C:\\Temp"))
+            {
+              Directory.CreateDirectory("C:\\Temp");
+            }
 
-          string dendroscopePath = @"C:\Temp\";
-          if (IsServiceClass.IsService)
-          {
+            string dendroscopePath = @"C:\Temp\";
             // For service, copy the tree.nwk from wherever it was stored to C:\Temp. If it is on the server, call the service to copy it.
             // If it is on the local machine, do a File.Copy.    
             string sourceFolderName = "[S]" + AppConfigHelper.UserFolder();
@@ -669,57 +659,45 @@ namespace BioSeqDB
 
             if (destinationFolderName.StartsWith("[L]")) // Buildtree output was created on server, to be stored on client.  [L]
             {
-              DirectoryHelper.FileCopy(sourceFolderName + "tree.nwk", destinationFolderName, true);
-              DirectoryHelper.FileCopy(sourceFolderName + "metadata_microreact.csv", destinationFolderName, true);
+              TransferHelper.FileCopy(sourceFolderName + "tree.nwk", destinationFolderName, true);
+              TransferHelper.FileCopy(sourceFolderName + "metadata_microreact.csv", destinationFolderName, true);
               dendroscopePath = DirectoryHelper.CleanPath(destinationFolderName);
               Logger.Log.Debug("btnPushTask: dendroscopePath: " + dendroscopePath);
             }
             else  // Buildtree output was created on server, to be stored on server.  [S]
             {
-              DirectoryHelper.FileCopy(sourceFolderName + "tree.nwk", destinationFolderName, true);
-              DirectoryHelper.FileCopy(sourceFolderName + "metadata_microreact.csv", destinationFolderName, true);
+              TransferHelper.FileCopy(sourceFolderName + "tree.nwk", destinationFolderName, true);
+              TransferHelper.FileCopy(sourceFolderName + "metadata_microreact.csv", destinationFolderName, true);
 
               // Also copy to local Temp folder for Dendroscope to pick up.
-              DirectoryHelper.FileCopy(sourceFolderName + "tree.nwk", @"[L]C:\Temp\", true);
-              DirectoryHelper.FileCopy(sourceFolderName + "metadata_microreact.csv", @"[L]C:\Temp\", true);
+              TransferHelper.FileCopy(sourceFolderName + "tree.nwk", @"[L]C:\Temp\", true);
+              TransferHelper.FileCopy(sourceFolderName + "metadata_microreact.csv", @"[L]C:\Temp\", true);
             }
-          }
-          else
-          {
-            if (DirectoryHelper.CleanPath(AppConfigHelper.BuildTreeOutputPath()) != @"C:\Temp")
+
+            File.WriteAllText("C:\\Temp\\commandline.txt", @"open file='" + dendroscopePath + "tree.nwk';" + Environment.NewLine);
+
+            if (task.LastExitCode == 0)
             {
-              if (File.Exists(@"C:\Temp\tree.nwk"))
+              // Invoke Dendroscope to visualize tree.  c:\\Temp\\commandine.txt contains the line:
+              // open file='C:\Temp\Save\tree.nwk';
+              try
               {
-                File.Delete(@"C:\Temp\tree.nwk");
+                Cursor.Current = Cursors.WaitCursor;
+                Process.Start(AppConfigHelper.PathToDendroscope(), "-g -c c:\\Temp\\commandline.txt");
+                Cursor.Current = Cursors.Default;
               }
-              File.Copy(DirectoryHelper.CleanPath(AppConfigHelper.BuildTreeOutputPath() + "\\tree.nwk"), @"C:\Temp\tree.nwk", true);
+              catch (Exception ex)
+              {
+                MessageBox.Show("Dendroscope needs to be installed to view the result. Check path " + AppConfigHelper.PathToDendroscope() +
+                                    Environment.NewLine + Environment.NewLine + ex.ToString(), "INSTALL DENDROSCOPE", MessageBoxButtons.OK);
+              }
             }
-            if (File.Exists(@"C:\Temp\metadata_microreact.csv"))
-            {
-              File.Delete(@"C:\Temp\metadata_microreact.csv");
-            }
-            File.Copy(DirectoryHelper.CleanPath(AppConfigHelper.BuildTreeOutputPath() + "\\metadata_microreact.csv"), @"C:\Temp\metadata_microreact.csv", true);
-          }
-
-          File.WriteAllText("C:\\Temp\\commandline.txt", @"open file='" + dendroscopePath + "tree.nwk';" + Environment.NewLine);
-
-          if (task.LastExitCode == 0)
-          {
-            // Invoke Dendroscope to visualize tree.  c:\\Temp\\commandine.txt contains the line:
-            // open file='C:\Temp\Save\tree.nwk';
-            try
-            {
-              Cursor.Current = Cursors.WaitCursor;
-              Process.Start(AppConfigHelper.PathToDendroscope(), "-g -c c:\\Temp\\commandline.txt");
-              Cursor.Current = Cursors.Default;
-            }
-            catch (Exception ex)
-            {
-              MessageBox.Show("Dendroscope needs to be installed to view the result. Check path " + AppConfigHelper.PathToDendroscope() +
-                                  Environment.NewLine + Environment.NewLine + ex.ToString(), "INSTALL DENDROSCOPE", MessageBoxButtons.OK);
-            }
-          }
-          break;
+            break;
+        }
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.Message, "ERROR", MessageBoxButtons.OK);
       }
       UIThreadRefresh(sender, e);
     }
@@ -745,7 +723,7 @@ namespace BioSeqDB
       // Read and delete the output file from the command.
       string linuxCapture = string.Empty;
       string filename = AppConfigHelper.NormalizePathToWindows(AppConfigHelper.LinuxHomeDirectory + "/output" + task.TaskID);
-      if (DirectoryHelper.FileExists("[S]" + filename))
+      if (task.TaskType != "BackupOffsite" && DirectoryHelper.FileExists("[S]" + filename))
       {
         linuxCapture = BioSeqDBModel.Instance.ReadAllText(filename, AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig()); // We know it is on the server.
         int residual = 6000;
@@ -780,12 +758,14 @@ namespace BioSeqDB
 
       RemoveTask(false); // Do this as soon as possible to reflect the user's closing of the dialog.
       StatusChangeEvent?.Invoke(this, null); // Notify parent we have a potential status change.
+      Cursor.Current = Cursors.WaitCursor;
 
       if (linuxCapture != null)
       {
         message += linuxCapture;
       }
       User user = AppConfigHelper.seqdbConfigGlobal.Users[AppConfigHelper.LoggedOnUser];
+      Cursor.Current = Cursors.WaitCursor;
       if (user.EmailNotifications)
       {
         string s1 = Emailer.SendEmail(AppConfigHelper.LoggedOnUser + "@mail.usask.ca", "BioSeqDB User: " + task.TaskUser + " " + subject, message, attachments, null);
@@ -796,7 +776,8 @@ namespace BioSeqDB
         }
       }
 
-      if (File.Exists(filename)) // Must do after email since it might be attached.
+      Cursor.Current = Cursors.WaitCursor;
+      if (task.TaskType != "BackupOffsite" && File.Exists(filename)) // Must do after email since it might be attached.
       {
         File.Delete(filename);
       }

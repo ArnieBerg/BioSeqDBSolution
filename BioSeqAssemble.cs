@@ -256,7 +256,7 @@ namespace BioSeqDB
       List<string> queryList = new List<string>();
       for (int i = 0; i < lstSamples.CheckedItems.Count; i++)
       {
-        queryList.Add(lstSamples.Items[i].ToString());
+        queryList.Add(lstSamples.CheckedItems[i].ToString());
       }
       lstSamples.Items.Clear();
       lstSamples.Items.AddRange(queryList.ToArray());
@@ -398,11 +398,7 @@ namespace BioSeqDB
     {
       if (IsServiceClass.IsService)
       {
-        string path = string.Empty;
-        if (!string.IsNullOrEmpty(AppConfigHelper.FileExists(AppConfigHelper.AssembleVFGeneXRef)))
-        {
-          path = AppConfigHelper.NormalizePathToWindows(AppConfigHelper.AssembleVFGeneXRef); // We want an actual file, so don't append "\\".
-        }
+        string path = AppConfigHelper.NormalizePathToWindows(AppConfigHelper.AssembleVFGeneXRef); // We want an actual file, so don't append "\\".
         Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Input path to gene cross-reference file",
                                  DirectoryHelper.IsServerPath(path), DirectoryHelper.CleanPath(path),
                                  "All files (*.*)|*.*", null, AppConfigHelper.UbuntuPrefix());

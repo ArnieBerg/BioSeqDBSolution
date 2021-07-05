@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbstractTcpServer", "..\..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BioSeqDBUserCore", "..\BioSeqDBUserCore\BioSeqDBUserCore.csproj", "{0CAD77B1-800C-416E-8C49-88D2D75D803E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BioSeqDBTransferData", "..\BioSeqDBTransferData\BioSeqDBTransferData.csproj", "{596B6FDF-51D5-4F70-BD55-ED498A1C7800}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -108,6 +110,14 @@ Global
 		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Release|x64.ActiveCfg = Release|Any CPU
 		{0CAD77B1-800C-416E-8C49-88D2D75D803E}.Release|x64.Build.0 = Release|Any CPU
+		{596B6FDF-51D5-4F70-BD55-ED498A1C7800}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{596B6FDF-51D5-4F70-BD55-ED498A1C7800}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{596B6FDF-51D5-4F70-BD55-ED498A1C7800}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{596B6FDF-51D5-4F70-BD55-ED498A1C7800}.Debug|x64.Build.0 = Debug|Any CPU
+		{596B6FDF-51D5-4F70-BD55-ED498A1C7800}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{596B6FDF-51D5-4F70-BD55-ED498A1C7800}.Release|Any CPU.Build.0 = Release|Any CPU
+		{596B6FDF-51D5-4F70-BD55-ED498A1C7800}.Release|x64.ActiveCfg = Release|Any CPU
+		{596B6FDF-51D5-4F70-BD55-ED498A1C7800}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

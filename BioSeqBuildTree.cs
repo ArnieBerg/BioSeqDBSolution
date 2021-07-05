@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Linq;
 using BioSeqDB.ModelClient;
 using FSExplorer;
+using BioSeqDBTransferData;
 
 namespace BioSeqDB
 {
@@ -72,30 +73,14 @@ namespace BioSeqDB
 
     private void btnFindOutputPath_Click(object sender, EventArgs e)
     {
-      if (IsServiceClass.IsService)
+      string path = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text + "\\");
+      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Output path",
+                                          DirectoryHelper.IsServerPath(txtOutputPath.Text), DirectoryHelper.CleanPath(path),
+                                          string.Empty, null, AppConfigHelper.UbuntuPrefix());
+      Explorer.frmExplorer.ShowDialog();
+      if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
       {
-        string path = AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text + "\\"));
-        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Output path",
-                                            DirectoryHelper.IsServerPath(txtOutputPath.Text), DirectoryHelper.CleanPath(path), 
-                                            string.Empty, null, AppConfigHelper.UbuntuPrefix());
-        Explorer.frmExplorer.ShowDialog();
-        if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
-        {
-          txtOutputPath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
-        }
-      }
-      else
-      {
-        VistaFolderBrowserDialog ofn = new VistaFolderBrowserDialog();
-        ofn.Description = "Output path";
-        ofn.SelectedPath = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text);
-        ofn.ShowNewFolderButton = true;
-        ofn.UseDescriptionForTitle = true;
-
-        if (ofn.ShowDialog() != DialogResult.Cancel)
-        {
-          txtOutputPath.Text = ofn.SelectedPath.Trim();
-        }
+        txtOutputPath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
       }
     }
 
@@ -178,12 +163,12 @@ namespace BioSeqDB
 
       if (chkMakeStandard.Checked && txtDomesticReference.Text.Trim() != txtWildReference.Text.Trim())
       {
-        AppConfigHelper.BuildTreeDomesticReference = txtDomesticReference.Text =
+        AppConfigHelper.BuildTreeDomesticReference = AppConfigHelper.StandardReference = txtDomesticReference.Text =
                                         AppConfigHelper.GetDirectoryName(AppConfigHelper.NormalizePathToWindows(AppConfigHelper.CurrentDBPath())) +
                                        "\\" + Path.GetFileName(AppConfigHelper.NormalizePathToWindows(txtWildReference.Text.Trim()));
 
         // Also copy the wild to the database folder so it can be used in the future.
-        DirectoryHelper.FileCopy(txtWildReference.Text.Trim(), AppConfigHelper.BuildTreeDomesticReference, true);
+        TransferHelper.FileCopy(txtWildReference.Text.Trim(), AppConfigHelper.BuildTreeDomesticReference, true);
       }
 
       AppConfigHelper.BuildTreeChooseDomestic = radDomesticReference.Checked;
@@ -351,7 +336,7 @@ namespace BioSeqDB
       List<string> queryList = new List<string>();
       for (int i = 0; i < lstQueryGenomes.CheckedItems.Count; i++)
       {
-        queryList.Add(lstQueryGenomes.Items[i].ToString());
+        queryList.Add(lstQueryGenomes.CheckedItems[i].ToString());
       }
       lstQueryGenomes.Items.Clear();
       lstQueryGenomes.Items.AddRange(queryList.ToArray());

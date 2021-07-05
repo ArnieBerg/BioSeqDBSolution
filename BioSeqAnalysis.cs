@@ -1,4 +1,5 @@
 ﻿using BioSeqDB.ModelClient;
+using BioSeqDBTransferData;
 using FSExplorer;
 using Ookii.Dialogs.WinForms;
 using System;
@@ -115,7 +116,7 @@ namespace BioSeqDB
             string[] files = Directory.GetFiles(DirectoryHelper.CleanPath(fastqPath), "*.fastq", SearchOption.TopDirectoryOnly);
             foreach (string file in files)
             {
-              DirectoryHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastqFiles", true);
+              TransferHelper.FileCopy("[L]" + file, "[S]" + AppConfigHelper.UserFolder() + "FastqFiles", true);
             }
           }
         }
@@ -181,7 +182,7 @@ namespace BioSeqDB
         {
           if (inputPath.StartsWith("[L]")) // Not extract sample ID
           {
-            DirectoryHelper.FileCopy(inputPath, AppConfigHelper.UserFolder(), true);
+            TransferHelper.FileCopy(inputPath, AppConfigHelper.UserFolder(), true);
           }
         }
 
@@ -429,7 +430,7 @@ namespace BioSeqDB
         {
           filename = "[S]" + filename;
         }
-        DirectoryHelper.FileCopy(filename, "[L]C:\\Temp", true);
+        TransferHelper.FileCopy(filename, "[L]C:\\Temp", true);
       }
 
       Process p = Process.Start("excel.exe", DirectoryHelper.CleanPath(filename));
@@ -439,7 +440,7 @@ namespace BioSeqDB
       if (IsServiceClass.IsService && filename.StartsWith("[S]")) // Copy back to server.
       {
         string nameOnly = Path.GetFileName(filename);
-        DirectoryHelper.FileCopy("[L]C:\\Temp\\" + nameOnly, filename.Replace(nameOnly, string.Empty), true);
+        TransferHelper.FileCopy("[L]C:\\Temp\\" + nameOnly, filename.Replace(nameOnly, string.Empty), true);
       }
     }
 

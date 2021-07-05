@@ -28,7 +28,7 @@
     <ProductName>BioSeqDB</ProductName>
     <PublisherName>Prairie Diagnostic Services</PublisherName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>65</ApplicationRevision>
+    <ApplicationRevision>87</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -97,11 +97,29 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppConfigHelper.cs" />
+    <Compile Include="BioSeqBandage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqBandage.Designer.cs">
+      <DependentUpon>BioSeqBandage.cs</DependentUpon>
+    </Compile>
     <Compile Include="BioSeqAssemble.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="BioSeqAssemble.Designer.cs">
       <DependentUpon>BioSeqAssemble.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqBackupOffsite.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqBackupOffsite.Designer.cs">
+      <DependentUpon>BioSeqBackupOffsite.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BioSeqArtemis.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BioSeqArtemis.Designer.cs">
+      <DependentUpon>BioSeqArtemis.cs</DependentUpon>
     </Compile>
     <Compile Include="BioSeqMultiQC.cs">
       <SubType>Form</SubType>
@@ -163,11 +181,11 @@
     <Compile Include="BioSeqSalmonella.Designer.cs">
       <DependentUpon>BioSeqSalmonella.cs</DependentUpon>
     </Compile>
-    <Compile Include="BioSeqInfluenzaAFastq.cs">
+    <Compile Include="BioSeqFolderPicker.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BioSeqInfluenzaAFastq.Designer.cs">
-      <DependentUpon>BioSeqInfluenzaAFastq.cs</DependentUpon>
+    <Compile Include="BioSeqFolderPicker.Designer.cs">
+      <DependentUpon>BioSeqFolderPicker.cs</DependentUpon>
     </Compile>
     <Compile Include="BioSeqLIMSEdit.cs">
       <SubType>Form</SubType>
@@ -270,8 +288,20 @@
     <None Include="Resources\treegraph.jpg" />
     <None Include="Resources\Search.png" />
     <None Include="Resources\DELETE.ICO" />
+    <EmbeddedResource Include="BioSeqBandage.resx">
+      <DependentUpon>BioSeqBandage.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="BioSeqAssemble.resx">
       <DependentUpon>BioSeqAssemble.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqBackupOffsite.resx">
+      <DependentUpon>BioSeqBackupOffsite.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BioSeqArtemis.resx">
+      <DependentUpon>BioSeqArtemis.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="BioSeqMultiQC.resx">
@@ -310,8 +340,8 @@
     <EmbeddedResource Include="BioSeqSalmonella.resx">
       <DependentUpon>BioSeqSalmonella.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BioSeqInfluenzaAFastq.resx">
-      <DependentUpon>BioSeqInfluenzaAFastq.cs</DependentUpon>
+    <EmbeddedResource Include="BioSeqFolderPicker.resx">
+      <DependentUpon>BioSeqFolderPicker.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="BioSeqLIMSEdit.resx">
       <DependentUpon>BioSeqLIMSEdit.cs</DependentUpon>
@@ -426,6 +456,10 @@
     <ProjectReference Include="..\BioSeqDBData\BioSeqDBData.csproj">
       <Project>{1fa71291-be01-4d8c-8637-787a05650f9d}</Project>
       <Name>BioSeqDBData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BioSeqDBTransferData\BioSeqDBTransferData.csproj">
+      <Project>{596B6FDF-51D5-4F70-BD55-ED498A1C7800}</Project>
+      <Name>BioSeqDBTransferData</Name>
     </ProjectReference>
     <ProjectReference Include="..\BioSeqDBUserCore\BioSeqDBUserCore.csproj">
       <Project>{0cad77b1-800c-416e-8c49-88d2d75d803e}</Project>

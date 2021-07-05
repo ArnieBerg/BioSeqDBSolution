@@ -108,7 +108,7 @@
       this.btnFindInputPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.btnFindInputPath.Location = new System.Drawing.Point(539, 246);
       this.btnFindInputPath.Name = "btnFindInputPath";
-      this.btnFindInputPath.Size = new System.Drawing.Size(31, 23);
+      this.btnFindInputPath.Size = new System.Drawing.Size(31, 22);
       this.btnFindInputPath.TabIndex = 7;
       this.btnFindInputPath.Text = "...";
       this.btnFindInputPath.UseVisualStyleBackColor = true;

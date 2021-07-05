@@ -1,5 +1,6 @@
 ﻿using BioSeqDB.ModelClient;
 using BioSeqDBConfigModel;
+using BioSeqDBTransferData;
 using FSExplorer;
 using System;
 using System.Diagnostics;
@@ -261,7 +262,7 @@ namespace BioSeqDB
         {
           filename = "[S]" + filename;
         }
-        DirectoryHelper.FileCopy(filename, "[L]C:\\Temp", true);
+        TransferHelper.FileCopy(filename, "[L]C:\\Temp", true);
       }
 
       //Process p = Process.Start("excel.exe", DirectoryHelper.CleanPath(filename));
@@ -272,7 +273,7 @@ namespace BioSeqDB
       if (IsServiceClass.IsService && filename.StartsWith("[S]")) // Copy back to server.
       {
         string nameOnly = Path.GetFileName(filename);
-        DirectoryHelper.FileCopy("[L]C:\\Temp\\" + nameOnly, filename.Replace(nameOnly, string.Empty), true);
+        TransferHelper.FileCopy("[L]C:\\Temp\\" + nameOnly, filename.Replace(nameOnly, string.Empty), true);
       }
     }
 

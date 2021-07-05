@@ -28,18 +28,11 @@ namespace BioSeqDB
       ReloadSampleList();
       EnableOK();
 
-      if (Size.Width != 0)
+      Location = AppConfigHelper.CANSLocation();
+      if (Location.X == 0 && Location.Y == 0)
       {
-        Location = AppConfigHelper.CANSLocation();
-        if (Location.X <= 0)
-        {
-          Location = new Point(100, 100);
-        }
-        Size = AppConfigHelper.CANSSize();
-        if (Size.Height <= 0 || Size.Width <= 0)
-        {
-          Size = new Size(1000, 1000);
-        }
+        Location = new Point(100, 100);
+        Size = new Size(1000, 600);
       }
     }
 
@@ -157,41 +150,25 @@ namespace BioSeqDB
 
     private void btnOutputPath_Click(object sender, EventArgs e)
     {
-      if (IsServiceClass.IsService)
+      string path = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text + "\\");
+      Cursor.Current = Cursors.WaitCursor;
+      Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Output path",
+                                          DirectoryHelper.IsServerPath(txtOutputPath.Text), DirectoryHelper.CleanPath(path),
+                                          string.Empty, null, AppConfigHelper.UbuntuPrefix());
+      Cursor.Current = Cursors.Default;
+      Explorer.frmExplorer.ShowDialog();
+      if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
       {
-        string path = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text + "\\");
-        Cursor.Current = Cursors.WaitCursor;
-        Explorer.frmExplorer = new Explorer(AppConfigHelper.LoggedOnUser, AppConfigHelper.JsonConfig(), "Output path",
-                                            DirectoryHelper.IsServerPath(txtOutputPath.Text), DirectoryHelper.CleanPath(path),
-                                            string.Empty, null, AppConfigHelper.UbuntuPrefix());
-        Cursor.Current = Cursors.Default;
-        Explorer.frmExplorer.ShowDialog();
-        if (Explorer.frmExplorer.DialogResult == DialogResult.OK)
-        {
-          txtOutputPath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
-        }
-        Explorer.frmExplorer = null;
+        txtOutputPath.Text = Explorer.PresentServerPath + Explorer.PresentLocalPath; // One of these is empty.
       }
-      else
-      {
-        VistaFolderBrowserDialog ofn = new VistaFolderBrowserDialog();
-        ofn.Description = "Output path";
-        ofn.SelectedPath = AppConfigHelper.NormalizePathToWindows(txtOutputPath.Text);
-        ofn.ShowNewFolderButton = true;
-        ofn.UseDescriptionForTitle = true;
-
-        if (ofn.ShowDialog() != DialogResult.Cancel)
-        {
-          txtOutputPath.Text = ofn.SelectedPath.Trim();
-        }
-      }
+      Explorer.frmExplorer = null;
 
       EnableOK();
     }
 
     private void btnFastqPicker_Click(object sender, EventArgs e)
     {
-      BioSeqInfluenzaAFastq frm = new BioSeqInfluenzaAFastq(AppConfigHelper.CANSSampleList, "CANS");
+      BioSeqFolderPicker frm = new BioSeqFolderPicker(AppConfigHelper.CANSSampleList, "CANS");
       if (frm.ShowDialog() == DialogResult.OK)
       {
         AppConfigHelper.CANSSampleList = frm.alreadySelected;

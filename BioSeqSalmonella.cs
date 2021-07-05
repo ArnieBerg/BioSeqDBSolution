@@ -134,7 +134,7 @@ namespace BioSeqDB
     private void btnFastqPicker_Click(object sender, EventArgs e)
     {
       // Overload the lookup form used for Influenza A.
-      BioSeqInfluenzaAFastq frm = new BioSeqInfluenzaAFastq(AppConfigHelper.SalmonellaSamplesList, "Salmonella");
+      BioSeqFolderPicker frm = new BioSeqFolderPicker(AppConfigHelper.SalmonellaSamplesList, "Salmonella");
       if (frm.ShowDialog() == DialogResult.OK)
       {
         AppConfigHelper.SalmonellaSamplesList = frm.alreadySelected;

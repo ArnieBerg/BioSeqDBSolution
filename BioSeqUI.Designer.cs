@@ -37,6 +37,7 @@
       this.label2 = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
       this.cmbSeqDB = new System.Windows.Forms.ComboBox();
+      this.btnReferenceGenome = new System.Windows.Forms.Button();
       this.panel1 = new System.Windows.Forms.Panel();
       this.btnRestore = new System.Windows.Forms.Button();
       this.btnBackup = new System.Windows.Forms.Button();
@@ -63,6 +64,7 @@
       this.mnuRemove = new System.Windows.Forms.ToolStripMenuItem();
       this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.cmbAnalysis = new System.Windows.Forms.ToolStripComboBox();
+      this.priorityDataBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
       this.ConfirmDBDelete = new Ookii.Dialogs.WinForms.TaskDialog(this.components);
       this.btnDeleteDBYes = new Ookii.Dialogs.WinForms.TaskDialogButton(this.components);
@@ -99,6 +101,7 @@
       // 
       // splitContainer1.Panel2
       // 
+      this.splitContainer1.Panel2.Controls.Add(this.btnReferenceGenome);
       this.splitContainer1.Panel2.Controls.Add(this.panel1);
       this.splitContainer1.Panel2.Controls.Add(this.btnRestore);
       this.splitContainer1.Panel2.Controls.Add(this.btnBackup);
@@ -195,6 +198,18 @@
       this.cmbSeqDB.TabIndex = 14;
       this.cmbSeqDB.SelectedIndexChanged += new System.EventHandler(this.cmbSeqDB_SelectedIndexChanged);
       // 
+      // btnReferenceGenome
+      // 
+      this.btnReferenceGenome.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnReferenceGenome.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.btnReferenceGenome.Location = new System.Drawing.Point(444, 148);
+      this.btnReferenceGenome.Name = "btnReferenceGenome";
+      this.btnReferenceGenome.Size = new System.Drawing.Size(31, 22);
+      this.btnReferenceGenome.TabIndex = 35;
+      this.btnReferenceGenome.Text = "...";
+      this.btnReferenceGenome.UseVisualStyleBackColor = true;
+      this.btnReferenceGenome.Click += new System.EventHandler(this.btnReferenceGenome_Click);
+      // 
       // panel1
       // 
       this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -271,7 +286,7 @@
       this.txtStandardReference.Margin = new System.Windows.Forms.Padding(2);
       this.txtStandardReference.Name = "txtStandardReference";
       this.txtStandardReference.ReadOnly = true;
-      this.txtStandardReference.Size = new System.Drawing.Size(456, 20);
+      this.txtStandardReference.Size = new System.Drawing.Size(426, 20);
       this.txtStandardReference.TabIndex = 34;
       // 
       // btnNotifications
@@ -335,6 +350,7 @@
       this.lstSampleIDs.Location = new System.Drawing.Point(521, 145);
       this.lstSampleIDs.Margin = new System.Windows.Forms.Padding(2);
       this.lstSampleIDs.Name = "lstSampleIDs";
+      this.lstSampleIDs.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
       this.lstSampleIDs.Size = new System.Drawing.Size(344, 264);
       this.lstSampleIDs.Sorted = true;
       this.lstSampleIDs.TabIndex = 28;
@@ -441,7 +457,8 @@
             this.mnuExtract,
             this.mnuRemove,
             this.aboutToolStripMenuItem,
-            this.cmbAnalysis});
+            this.cmbAnalysis,
+            this.priorityDataBackupToolStripMenuItem});
       this.menuStrip1.Location = new System.Drawing.Point(0, 0);
       this.menuStrip1.Name = "menuStrip1";
       this.menuStrip1.Padding = new System.Windows.Forms.Padding(3, 1, 0, 1);
@@ -507,6 +524,8 @@
       this.cmbAnalysis.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
       this.cmbAnalysis.Items.AddRange(new object[] {
             "-- Select analysis --",
+            "Artemis...",
+            "Bandage...",
             "BBMap...",
             "Build tree...",
             "CANS...",
@@ -525,6 +544,15 @@
       this.cmbAnalysis.Size = new System.Drawing.Size(200, 36);
       this.cmbAnalysis.Sorted = true;
       this.cmbAnalysis.SelectedIndexChanged += new System.EventHandler(this.cmbAnalysis_SelectedIndexChanged);
+      // 
+      // priorityDataBackupToolStripMenuItem
+      // 
+      this.priorityDataBackupToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+      this.priorityDataBackupToolStripMenuItem.Name = "priorityDataBackupToolStripMenuItem";
+      this.priorityDataBackupToolStripMenuItem.Size = new System.Drawing.Size(142, 36);
+      this.priorityDataBackupToolStripMenuItem.Text = "Priority Data Backup...";
+      this.priorityDataBackupToolStripMenuItem.Visible = false;
+      this.priorityDataBackupToolStripMenuItem.Click += new System.EventHandler(this.priorityDataBackupToolStripMenuItem_Click);
       // 
       // ConfirmDBDelete
       // 
@@ -631,5 +659,7 @@
     private System.Windows.Forms.Panel panel1;
     private System.Windows.Forms.ToolStripComboBox cmbAnalysis;
     private System.ComponentModel.BackgroundWorker backgroundWorker_CleanUserFolder;
+    private System.Windows.Forms.Button btnReferenceGenome;
+    private System.Windows.Forms.ToolStripMenuItem priorityDataBackupToolStripMenuItem;
   }
 }

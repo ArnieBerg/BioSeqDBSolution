@@ -196,6 +196,7 @@
       this.pnlKraken.Name = "pnlKraken";
       this.pnlKraken.Size = new System.Drawing.Size(149, 66);
       this.pnlKraken.TabIndex = 41;
+      this.pnlKraken.Visible = false;
       // 
       // radUseFastq
       // 

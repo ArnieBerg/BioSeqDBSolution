@@ -1,5 +1,6 @@
 ﻿using BioSeqDB.ModelClient;
 using BioSeqDBConfigModel;
+using BioSeqDBTransferData;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,19 +10,23 @@ namespace BioSeqDB
 {
   public static class ServiceCallHelper
   {
-    public static void InitConfig()
+    internal static void LoadConfig(string loggedOnUser)
     {
-      if (!IsServiceClass.IsService)
-      {
-        AppConfigHelper.LoadConfig();
-      }
-      else
-      {
-        AppConfigHelper.executablePath = System.Reflection.Assembly.GetExecutingAssembly().Location; // To be able to store config files locally. 
-                                                                                                     // May not be necessary once service implementation is complete, but may still be a good idea to keep a local copy.
-        AppConfigHelper.executablePath = AppConfigHelper.GetDirectoryName(AppConfigHelper.executablePath);
+      // If loggedOnUser is empty, this loads the global config.
 
-        string cfg = BioSeqDBModel.Instance.AppSettings(string.Empty);  // Uncomment
+      //AppConfigHelper.executablePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+      //AppConfigHelper.executablePath = Path.GetDirectoryName(AppConfigHelper.executablePath);
+      string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+      AppConfigHelper.localAppDataPath = Path.Combine(localAppData, "PDS");
+      if (!Directory.Exists(AppConfigHelper.localAppDataPath))
+      {
+        Directory.CreateDirectory(AppConfigHelper.localAppDataPath);
+      }
+
+      string cfg = BioSeqDBModel.Instance.AppSettings(loggedOnUser);
+
+      if (string.IsNullOrEmpty(loggedOnUser)) // global
+      {
         AppConfigHelper.seqdbConfigGlobal = JsonSerializer.Deserialize<BioSeqDBConfig>(cfg);
         if (AppConfigHelper.seqdbConfigGlobal.seqDBs == null)
         {
@@ -32,44 +37,16 @@ namespace BioSeqDB
           AppConfigHelper.seqdbConfigGlobal.Users = new Dictionary<string, User>();
         }
       }
-    }
-
-    internal static void LoadConfig(string loggedOnUser)
-    {
-      AppConfigHelper.executablePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-      AppConfigHelper.executablePath = Path.GetDirectoryName(AppConfigHelper.executablePath);
-
-      if (!IsServiceClass.IsService)
+      else // local
       {
-        AppConfigHelper.LoadConfig(); // Load the user specific config.
-      }
-      else // Is service call.
-      {
-        string cfg = BioSeqDBModel.Instance.AppSettings(loggedOnUser);
-
-        if (string.IsNullOrEmpty(loggedOnUser)) // global
+        AppConfigHelper.seqdbConfig = JsonSerializer.Deserialize<BioSeqDBConfig>(cfg);
+        if (AppConfigHelper.seqdbConfig.seqDBs == null)
         {
-          AppConfigHelper.seqdbConfigGlobal = JsonSerializer.Deserialize<BioSeqDBConfig>(cfg);
-          if (AppConfigHelper.seqdbConfigGlobal.seqDBs == null)
-          {
-            AppConfigHelper.seqdbConfigGlobal.seqDBs = new Dictionary<string, SeqDB>();
-          }
-          if (AppConfigHelper.seqdbConfigGlobal.Users == null)
-          {
-            AppConfigHelper.seqdbConfigGlobal.Users = new Dictionary<string, User>();
-          }
+          AppConfigHelper.seqdbConfig.seqDBs = new Dictionary<string, SeqDB>();
         }
-        else // local
+        if (AppConfigHelper.seqdbConfig.Users == null)
         {
-          AppConfigHelper.seqdbConfig = JsonSerializer.Deserialize<BioSeqDBConfig>(cfg);
-          if (AppConfigHelper.seqdbConfig.seqDBs == null)
-          {
-            AppConfigHelper.seqdbConfig.seqDBs = new Dictionary<string, SeqDB>();
-          }
-          if (AppConfigHelper.seqdbConfig.Users == null)
-          {
-            AppConfigHelper.seqdbConfig.Users = new Dictionary<string, User>();
-          }
+          AppConfigHelper.seqdbConfig.Users = new Dictionary<string, User>();
         }
       }
     }
@@ -102,11 +79,11 @@ namespace BioSeqDB
       {
         WriteIndented = true
       });
-      File.WriteAllText(AppConfigHelper.executablePath + "\\appsettings.json", jsonString);
+      File.WriteAllText(AppConfigHelper.localAppDataPath + "\\appsettings.json", jsonString);
 
       if (IsServiceClass.IsService)
       {
-        BioSeqDBModel.Instance.AppSettings(string.Empty, jsonString);
+        BioSeqDBModel.Instance.AppSettings(string.Empty, jsonString); // This saves the global config appsettings.json.
       }
     }
 
@@ -129,17 +106,17 @@ namespace BioSeqDB
       });
       try
       {
-        File.WriteAllText(AppConfigHelper.executablePath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json", jsonString);
+        File.WriteAllText(AppConfigHelper.localAppDataPath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json", jsonString);
       }
       catch (Exception ex)
       {
         try
         {
-          File.WriteAllText(AppConfigHelper.executablePath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json", jsonString);
+          File.WriteAllText(AppConfigHelper.localAppDataPath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json", jsonString);
         }
         catch (Exception ex2)
         {
-          File.WriteAllText(AppConfigHelper.executablePath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json", jsonString);
+          File.WriteAllText(AppConfigHelper.localAppDataPath + "\\" + AppConfigHelper.LoggedOnUser + "_appsettings.json", jsonString);
         }
       }
 
@@ -251,7 +228,7 @@ namespace BioSeqDB
       {
         if (AppConfigHelper.InfluenzaASamplesPath.StartsWith("[L]"))
         {
-          DirectoryHelper.FileCopy(AppConfigHelper.InfluenzaASamplesPath, "[S]" + AppConfigHelper.UserFolder(), true);
+          TransferHelper.FileCopy(AppConfigHelper.InfluenzaASamplesPath, "[S]" + AppConfigHelper.UserFolder(), true);
         }
         return BioSeqDBModel.Instance.InfluenzaA(loggedOnUser, config);
       }
@@ -298,7 +275,7 @@ namespace BioSeqDB
     }
 
     internal static WSLProxyResponse Build_DB(string loggedOnUser, string cfg)
-    {     
+    {
       if (IsServiceClass.IsService)
       {
         return BioSeqDBModel.Instance.Build_DB(loggedOnUser, cfg);
@@ -442,14 +419,9 @@ namespace BioSeqDB
       return SeqDBHelper.InsertSample();
     }
 
-    internal static WSLProxyResponse RemoveSample(string loggedOnUser, string cfg)
+    public static WSLProxyResponse RemoveSample(string loggedOnUser, string cfg)
     {
-      if (IsServiceClass.IsService)
-      {
-        return BioSeqDBModel.Instance.RemoveSample(loggedOnUser, cfg);
-      }
-
-      return SeqDBHelper.RemoveSample();
+      return BioSeqDBModel.Instance.RemoveSample(loggedOnUser, cfg);
     }
 
     internal static Dictionary<string, string> ReadLIMSData(string loggedOnUser, string cfg)

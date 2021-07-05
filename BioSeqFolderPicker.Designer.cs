@@ -1,6 +1,6 @@
 ﻿namespace BioSeqDB
 {
-  partial class BioSeqInfluenzaAFastq
+  partial class BioSeqFolderPicker
   {
     /// <summary>
     /// Required designer variable.
@@ -29,10 +29,9 @@
     private void InitializeComponent()
     {
       this.components = new System.ComponentModel.Container();
-      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BioSeqInfluenzaAFastq));
       this.label4 = new System.Windows.Forms.Label();
       this.label2 = new System.Windows.Forms.Label();
-      this.btnFindInputPath = new System.Windows.Forms.Button();
+      this.btnFindFolder = new System.Windows.Forms.Button();
       this.btnOK = new System.Windows.Forms.Button();
       this.btnCancel = new System.Windows.Forms.Button();
       this.ReplacePrompt = new Ookii.Dialogs.WinForms.TaskDialog(this.components);
@@ -43,7 +42,7 @@
       this.LIMSDuplicatePrompt = new Ookii.Dialogs.WinForms.TaskDialog(this.components);
       this.btnYes = new Ookii.Dialogs.WinForms.TaskDialogButton(this.components);
       this.btnNo = new Ookii.Dialogs.WinForms.TaskDialogButton(this.components);
-      this.lvSamples = new System.Windows.Forms.ListView();
+      this.lvFolders = new System.Windows.Forms.ListView();
       this.colSampleID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.colPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.panel1 = new System.Windows.Forms.Panel();
@@ -66,7 +65,9 @@
       this.label4.Name = "label4";
       this.label4.Size = new System.Drawing.Size(565, 48);
       this.label4.TabIndex = 13;
-      this.label4.Text = resources.GetString("label4.Text");
+      this.label4.Text = "Select <analysis> data folder(s), and provide an for each folder used to identify" +
+    " the selection. By default, the ID comes from the name of the last sub-folder na" +
+    "me of the selected path.";
       // 
       // label2
       // 
@@ -74,21 +75,21 @@
       this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.label2.Location = new System.Drawing.Point(9, 61);
       this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(254, 13);
+      this.label2.Size = new System.Drawing.Size(202, 13);
       this.label2.TabIndex = 15;
-      this.label2.Text = "Sample <analysis> .fastq folder(s) to select:";
+      this.label2.Text = "<analysis> data folder(s) to select:";
       // 
-      // btnFindInputPath
+      // btnFindFolder
       // 
-      this.btnFindInputPath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.btnFindInputPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.btnFindInputPath.Location = new System.Drawing.Point(558, 77);
-      this.btnFindInputPath.Name = "btnFindInputPath";
-      this.btnFindInputPath.Size = new System.Drawing.Size(31, 23);
-      this.btnFindInputPath.TabIndex = 1;
-      this.btnFindInputPath.Text = "...";
-      this.btnFindInputPath.UseVisualStyleBackColor = true;
-      this.btnFindInputPath.Click += new System.EventHandler(this.btnFindInputPath_Click);
+      this.btnFindFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnFindFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.btnFindFolder.Location = new System.Drawing.Point(558, 76);
+      this.btnFindFolder.Name = "btnFindFolder";
+      this.btnFindFolder.Size = new System.Drawing.Size(31, 23);
+      this.btnFindFolder.TabIndex = 1;
+      this.btnFindFolder.Text = "...";
+      this.btnFindFolder.UseVisualStyleBackColor = true;
+      this.btnFindFolder.Click += new System.EventHandler(this.btnFindFolder_Click);
       // 
       // btnOK
       // 
@@ -168,29 +169,29 @@
       this.btnNo.ButtonType = Ookii.Dialogs.WinForms.ButtonType.No;
       this.btnNo.Text = "No";
       // 
-      // lvSamples
+      // lvFolders
       // 
-      this.lvSamples.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+      this.lvFolders.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.lvSamples.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+      this.lvFolders.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colSampleID,
             this.colPath});
-      this.lvSamples.FullRowSelect = true;
-      this.lvSamples.HideSelection = false;
-      this.lvSamples.Location = new System.Drawing.Point(12, 77);
-      this.lvSamples.MultiSelect = false;
-      this.lvSamples.Name = "lvSamples";
-      this.lvSamples.Scrollable = false;
-      this.lvSamples.Size = new System.Drawing.Size(547, 243);
-      this.lvSamples.TabIndex = 68;
-      this.lvSamples.UseCompatibleStateImageBehavior = false;
-      this.lvSamples.View = System.Windows.Forms.View.Details;
-      this.lvSamples.SelectedIndexChanged += new System.EventHandler(this.lvSamples_SelectedIndexChanged);
+      this.lvFolders.FullRowSelect = true;
+      this.lvFolders.HideSelection = false;
+      this.lvFolders.Location = new System.Drawing.Point(12, 77);
+      this.lvFolders.MultiSelect = false;
+      this.lvFolders.Name = "lvFolders";
+      this.lvFolders.Scrollable = false;
+      this.lvFolders.Size = new System.Drawing.Size(547, 243);
+      this.lvFolders.TabIndex = 68;
+      this.lvFolders.UseCompatibleStateImageBehavior = false;
+      this.lvFolders.View = System.Windows.Forms.View.Details;
+      this.lvFolders.SelectedIndexChanged += new System.EventHandler(this.lvSamples_SelectedIndexChanged);
       // 
       // colSampleID
       // 
-      this.colSampleID.Text = "Sample ID";
+      this.colSampleID.Text = "ID";
       this.colSampleID.Width = 100;
       // 
       // colPath
@@ -266,9 +267,9 @@
       this.lblSampleID.Location = new System.Drawing.Point(15, 13);
       this.lblSampleID.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
       this.lblSampleID.Name = "lblSampleID";
-      this.lblSampleID.Size = new System.Drawing.Size(69, 13);
+      this.lblSampleID.Size = new System.Drawing.Size(24, 13);
       this.lblSampleID.TabIndex = 37;
-      this.lblSampleID.Text = "Sample ID:";
+      this.lblSampleID.Text = "ID:";
       // 
       // btnDelete
       // 
@@ -281,11 +282,11 @@
       this.btnDelete.Name = "btnDelete";
       this.btnDelete.Size = new System.Drawing.Size(136, 20);
       this.btnDelete.TabIndex = 32;
-      this.btnDelete.Text = "Delete Sample";
+      this.btnDelete.Text = "Delete Folder";
       this.btnDelete.UseVisualStyleBackColor = true;
       this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
       // 
-      // BioSeqInfluenzaAFastq
+      // BioSeqFolderPicker
       // 
       this.AcceptButton = this.btnOK;
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -293,16 +294,16 @@
       this.CancelButton = this.btnCancel;
       this.ClientSize = new System.Drawing.Size(601, 456);
       this.Controls.Add(this.panel1);
-      this.Controls.Add(this.lvSamples);
+      this.Controls.Add(this.lvFolders);
       this.Controls.Add(this.btnCancel);
       this.Controls.Add(this.btnOK);
-      this.Controls.Add(this.btnFindInputPath);
+      this.Controls.Add(this.btnFindFolder);
       this.Controls.Add(this.label2);
       this.Controls.Add(this.label4);
-      this.Name = "BioSeqInfluenzaAFastq";
+      this.Name = "BioSeqFolderPicker";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-      this.Text = "BioSeqDB select <analysis> fastq sample";
-      this.Shown += new System.EventHandler(this.BioSeqInfluenzaAFastq_Shown);
+      this.Text = "BioSeqDB folder picker for <analysis> ";
+      this.Shown += new System.EventHandler(this.BioSeqFolderPicker_Shown);
       this.panel1.ResumeLayout(false);
       this.panel1.PerformLayout();
       this.ResumeLayout(false);
@@ -314,7 +315,7 @@
 
     private System.Windows.Forms.Label label4;
     private System.Windows.Forms.Label label2;
-    private System.Windows.Forms.Button btnFindInputPath;
+    private System.Windows.Forms.Button btnFindFolder;
     private System.Windows.Forms.Button btnOK;
     private System.Windows.Forms.Button btnCancel;
     private Ookii.Dialogs.WinForms.TaskDialog ReplacePrompt;
@@ -325,7 +326,7 @@
     private Ookii.Dialogs.WinForms.TaskDialogButton btnLIMSDialogOK;
     private Ookii.Dialogs.WinForms.TaskDialogButton btnYes;
     private Ookii.Dialogs.WinForms.TaskDialogButton btnNo;
-    private System.Windows.Forms.ListView lvSamples;
+    private System.Windows.Forms.ListView lvFolders;
     private System.Windows.Forms.ColumnHeader colSampleID;
     private System.Windows.Forms.ColumnHeader colPath;
     private System.Windows.Forms.Panel panel1;

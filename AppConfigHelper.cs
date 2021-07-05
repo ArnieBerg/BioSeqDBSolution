@@ -1,5 +1,6 @@
 ﻿using BioSeqDB.ModelClient;
 using BioSeqDBConfigModel;
+using BioSeqDBTransferData;
 using BioSeqDBUserCore;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text.Json;
+using System.Windows.Forms;
 
 namespace BioSeqDB
 {
@@ -15,7 +17,7 @@ namespace BioSeqDB
     public static BioSeqDBConfig seqdbConfig { get; set; }
     public static BioSeqDBConfig seqdbConfigGlobal { get; set; }
 
-    public static string executablePath;
+    public static string localAppDataPath;
 
     private static string loggedOnUser = string.Empty;
 
@@ -155,6 +157,28 @@ namespace BioSeqDB
       db.NextstrainProfile = nextstrainProfile;
       seqdbConfig.TaskMemo = memo;
       SaveConfig();
+    }
+
+    internal static string BandageInvocation()
+    {
+      string path = seqdbConfigGlobal.BandageInvocation ?? string.Empty;
+      if (path.Length == 0)
+      {
+        seqdbConfigGlobal.BandageInvocation = @"C:\Programs\Bandage\Bandage.exe";
+        SaveConfigGlobal();
+      }
+      return seqdbConfigGlobal.BandageInvocation ?? string.Empty;
+    }
+
+    internal static string ArtemisInvocation()
+    {
+      string path = seqdbConfigGlobal.ArtemisInvocation ?? string.Empty;
+      if (path.Length == 0)
+      {
+        seqdbConfigGlobal.ArtemisInvocation = @"C:\Programs\artemis\artemis.jar";
+        SaveConfigGlobal();
+      }
+      return seqdbConfigGlobal.ArtemisInvocation ?? string.Empty;
     }
 
     public static string LinuxHomeDirectory
@@ -298,8 +322,16 @@ namespace BioSeqDB
       BioSeqTask task = TaskOfIndex(index); // Task to delete.
       if (kill)
       {
+        task.TaskTimeout = 5;
         seqdbConfig.TaskToDelete = task;
-        ServiceCallHelper.KillTask(LoggedOnUser, JsonConfig());
+        try
+        {
+          ServiceCallHelper.KillTask(LoggedOnUser, JsonConfig()); // This gets rid of Ubuntu background task, if possible.
+        }
+        catch (Exception ex)
+        {
+          // Ignore timeout, couldn't remove Ubuntu process.
+        }
       }
 
       seqdbConfig.Tasks.Remove(task.TaskID);
@@ -420,6 +452,27 @@ namespace BioSeqDB
       }
     }
 
+    internal static void RebuildBackupFolderList(Dictionary<string, BackupFolderDetails>  BackupFolderList, Dictionary<string, string> folderList)
+    {
+      if (BackupFolderList == null)
+      {
+        BackupFolderList = new Dictionary<string, BackupFolderDetails>();
+      }
+      foreach (string folder in folderList.Keys)
+      {
+        if (!BackupFolderList.ContainsKey(folder))
+        {
+          BackupFolderDetails backupFolderDetails = new BackupFolderDetails();
+          backupFolderDetails.ID = folder;
+          backupFolderDetails.Checked = true;
+          backupFolderDetails.FolderPath = folderList[folder].Substring(1);
+          backupFolderDetails.Compress = false;
+          backupFolderDetails.RetentionDate = DateTime.MinValue;
+          BackupFolderList.Add(folder, backupFolderDetails);
+        }
+      }
+    }
+
     public static string AssembleHostReference
     {
       get
@@ -456,22 +509,22 @@ namespace BioSeqDB
       }
     }
     
-    public static string PathToServerAppsettings
-    {
-      get
-      {
-        return seqdbConfig.PathToServerAppsettings;
-      }
-      set
-      {
-        seqdbConfig.PathToServerAppsettings = value;
-        if (string.IsNullOrEmpty(value))
-        {
-          seqdbConfig.PathToServerAppsettings = @"C:\BioSeqDB\Service";
-        }
-        SaveConfig();
-      }
-    }
+    //public static string PathToServerAppsettings
+    //{
+    //  get
+    //  {
+    //    return seqdbConfig.PathToServerAppsettings;
+    //  }
+    //  set
+    //  {
+    //    seqdbConfig.PathToServerAppsettings = value;
+    //    if (string.IsNullOrEmpty(value))
+    //    {
+    //      seqdbConfig.PathToServerAppsettings = @"C:\BioSeqDB\Service";
+    //    }
+    //    SaveConfig();
+    //  }
+    //}
 
     public static bool AssembleFastPolish()
     {
@@ -487,7 +540,8 @@ namespace BioSeqDB
     {
       // If the output path is on the server, we need to copy it to the local Temp folder to display the results.
       // If the output path is on the local machine, we need to copy from the user folder on the server to the local destination.
-      // If filenames is empty, outpuPath is a folder to copy.
+      // If filenames is empty, outputPath is a folder to copy.
+      // userSubFolder is the optional name of the folder in the user folder if that is where the source is.
       string destination = @"[L]C:\Temp\"; // Copy from UserFolder() on server to C:\Temp.
       string source = outputPath + "\\";
       if (outputPath.StartsWith("[L]"))  // Copy from user folder on server to OutputPath.
@@ -501,7 +555,16 @@ namespace BioSeqDB
         foreach (string foldername in names)
         {
           Logger.Log.Debug("Copy " + foldername + " from " + source + " to " + destination);
-          DirectoryHelper.FolderCopy(source + foldername, destination);
+          try
+          {
+            //DirectoryHelper.FolderCopy(source + foldername, destination);
+            TransferHelper.FolderCopy(source + foldername, destination);
+          }
+          catch (Exception ex) // Fail on unsuccessful folders but continue with the rest.
+          {
+            Logger.Log.Debug("Failed to copy " + foldername + " from " + source + " to " + destination + ". Error: " + ex.ToString());
+            throw;
+          }
         }
       }
       else // Copy files.
@@ -509,7 +572,15 @@ namespace BioSeqDB
         foreach (string filename in names)
         {
           Logger.Log.Debug("Copy " + filename + " from " + source + " to " + destination);
-          DirectoryHelper.FileCopy(source + filename, destination, true);
+          try
+          {
+            TransferHelper.FileCopy(source + filename, destination, true);
+          }
+          catch (Exception ex) // Fail on unsuccessful files but continue with the rest.
+          {
+            Logger.Log.Debug("Failed to copy " + filename + " from " + source + " to " + destination + ". Error: " + ex.ToString());
+            throw;
+          }
         }
       }
       return destination;
@@ -997,7 +1068,7 @@ namespace BioSeqDB
         {
           if (path.IndexOf(LinuxDrivePrefix() + "/" + drive.Substring(0, 1).ToLower() + "/") > -1)
           {
-            path = path.Replace("/" + LinuxDrivePrefix() + "/" + drive.Substring(0, 1).ToLower() , "C:\\");
+            path = path.Replace("/" + LinuxDrivePrefix() + (LinuxDrivePrefix().Length > 0 ? "/" : string.Empty) + drive.Substring(0, 1).ToLower() , "C:\\");
             return path.Replace("/", "\\");
           }
         }
@@ -1163,12 +1234,28 @@ namespace BioSeqDB
 
     public static void LoadConfig(string user) // This loads the local appsettings.
     {
-      //MessageBox.Show("Looking for appsettings.json in " + executablePath);
-      string filename = executablePath + "\\" + user + "appsettings.json";
+      string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+      string userFilePath = Path.Combine(localAppData, "PDS");
+
+      if (!Directory.Exists(userFilePath))
+      {
+        Directory.CreateDirectory(userFilePath);
+      }
+
+      //if it's not already there, copy the file from the server to the folder
+      string filename = Path.Combine(userFilePath, user + "appsettings.json");
+      string sourceFilePath = Application.StartupPath + "\\bin\\debug\\" + user + "appsettings.json";
+      if (!File.Exists(filename))
+      {
+        string cfgServer = BioSeqDBModel.Instance.AppSettings(loggedOnUser);
+        File.WriteAllText(sourceFilePath, cfgServer);
+        File.Copy(sourceFilePath, filename);
+      }
+
       if (!string.IsNullOrEmpty(user) && !File.Exists(filename)) // assume this is because the user version of appsettings.json does not yet exist, so take a copy of the global appsettings.
       {
         // Then make a copy of appsettings.json for this user.
-        File.Copy(executablePath + "\\appsettings.json", executablePath + "\\" + user + "appsettings.json");
+        File.Copy(Application.StartupPath + "\\bin\\debug\\appsettings.json", filename);
       }
 
       // If we are running in the dev environment, and the server in Remember.json is different from the 
@@ -1206,47 +1293,46 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    public static void LoadConfig()
-    {
-      //MessageBox.Show("Looking for appsettings.json in " + executablePath);
-      string filename = executablePath + "\\" + loggedOnUser + "appsettings.json";
-      if (!string.IsNullOrEmpty(loggedOnUser) && !File.Exists(filename)) // assume this is because the user version of appsettings.json does not yet exist.
-      {
-        // Then make a copy of appsettings.json for this user.
-        File.Copy(executablePath + "\\appsettings.json", executablePath + "\\" + loggedOnUser + "appsettings.json");
-      }
+    //public static void LoadConfig() // This loads the global config.
+    //{
+    //  string filename = executablePath + "\\" + loggedOnUser + "appsettings.json";
+    //  if (!string.IsNullOrEmpty(loggedOnUser) && !File.Exists(filename)) // assume this is because the user version of appsettings.json does not yet exist.
+    //  {
+    //    // Then make a copy of appsettings.json for this user.
+    //    File.Copy(executablePath + "\\appsettings.json", executablePath + "\\" + loggedOnUser + "appsettings.json");
+    //  }
 
-      string cfg = File.ReadAllText(filename);
-      if (string.IsNullOrEmpty(loggedOnUser))
-      {
-        seqdbConfigGlobal = JsonSerializer.Deserialize<BioSeqDBConfig>(cfg);
-        if (seqdbConfigGlobal.seqDBs == null)
-        {
-          seqdbConfigGlobal.seqDBs = new Dictionary<string, SeqDB>();
-        }
-        if (seqdbConfigGlobal.MappedDrives == null)
-        {
-          seqdbConfigGlobal.MappedDrives = new List<MappedDrive>();
-        }
-        if (seqdbConfigGlobal.Users == null)
-        {
-          seqdbConfigGlobal.Users = new Dictionary<string, User>();
-          //seqdbConfigGlobal.Users.Add("superuser", new User() { Username = "superuser", Password = "anything" });
-        }
-      }
-      else
-      {
-        seqdbConfig = JsonSerializer.Deserialize<BioSeqDBConfig>(cfg);
-        if (seqdbConfig.Tasks == null)
-        {
-          seqdbConfig.Tasks = new Dictionary<string, BioSeqTask>();
-        }
-        if (seqdbConfig.seqDBs == null)
-        {
-          seqdbConfig.seqDBs = new Dictionary<string, SeqDB>();
-        }
-      }
-    }
+    //  string cfg = File.ReadAllText(filename);
+    //  if (string.IsNullOrEmpty(loggedOnUser))
+    //  {
+    //    seqdbConfigGlobal = JsonSerializer.Deserialize<BioSeqDBConfig>(cfg);
+    //    if (seqdbConfigGlobal.seqDBs == null)
+    //    {
+    //      seqdbConfigGlobal.seqDBs = new Dictionary<string, SeqDB>();
+    //    }
+    //    if (seqdbConfigGlobal.MappedDrives == null)
+    //    {
+    //      seqdbConfigGlobal.MappedDrives = new List<MappedDrive>();
+    //    }
+    //    if (seqdbConfigGlobal.Users == null)
+    //    {
+    //      seqdbConfigGlobal.Users = new Dictionary<string, User>();
+    //      //seqdbConfigGlobal.Users.Add("superuser", new User() { Username = "superuser", Password = "anything" });
+    //    }
+    //  }
+    //  else
+    //  {
+    //    seqdbConfig = JsonSerializer.Deserialize<BioSeqDBConfig>(cfg);
+    //    if (seqdbConfig.Tasks == null)
+    //    {
+    //      seqdbConfig.Tasks = new Dictionary<string, BioSeqTask>();
+    //    }
+    //    if (seqdbConfig.seqDBs == null)
+    //    {
+    //      seqdbConfig.seqDBs = new Dictionary<string, SeqDB>();
+    //    }
+    //  }
+    //}
 
     public static string JsonConfig()
     {
@@ -1361,6 +1447,24 @@ namespace BioSeqDB
       SaveConfig();
     }
 
+    internal static void SaveBioSeqBandageUIForm(Point location, Size size)
+    {
+      seqdbConfig.BandageX = location.X;
+      seqdbConfig.BandageY = location.Y;
+      seqdbConfig.BandageW = size.Width;
+      seqdbConfig.BandageH = size.Height;
+      SaveConfig();
+    }
+
+    internal static void SaveArtemisUIForm(Point location, Size size)
+    {
+      seqdbConfig.ArtemisX = location.X;
+      seqdbConfig.ArtemisY = location.Y;
+      seqdbConfig.ArtemisW = size.Width;
+      seqdbConfig.ArtemisH = size.Height;
+      SaveConfig();
+    }
+
     internal static void SaveCANSUIForm(Point location, Size size)
     {
       seqdbConfig.CANSX = location.X;
@@ -1440,6 +1544,16 @@ namespace BioSeqDB
       return new Size(seqdbConfig.CANSW, seqdbConfig.CANSH);
     }
 
+    internal static Point BioSeqBandageLocation()
+    {
+      return new Point(seqdbConfig.BandageX, seqdbConfig.BandageY);
+    }
+
+    internal static Point ArtemisLocation()
+    {
+      return new Point(seqdbConfig.ArtemisX, seqdbConfig.ArtemisY);
+    }
+
     internal static Point CANSLocation()
     {
       return new Point(seqdbConfig.CANSX, seqdbConfig.CANSY);
@@ -1463,6 +1577,16 @@ namespace BioSeqDB
     internal static Point CentrifugeLocation()
     {
       return new Point(seqdbConfig.CentrifugeX, seqdbConfig.CentrifugeY);
+    }
+
+    internal static Size BioSeqBandageSize()
+    {
+      return new Size(seqdbConfig.BandageW, seqdbConfig.BandageH);
+    }
+
+    internal static Size ArtemisSize()
+    {
+      return new Size(seqdbConfig.ArtemisW, seqdbConfig.ArtemisH);
     }
 
     internal static Size FastQCSize()
@@ -1694,6 +1818,19 @@ namespace BioSeqDB
       set
       {
         seqdbConfig.SalmonellaChooseTrim = value;
+        SaveConfig();
+      }
+    }
+
+    public static string CANSSamplesPath
+    {
+      get
+      {
+        return seqdbConfig.CANSSamplesPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.CANSSamplesPath = value;
         SaveConfig();
       }
     }
@@ -2126,6 +2263,47 @@ namespace BioSeqDB
       }
     }
 
+    public static string BackupFoldersPath
+    {
+      get
+      {
+        return seqdbConfig.BackupFoldersPath ?? string.Empty;
+      }
+      set
+      {
+        seqdbConfig.BackupFoldersPath = value;
+        SaveConfig();
+      }
+    }
+
+    //public static Dictionary<string, BackupFolderDetails> BackupFolderList
+    //{
+    //  get
+    //  {
+    //    return seqdbConfig.BackupOffsite == null ? null : seqdbConfig.BackupOffsite.BackupFolderList;
+    //  }
+
+    //  set
+    //  {
+    //    if (seqdbConfig.BackupOffsite == null)
+    //    {
+    //      seqdbConfig.BackupOffsite = new BioSeqDBConfigModel.BackupOffsiteParms();
+    //    }
+    //    seqdbConfig.BackupOffsite.BackupFolderList = value;
+    //    SaveConfig();
+    //  }
+    //}
+
+    //public static string BackupOffsiteTargetPath
+    //{
+    //  get => seqdbConfig.BackupOffsite.TargetPath;
+    //  set
+    //  {
+    //    seqdbConfig.BackupOffsite.TargetPath = value;
+    //    SaveConfig();
+    //  }
+    //}
+
     public static Dictionary<string, string> CANSSampleList
     {
       get
@@ -2191,6 +2369,32 @@ namespace BioSeqDB
       }
     }
 
+    public static string BandageInputPath
+    {
+      get
+      {
+        return seqdbConfig.BandageInputPath == null ? string.Empty : seqdbConfig.BandageInputPath;
+      }
+      set
+      {
+        seqdbConfig.BandageInputPath = value;
+        SaveConfig();
+      }
+    }
+
+    public static string ArtemisInputPath
+    {
+      get
+      {
+        return seqdbConfig.ArtemisInputPath == null ? string.Empty : seqdbConfig.ArtemisInputPath;
+      }
+      set
+      {
+        seqdbConfig.ArtemisInputPath = value;
+        SaveConfig();
+      }
+    }
+
     public static string LastExplorerServerPath
     {
       get
@@ -2245,6 +2449,32 @@ namespace BioSeqDB
     {
       SeqDB db = seqdbConfig.Current();
       return db.SampleSelected ?? string.Empty;
+    }
+
+    public static string StandardReference
+    {
+      get
+      {
+        SeqDB db = seqdbConfig.Current();
+        if (string.IsNullOrEmpty(db.StandardReference))
+        {
+          db.StandardReference = db.BuildTreeDomesticReference;
+          SaveConfig();
+        }
+        if (string.IsNullOrEmpty(db.StandardReference))
+        {
+          db.StandardReference = db.BuildTreeWildReference;
+          SaveConfig();
+        }
+
+        return db.StandardReference ?? string.Empty;
+      }
+      set
+      {
+        SeqDB db = seqdbConfig.Current();
+        db.StandardReference = value;
+        SaveConfig();
+      }
     }
 
     public static string CurrentKipperPath()
@@ -2401,39 +2631,64 @@ namespace BioSeqDB
       SaveConfig();
     }
 
-    public static void RemoveSample(string sampleID)
+    //public static void RemoveSample(List<string> sampleIDs)
+    //{
+    //  // This removes the samples from the settings
+    //  SeqDB db = seqdbConfig.Current();
+    //  db.RemoveSampleIDs = sampleIDs;
+    //  SaveConfig();
+
+    //  // Also remove from LIMS file if present (i.e. duplicate).
+    //  Dictionary<string, string> LIMSList = ServiceCallHelper.ReadLIMSData(LoggedOnUser, JsonConfig());
+    //  foreach (string key in LIMSList.Keys)
+    //  {
+    //    if (sampleIDs.Contains(LIMSList[key]))
+    //    {
+    //      LIMSList.Remove(key);
+    //      ServiceCallHelper.WriteLIMSData(LoggedOnUser, JsonConfig(), LIMSList);
+    //      return;
+    //    }
+    //  }
+    //}
+
+    //public static List<string> RemoveSampleIDs()
+    //{
+    //  // This returns the list of sample IDs to remove.
+    //  SeqDB db = seqdbConfig.Current();
+    //  return db.RemoveSampleIDs;
+    //}
+
+    public static List<string> RemoveSampleIDs
     {
-      SeqDB db = seqdbConfig.Current();
-      db.RemoveSampleID = sampleID;
-      SaveConfig();
-
-      if (sampleID.Length == 0)
+      get
       {
-        return;
+        SeqDB db = seqdbConfig.Current();
+        return db.RemoveSampleIDs;
       }
-
-      // Also remove from LIMS file if present (i.e. duplicate).
-      Dictionary<string, string> LIMSList = ServiceCallHelper.ReadLIMSData(LoggedOnUser, JsonConfig());
-      foreach (string key in LIMSList.Keys)
+      set
       {
-        if (LIMSList[key] == sampleID)
-        {
-          LIMSList.Remove(key);
-          ServiceCallHelper.WriteLIMSData(LoggedOnUser, JsonConfig(), LIMSList);
-          return;
-        }
+        SeqDB db = seqdbConfig.Current();
+        db.RemoveSampleIDs = value;
+        SaveConfig();
       }
     }
 
-    public static string RemoveSampleID()
+    public static string BackupManager
     {
-      SeqDB db = seqdbConfig.Current();
-      string sample = db.RemoveSampleID ?? string.Empty;
-      if (CurrentSelectedSample().Length > 0)
+      get
       {
-        sample = CurrentSelectedSample();
+        if (seqdbConfigGlobal.BackupManager == null)
+        {
+          seqdbConfigGlobal.BackupManager = "AGB465";
+          SaveConfigGlobal();
+        }
+        return seqdbConfigGlobal.BackupManager;
       }
-      return sample;
+      set
+      {
+        seqdbConfigGlobal.BackupManager = value;
+        SaveConfigGlobal();
+      }
     }
 
     public static string Password(string username)
@@ -2461,6 +2716,11 @@ namespace BioSeqDB
       }
 
       return false;
+    }
+
+    public static bool IsNumeric(char KeyChar)
+    {
+      return (!Char.IsNumber(KeyChar) && KeyChar != (Char)Keys.Back && KeyChar != (Char)Keys.Delete) || KeyChar == '.';  // Numerics only
     }
 
     public static string FileExists(string path)
